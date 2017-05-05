@@ -1,4 +1,4 @@
-package com.redstoner.modules.dataManager;
+package com.redstoner.modules.datamanager;
 
 import java.io.File;
 import java.io.FilenameFilter;
