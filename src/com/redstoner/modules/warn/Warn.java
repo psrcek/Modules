@@ -8,7 +8,7 @@ import com.redstoner.annotations.Version;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 2, minor = 0, revision = 2, compatible = 2)
 public class Warn implements Module
 {
 	@Command(hook = "warn")
@@ -32,7 +32,6 @@ public class Warn implements Module
 		return "command warn {\n" + 
 				"	[empty] {\n" + 
 				"		run warn;\n" + 
-				"		type player;\n" + 
 				"		help Warns other players about definite lag;\n" + 
 				"		perm utils.warn;\n" + 
 				"	}\n" + 
@@ -41,7 +40,6 @@ public class Warn implements Module
 				"command warnp {\n" + 
 				"	[empty] {\n" + 
 				"		run warnp;\n" + 
-				"		type player;\n" + 
 				"		help Warns other players about possible lag;\n" + 
 				"		perm utils.warn;\n" + 
 				"	}\n" + 
