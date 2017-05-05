@@ -27,7 +27,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 5, compatible = 2)
+@Version(major = 2, minor = 0, revision = 6, compatible = 2)
 public class Chatalias implements Module, Listener
 {
 	// to export chatalias data to json:
@@ -119,20 +119,9 @@ public class Chatalias implements Module, Listener
 				return;
 			}
 		}
-		event.setMessage(colorify(event.getMessage(), player));
+		event.setMessage(Utils.colorify(event.getMessage(), player));
 		if (changed)
 			saveAliases(uuid);
-	}
-	
-	public static String colorify(String message, CommandSender sender)
-	{
-		if (sender.hasPermission("essentials.chat.color"))
-			message = message.replaceAll("&([0-9a-fA-FrR])", "§$1");
-		if (sender.hasPermission("essentials.chat.format"))
-			message = message.replaceAll("&(l-oL-OrR)", "§$1");
-		if (sender.hasPermission("essentials.chat.magic"))
-			message = message.replaceAll("&([kKrR])", "§$1");
-		return message;
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST)
