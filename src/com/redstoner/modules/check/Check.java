@@ -21,8 +21,10 @@ import org.json.simple.parser.ParseException;
 
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
+import com.nemez.cmdmgr.CommandManager;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
+import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.misc.mysql.JSONManager;
 import com.redstoner.misc.mysql.MysqlHandler;
@@ -32,7 +34,7 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 2, compatible = 2)
+@Version(major = 3, minor = 0, revision = 0, compatible = 3)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -58,6 +60,12 @@ public class Check implements Module, Listener
 			return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public void postEnable()
+	{
+		CommandManager.registerCommand(getCommandString(), this, Main.plugin);
 	}
 	
 	@SuppressWarnings("deprecation")
