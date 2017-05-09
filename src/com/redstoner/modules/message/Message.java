@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 8, compatible = 3)
+@Version(major = 3, minor = 0, revision = 9, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -64,6 +64,7 @@ public class Message implements Module
 		}
 		else
 		{
+			message = Utils.colorify(message, sender);
 			spyBroadcast(sender, target, message, "/m");
 			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(target) + "&6] ", message, '&');
 			Utils.sendMessage(target, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", message, '&');
