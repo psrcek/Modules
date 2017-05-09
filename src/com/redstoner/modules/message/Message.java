@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 4, compatible = 3)
+@Version(major = 3, minor = 0, revision = 5, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
