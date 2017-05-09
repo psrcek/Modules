@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 12, compatible = 3)
+@Version(major = 3, minor = 0, revision = 13, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -46,8 +46,8 @@ public class Message implements Module
 		{
 			message = Utils.colorify(message, sender);
 			spyBroadcast(sender, p, message, "/m");
-			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(p) + "&6] ", message, '&');
-			Utils.sendMessage(p, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", message, '&');
+			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(p) + "&6] ", "§7" + message, '&');
+			Utils.sendMessage(p, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§7" + message, '&');
 			replyTargets.put(sender, p);
 			replyTargets.put(p, sender);
 		}
@@ -67,8 +67,8 @@ public class Message implements Module
 		{
 			message = Utils.colorify(message, sender);
 			spyBroadcast(sender, target, message, "/m");
-			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(target) + "&6] ", message, '&');
-			Utils.sendMessage(target, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", message, '&');
+			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(target) + "&6] ", "§7" + message, '&');
+			Utils.sendMessage(target, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§7" + message, '&');
 		}
 		return true;
 	}
