@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,11 +21,11 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 0, revision = 0, compatible = 3)
+@Version(major = 3, minor = 0, revision = 3, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	private static final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
-	private static JSONObject data;
+	private static JSONObject data = new JSONObject();
 	
 	@Override
 	public void postEnable()
@@ -42,7 +43,7 @@ public final class DataManager implements CoreModule, Listener
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
-			saveAndUnload(p.getUniqueId());
+			saveAndUnload(p);
 		}
 	}
 	
@@ -55,7 +56,7 @@ public final class DataManager implements CoreModule, Listener
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event)
 	{
-		saveAndUnload(event.getPlayer().getUniqueId());
+		saveAndUnload(event.getPlayer());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -67,78 +68,116 @@ public final class DataManager implements CoreModule, Listener
 		data.put(id.toString(), playerData);
 	}
 	
-	public static Object getData(UUID id, String key)
+	public static Object getData(CommandSender sender, String key)
 	{
-		return getData(id, Utils.getCaller(DataManager.class), key);
+		return getData(sender, Utils.getCaller(DataManager.class), key);
 	}
 	
-	public static Object getData(UUID id, String module, String key)
+	public static Object getData(CommandSender sender, String module, String key)
 	{
-		if (data.containsKey(id.toString()))
-			return ((JSONObject) ((JSONObject) data.get(id.toString())).get(module)).get(key);
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
+		if (data.containsKey(id))
+		{
+			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
+			if (moduleData == null)
+				return null;
+			return moduleData.get(key);
+		}
 		else
 			return loadAndGet(id, module, key);
 	}
 	
-	private static Object loadAndGet(UUID id, String module, String key)
+	private static Object loadAndGet(String id, String module, String key)
 	{
-		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id.toString() + ".json"));
+		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
 			return null;
 		return ((JSONObject) playerData.get(module)).get(key);
 	}
 	
-	public static void setData(UUID id, String key, Object value)
+	public static void setData(CommandSender sender, String key, Object value)
 	{
-		setData(id, Utils.getCaller(DataManager.class), key, value);
+		setData(sender, Utils.getCaller(DataManager.class), key, value);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void setData(UUID id, String module, String key, Object value)
+	public static void setData(CommandSender sender, String module, String key, Object value)
 	{
-		if (data.containsKey(id.toString()))
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
+		if (data.containsKey(id))
 		{
-			((JSONObject) ((JSONObject) data.get(id.toString())).get(module)).put(key, value);
-			save(id);
+			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
+			if (moduleData == null)
+			{
+				moduleData = new JSONObject();
+				((JSONObject) data.get(id)).put(module, moduleData);
+			}
+			moduleData.put(key, value);
+			save(sender);
 		}
 		else
 			loadAndSet(id, module, key, value);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void loadAndSet(UUID id, String module, String key, Object value)
+	private static void loadAndSet(String id, String module, String key, Object value)
 	{
-		File dataFile = new File(dataFolder, id.toString() + ".json");
+		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
 		if (playerData == null)
 			playerData = new JSONObject();
-		((JSONObject) playerData.get(module)).put(key, value);
+		JSONObject moduleData = ((JSONObject) playerData.get(module));
+		if (moduleData == null)
+		{
+			moduleData = new JSONObject();
+			playerData.put(module, moduleData);
+		}
+		moduleData.put(key, value);
 		JsonManager.save(playerData, dataFile);
 	}
 	
-	public static void removeData(UUID id, String key)
+	public static void removeData(CommandSender sender, String key)
 	{
-		removeData(id, Utils.getCaller(DataManager.class), key);
+		removeData(sender, Utils.getCaller(DataManager.class), key);
 	}
 	
-	public static void removeData(UUID id, String module, String key)
+	public static void removeData(CommandSender sender, String module, String key)
 	{
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
 		if (data.containsKey(id.toString()))
 		{
-			((JSONObject) ((JSONObject) data.get(module)).get(id.toString())).remove(key);
-			save(id);
+			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
+			if (moduleData == null)
+				return;
+			moduleData.remove(key);
+			save(sender);
 		}
 		else
 			loadAndRemove(id, module, key);
 	}
 	
-	private static void loadAndRemove(UUID id, String module, String key)
+	private static void loadAndRemove(String id, String module, String key)
 	{
-		File dataFile = new File(dataFolder, id.toString() + ".json");
+		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
 		if (playerData == null)
 			return;
-		((JSONObject) playerData.get(module)).remove(key);
+		JSONObject moduleData = ((JSONObject) playerData.get(module));
+		if (moduleData == null)
+			return;
+		moduleData.remove(key);
 		JsonManager.save(playerData, dataFile);
 	}
 	
@@ -158,19 +197,19 @@ public final class DataManager implements CoreModule, Listener
 			}
 		}))
 		{
-			migrate(UUID.fromString(s.replace(".json", "")), oldName, newName);
+			migrate(s.replace(".json", ""), oldName, newName);
 		}
 	}
 	
-	public static void migrate(UUID id, String oldName)
+	public static void migrate(String id, String oldName)
 	{
 		migrate(id, oldName, Utils.getCaller(DataManager.class));
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void migrate(UUID id, String oldName, String newName)
+	public static void migrate(String id, String oldName, String newName)
 	{
-		if (data.containsKey(id.toString()))
+		if (data.containsKey(id))
 		{
 			data.put(newName, data.get(oldName));
 			data.remove(oldName);
@@ -181,29 +220,46 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void loadAndMigrate(UUID id, String oldName, String newName)
+	private static void loadAndMigrate(String id, String oldName, String newName)
 	{
-		File dataFile = new File(dataFolder, id.toString() + ".json");
+		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject data = JsonManager.getObject(dataFile);
 		data.put(newName, data.get(oldName));
 		data.remove(oldName);
 		JsonManager.save(data, dataFile);
 	}
 	
-	public static void save(UUID id)
+	public static void save(CommandSender sender)
+	{
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
+		save(id);
+	}
+	
+	public static void save(String id)
 	{
 		Object raw = data.get(id);
 		if (raw == null || ((JSONObject) raw).size() == 0)
 			return;
-		JsonManager.save((JSONObject) raw, new File(dataFolder, id.toString() + ".json"));
+		JsonManager.save((JSONObject) raw, new File(dataFolder, id + ".json"));
 	}
 	
-	private static void saveAndUnload(UUID id)
+	private static void saveAndUnload(CommandSender sender)
 	{
-		String key = id.toString();
-		Object raw = data.containsKey(key);
-		if (!(raw == null || ((JSONObject) raw).size() == 0))
-			save(id);
-		data.remove(key);
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
+		saveAndUnload(id);
+	}
+	
+	private static void saveAndUnload(String id)
+	{
+		save(id);
+		data.remove(id);
 	}
 }
