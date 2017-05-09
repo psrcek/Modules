@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 9, compatible = 3)
+@Version(major = 3, minor = 0, revision = 10, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -44,6 +44,7 @@ public class Message implements Module
 		}
 		else
 		{
+			message = Utils.colorify(message, sender);
 			spyBroadcast(sender, p, message, "/m");
 			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(p) + "&6] ", message, '&');
 			Utils.sendMessage(p, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", message, '&');
@@ -81,7 +82,7 @@ public class Message implements Module
 	@Command(hook = "config_prefix")
 	public boolean prefix(CommandSender sender, String prefix)
 	{
-		Utils.sendMessage(sender, null, "Set your socialspy prefix to: " + prefix, '&');
+		Utils.sendMessage(sender, null, "Set your socialspy prefix to: " + prefix);
 		DataManager.setData(sender, "prefix", prefix);
 		return true;
 	}
