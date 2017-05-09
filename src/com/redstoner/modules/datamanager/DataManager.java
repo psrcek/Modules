@@ -21,7 +21,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 0, revision = 4, compatible = 3)
+@Version(major = 3, minor = 0, revision = 6, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	private static final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -70,7 +70,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static Object getOrDefault(CommandSender sender, String key, Object fallback)
 	{
-		Object o = getData(sender, Utils.getCaller(DataManager.class), key);
+		Object o = getData(sender, Utils.getCaller("DataManager"), key);
 		return o == null ? fallback : o;
 	}
 	
@@ -82,7 +82,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static Object getData(CommandSender sender, String key)
 	{
-		return getData(sender, Utils.getCaller(DataManager.class), key);
+		return getData(sender, Utils.getCaller("DataManager"), key);
 	}
 	
 	public static Object getData(CommandSender sender, String module, String key)
@@ -113,7 +113,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void setData(CommandSender sender, String key, Object value)
 	{
-		setData(sender, Utils.getCaller(DataManager.class), key, value);
+		setData(sender, Utils.getCaller("DataManager"), key, value);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -158,7 +158,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void removeData(CommandSender sender, String key)
 	{
-		removeData(sender, Utils.getCaller(DataManager.class), key);
+		removeData(sender, Utils.getCaller("DataManager"), key);
 	}
 	
 	public static void removeData(CommandSender sender, String module, String key)
@@ -195,7 +195,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void migrateAll(String oldName)
 	{
-		migrateAll(oldName, Utils.getCaller(DataManager.class));
+		migrateAll(oldName, Utils.getCaller("DataManager"));
 	}
 	
 	public static void migrateAll(String oldName, String newName)
@@ -215,7 +215,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void migrate(String id, String oldName)
 	{
-		migrate(id, oldName, Utils.getCaller(DataManager.class));
+		migrate(id, oldName, Utils.getCaller("DataManager"));
 	}
 	
 	@SuppressWarnings("unchecked")
