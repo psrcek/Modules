@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 5, compatible = 3)
+@Version(major = 3, minor = 0, revision = 6, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -118,7 +118,7 @@ public class Message implements Module
 	@Command(hook = "stripcolor")
 	public boolean stripcolor(CommandSender sender)
 	{
-		boolean b = (boolean) DataManager.getData(sender, "stripcolor");
+		boolean b = (boolean) DataManager.getOrDefault(sender, "stripcolor", true);
 		Utils.sendMessage(sender, null, (b ? "Disabled" : "Enabled") + " stripping colors!");
 		DataManager.setData(sender, "stripcolor", !b);
 		return true;
@@ -127,7 +127,7 @@ public class Message implements Module
 	@Command(hook = "on")
 	public boolean spyOn(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Enabled spy!");
+		Utils.sendMessage(sender, null, "Enabled socialspy!");
 		DataManager.setData(sender, "enabled", true);
 		return true;
 	}
@@ -135,7 +135,7 @@ public class Message implements Module
 	@Command(hook = "off")
 	public boolean spyOff(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Disabled spy!");
+		Utils.sendMessage(sender, null, "Disabled socialspy!");
 		DataManager.setData(sender, "enabled", false);
 		return true;
 	}
@@ -209,7 +209,7 @@ public class Message implements Module
 	
 	private static final String getDefaultFormat()
 	{
-		return "%s &7to %t %p: %m";
+		return "%s &7to %t %p&7: %m";
 	}
 	
 	private static final String getDefaultPrefix()
