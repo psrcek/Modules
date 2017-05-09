@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 10, compatible = 3)
+@Version(major = 3, minor = 0, revision = 11, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -198,7 +198,7 @@ public class Message implements Module
 		format = format.replace("%t", Utils.getName(target));
 		format = format.replace("%T", target.getName());
 		// Prefix
-		String prefix = (String) DataManager.getOrDefault(sender, "prefix", getDefaultPrefix());
+		String prefix = (String) DataManager.getOrDefault(formatHolder, "prefix", getDefaultPrefix());
 		format = format.replace("%p", prefix);
 		// Apply colors to halfway replaced String
 		format = ChatColor.translateAlternateColorCodes('&', format);
