@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 11, compatible = 3)
+@Version(major = 3, minor = 0, revision = 12, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -96,7 +96,7 @@ public class Message implements Module
 	@Command(hook = "config_format")
 	public boolean configFormat(CommandSender sender, String format)
 	{
-		Utils.sendMessage(sender, null, "Set your socialspy format to: " + format, '&');
+		Utils.sendMessage(sender, null, "Set your socialspy format to: " + format);
 		DataManager.setData(sender, "format", format);
 		return true;
 	}
