@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 6, compatible = 3)
+@Version(major = 3, minor = 0, revision = 7, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -174,7 +174,7 @@ public class Message implements Module
 				{
 					if (p.equals(sender) || p.equals(target))
 						continue;
-					Utils.sendMessage(sender, "", formatMessage(sender, target, message, command));
+					Utils.sendMessage(p, "", formatMessage(sender, target, message, command));
 				}
 				else
 					DataManager.setData(sender, "enabled", false);
@@ -201,7 +201,7 @@ public class Message implements Module
 		format = ChatColor.translateAlternateColorCodes('&', format);
 		// Insert command and message
 		format = format.replace("%c", command);
-		format = format.replace("%c", command);
+		format = format.replace("%m", message);
 		// Convert placeholder back
 		format = format.replace("§§", "%%");
 		return format;
