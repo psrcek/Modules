@@ -21,7 +21,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 0, revision = 3, compatible = 3)
+@Version(major = 3, minor = 0, revision = 4, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	private static final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -66,6 +66,18 @@ public final class DataManager implements CoreModule, Listener
 		if (playerData == null)
 			playerData = new JSONObject();
 		data.put(id.toString(), playerData);
+	}
+	
+	public static Object getOrDefault(CommandSender sender, String key, Object fallback)
+	{
+		Object o = getData(sender, Utils.getCaller(DataManager.class), key);
+		return o == null ? fallback : o;
+	}
+	
+	public static Object getOrDefault(CommandSender sender, String module, String key, Object fallback)
+	{
+		Object o = getData(sender, module, key);
+		return o == null ? fallback : o;
 	}
 	
 	public static Object getData(CommandSender sender, String key)
