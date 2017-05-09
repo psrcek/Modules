@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 0, revision = 7, compatible = 3)
+@Version(major = 3, minor = 0, revision = 8, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -174,18 +174,19 @@ public class Message implements Module
 				{
 					if (p.equals(sender) || p.equals(target))
 						continue;
-					Utils.sendMessage(p, "", formatMessage(sender, target, message, command));
+					Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 				}
 				else
 					DataManager.setData(sender, "enabled", false);
 		}
 	}
 	
-	private String formatMessage(CommandSender sender, CommandSender target, String message, String command)
+	private String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target, String message,
+			String command)
 	{
-		if ((boolean) DataManager.getOrDefault(sender, "stripcolor", false))
+		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
 			message = ChatColor.stripColor(message);
-		String format = (String) DataManager.getOrDefault(sender, "format", getDefaultFormat());
+		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
 		// Sender name
@@ -209,7 +210,7 @@ public class Message implements Module
 	
 	private static final String getDefaultFormat()
 	{
-		return "%s &7to %t %p&7: %m";
+		return "%s &7to %t %p: %m";
 	}
 	
 	private static final String getDefaultPrefix()
