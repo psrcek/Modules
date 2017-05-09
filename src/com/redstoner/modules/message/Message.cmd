@@ -1,5 +1,17 @@
 command message {
     [string:player] [string:message...] {
+        alias m;
+        alias em;
+        alias msg;
+        alias emsg;
+        alias t;
+        alias et;
+        alias tell;
+        alias etell;
+        alias w;
+        alias ew;
+        alias whisper;
+        alias ewhisper;
         run message player message;
         help Sends a direct message to a player.;
         perm utils.message;
@@ -8,6 +20,9 @@ command message {
 
 command reply {
     [string:message...] {
+        alias r;
+        alias er;
+        alias ereply;
         run reply message;
         help Sends a direct message to the last person you talked to.;
         perm utils.message;
