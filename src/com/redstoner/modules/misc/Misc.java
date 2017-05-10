@@ -22,7 +22,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 20, compatible = 2)
+@Version(major = 2, minor = 0, revision = 21, compatible = 2)
 public class Misc implements Module, Listener
 {
 	private final String[] sudoBlacklist = new String[] {".?+:?esudo", ".?+:?sudo", ".?+:?script.*", ".?+:?stop",
@@ -147,6 +147,13 @@ public class Misc implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "sayn")
+	public boolean say(CommandSender sender, String name, String message)
+	{
+		Utils.broadcast(" &7[&9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "&7]: ", "&r" + message, null, '&');
+		return true;
+	}
+	
 	@Command(hook = "sudo")
 	public boolean sudo(CommandSender sender, String name, String command)
 	{
@@ -230,6 +237,14 @@ public class Misc implements Module, Listener
 				"    [string:message...] {\n" + 
 				"        perm utils.say;\n" + 
 				"        run say message;\n" +
+				"        help A replacement for the default say command to make the format be more consistant.;\n" + 
+				"    }\n" + 
+				"}" + 
+				"command sayn {\n" +
+				"    [string:name] [string:message...] {\n" + 
+				"        perm utils.sayn;\n" +
+				"        type console;\n" +
+				"        run sayn name message;\n" +
 				"        help A replacement for the default say command to make the format be more consistant.;\n" + 
 				"    }\n" + 
 				"}";
