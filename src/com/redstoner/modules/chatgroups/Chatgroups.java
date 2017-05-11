@@ -29,7 +29,7 @@ import com.redstoner.modules.socialspy.Socialspy;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 1, revision = 0, compatible = 2)
+@Version(major = 2, minor = 1, revision = 1, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -241,15 +241,17 @@ public class Chatgroups implements Module, Listener
 	{
 		String pname = Utils.getName(sender);
 		String group = getGroup(sender);
-		if (group != null && !group.equals(name))
+		if (group != null && group.equals(name))
+			Utils.sendErrorMessage(sender, null, "You were already in group §6" + name);
+		else
 		{
+			setGroup(sender, null);
+			if (group != null)
+				sendToGroup(group, "&9" + pname + " &7left the group!");
 			sendToGroup(name, "&9" + pname + " &7joined the group!");
 			setGroup(sender, name);
-			sendToGroup(group, "&9" + pname + " &7left the group!");
 			Utils.sendMessage(sender, null, "Successfully joined group §6" + name);
 		}
-		else
-			Utils.sendErrorMessage(sender, null, "You were already in group §6" + name);
 		return true;
 	}
 	
