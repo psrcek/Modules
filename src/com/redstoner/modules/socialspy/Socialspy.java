@@ -11,13 +11,14 @@ import org.json.simple.JSONArray;
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.CommandManager;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 1, revision = 0, compatible = 3)
+@Version(major = 3, minor = 1, revision = 1, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -169,7 +170,7 @@ public class Socialspy implements CoreModule
 		return true;
 	}
 	
-	public static void spyBroadcast(CommandSender sender, CommandSender target, String message, String command,
+	public void spyBroadcast(CommandSender sender, CommandSender target, String message, String command,
 			BroadcastFilter filter)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
@@ -185,7 +186,7 @@ public class Socialspy implements CoreModule
 		}
 	}
 	
-	public static void spyBroadcast(CommandSender sender, String target, String message, String command,
+	public void spyBroadcast(CommandSender sender, String target, String message, String command,
 			BroadcastFilter filter)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
@@ -201,8 +202,8 @@ public class Socialspy implements CoreModule
 		}
 	}
 	
-	private static String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target,
-			String message, String command)
+	private String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target, String message,
+			String command)
 	{
 		if ((boolean) DataManager.getDataManager().getOrDefault(formatHolder, "stripcolor", false))
 			message = ChatColor.stripColor(message);
@@ -228,7 +229,7 @@ public class Socialspy implements CoreModule
 		return format;
 	}
 	
-	private static String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
+	private String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
 			String command)
 	{
 		if ((boolean) DataManager.getDataManager().getOrDefault(formatHolder, "stripcolor", false))
@@ -255,12 +256,12 @@ public class Socialspy implements CoreModule
 		return format;
 	}
 	
-	private static final String getDefaultFormat()
+	private final String getDefaultFormat()
 	{
 		return "%s &7to %t %p: %m";
 	}
 	
-	private static final String getDefaultPrefix()
+	private final String getDefaultPrefix()
 	{
 		return "&7";
 	}
@@ -270,5 +271,10 @@ public class Socialspy implements CoreModule
 	{
 		DataManager.getDataManager().migrateAll("Message");
 		return true;
+	}
+	
+	public static Socialspy getSocialspy()
+	{
+		return (Socialspy) ModuleLoader.getModule("Socialspy");
 	}
 }

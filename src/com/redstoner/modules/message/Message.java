@@ -17,7 +17,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.socialspy.Socialspy;
 
-@Version(major = 3, minor = 2, revision = 0, compatible = 3)
+@Version(major = 3, minor = 3, revision = 0, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -45,7 +45,7 @@ public class Message implements Module
 		{
 			message = Utils.colorify(message, sender);
 			if (ModuleLoader.getModule("Socialspy") != null)
-				Socialspy.spyBroadcast(sender, p, message, "/m", new BroadcastFilter()
+				Socialspy.getSocialspy().spyBroadcast(sender, p, message, "/m", new BroadcastFilter()
 				{
 					@Override
 					public boolean sendTo(CommandSender recipient)
@@ -74,7 +74,7 @@ public class Message implements Module
 		{
 			message = Utils.colorify(message, sender);
 			if (ModuleLoader.getModule("Socialspy") != null)
-				Socialspy.spyBroadcast(sender, target, message, "/m", new BroadcastFilter()
+				Socialspy.getSocialspy().spyBroadcast(sender, target, message, "/m", new BroadcastFilter()
 				{
 					@Override
 					public boolean sendTo(CommandSender recipient)
