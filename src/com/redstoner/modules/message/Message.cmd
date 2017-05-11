@@ -50,6 +50,19 @@ command socialspy {
         run config_prefix prefix;
         help Sets your prefix to the specified term.;
     }
+    commands list {
+        run commands_list;
+        help Displays all commands you're listening to.;
+    }
+    commands add [string:command] {
+        run commands_add command;
+        help Adds a command to the list of commands that you're listening to.;
+    }
+    commands del [string:command] {
+        run commands_del command;
+        help Deletes a command from the list of commands that you're listening to.;
+    }
+    
     stripcolor on {
         run stripcolor_on;
     }
@@ -64,10 +77,10 @@ command socialspy {
     }
     off {
         run off;
-    }   
+    }
     [empty] {
         run toggle;
     }
-    perm utils.ss;
+    perm utils.socialspy;
     type player;
 }

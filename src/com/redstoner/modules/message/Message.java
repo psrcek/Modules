@@ -11,6 +11,7 @@ import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
 import com.nemez.cmdmgr.CommandManager;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
@@ -18,7 +19,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 1, revision = 4, compatible = 3)
+@Version(major = 3, minor = 1, revision = 5, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -45,7 +46,14 @@ public class Message implements Module
 		else
 		{
 			message = Utils.colorify(message, sender);
-			spyBroadcast(sender, p, message, "/m");
+			spyBroadcast(sender, p, message, "/m", new BroadcastFilter()
+			{
+				@Override
+				public boolean sendTo(CommandSender recipient)
+				{
+					return !(recipient.equals(sender) || recipient.equals(target));
+				}
+			});
 			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(p) + "&6] ", "§f" + message, '&');
 			Utils.sendMessage(p, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§f" + message, '&');
 			replyTargets.put(sender, p);
@@ -66,7 +74,14 @@ public class Message implements Module
 		else
 		{
 			message = Utils.colorify(message, sender);
-			spyBroadcast(sender, target, message, "/m");
+			spyBroadcast(sender, target, message, "/m", new BroadcastFilter()
+			{
+				@Override
+				public boolean sendTo(CommandSender recipient)
+				{
+					return !(recipient.equals(sender) || recipient.equals(target));
+				}
+			});
 			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(target) + "&6] ", "§f" + message, '&');
 			Utils.sendMessage(target, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§f" + message, '&');
 		}
@@ -167,15 +182,34 @@ public class Message implements Module
 		return true;
 	}
 	
-	public static void spyBroadcast(CommandSender sender, CommandSender target, String message, String command)
+	@Command(hook = "commands_list")
+	public boolean commands_list(CommandSender sender)
+	{
+		return true;
+	}
+	
+	@Command(hook = "commands_add")
+	public boolean commands_add(CommandSender sender, String command)
+	{
+		return true;
+	}
+	
+	@Command(hook = "commands_del")
+	public boolean commands_del(CommandSender sender, String command)
+	{
+		return true;
+	}
+	
+	public static void spyBroadcast(CommandSender sender, CommandSender target, String message, String command,
+			BroadcastFilter filter)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
 			if ((boolean) DataManager.getOrDefault(p, "enabled", false))
 				if (p.hasPermission("utils.socialspy"))
 				{
-					if (p.equals(sender) || p.equals(target))
-						continue;
+					if (filter == null || filter.sendTo(p))
+						Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 					Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 				}
 				else
@@ -183,16 +217,16 @@ public class Message implements Module
 		}
 	}
 	
-	public static void spyBroadcast(CommandSender sender, String target, String message, String command)
+	public static void spyBroadcast(CommandSender sender, String target, String message, String command,
+			BroadcastFilter filter)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
 			if ((boolean) DataManager.getOrDefault(p, "enabled", false))
 				if (p.hasPermission("utils.socialspy"))
 				{
-					if (p.equals(sender) || p.equals(target))
-						continue;
-					Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
+					if (filter == null || filter.sendTo(p))
+						Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 				}
 				else
 					DataManager.setData(sender, "enabled", false);
