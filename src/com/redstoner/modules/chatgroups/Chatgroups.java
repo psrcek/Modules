@@ -16,17 +16,19 @@ import org.json.simple.JSONObject;
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.message.Message;
 
 /** The ChatGroups module. Allows people to have private sub-chats that can be accessed via a single char prefix or a toggle.
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 2, compatible = 2)
+@Version(major = 2, minor = 0, revision = 3, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -364,6 +366,10 @@ public class Chatgroups implements Module, Listener
 					return false;
 			}
 		}, '&');
+		if (ModuleLoader.getModule("Message") != null)
+		{
+			Message.spyBroadcast(sender, group + "(cg)", message, "/cg");
+		}
 		if (getGroup(Bukkit.getConsoleSender()) == null || !getGroup(Bukkit.getConsoleSender()).equals(group))
 		{
 			Utils.info(name + " in " + group + ": " + message + " §8(hidden)");
