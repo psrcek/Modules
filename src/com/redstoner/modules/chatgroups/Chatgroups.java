@@ -28,7 +28,7 @@ import com.redstoner.modules.message.Message;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+@Version(major = 2, minor = 0, revision = 4, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -368,7 +368,7 @@ public class Chatgroups implements Module, Listener
 		}, '&');
 		if (ModuleLoader.getModule("Message") != null)
 		{
-			Message.spyBroadcast(sender, group + "(cg)", message, "/cg", new BroadcastFilter()
+			Message.spyBroadcast(sender, "&e" + group + " &a(cg)", message, "/cg", new BroadcastFilter()
 			{
 				@Override
 				public boolean sendTo(CommandSender recipient)
