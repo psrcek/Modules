@@ -28,7 +28,7 @@ import com.redstoner.modules.message.Message;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 5, compatible = 2)
+@Version(major = 2, minor = 0, revision = 6, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -222,11 +222,7 @@ public class Chatgroups implements Module, Listener
 			Utils.sendErrorMessage(sender, null, "You were not in a chatgroup!");
 			return true;
 		}
-		String name;
-		if (sender instanceof Player)
-			name = ((Player) sender).getDisplayName();
-		else
-			name = sender.getName();
+		String name = Utils.getName(sender);
 		sendToGroup(group, "&9" + name + " &7left the group!");
 		Utils.sendMessage(sender, null, "Successfully removed you from your group!");
 		if (sender instanceof Player)
@@ -242,11 +238,7 @@ public class Chatgroups implements Module, Listener
 	@Command(hook = "cgjoin")
 	public boolean cgJoin(CommandSender sender, String name)
 	{
-		String pname;
-		if (sender instanceof Player)
-			pname = ((Player) sender).getDisplayName();
-		else
-			pname = sender.getName();
+		String pname = Utils.getName(sender);
 		String group = getGroup(sender);
 		sendToGroup(name, "&9" + pname + " &7joined the group!");
 		setGroup(sender, name);
@@ -351,11 +343,7 @@ public class Chatgroups implements Module, Listener
 	 * @param message the message to be sent. */
 	private void sendToGroup(CommandSender sender, String message)
 	{
-		String name;
-		if (sender instanceof Player)
-			name = ((Player) sender).getDisplayName();
-		else
-			name = sender.getName();
+		String name = Utils.getName(sender);
 		String group = getGroup(sender);
 		Utils.broadcast("§8[§bCG§8] §9", name + "§8: §6" + message, new BroadcastFilter()
 		{
