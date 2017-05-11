@@ -17,7 +17,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 0, revision = 0, compatible = 3)
+@Version(major = 3, minor = 0, revision = 2, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -261,5 +261,12 @@ public class Socialspy implements CoreModule
 	private static final String getDefaultPrefix()
 	{
 		return "&7";
+	}
+	
+	@Command(hook = "migrate")
+	public boolean migrate(CommandSender sender)
+	{
+		DataManager.migrateAll("Message");
+		return true;
 	}
 }

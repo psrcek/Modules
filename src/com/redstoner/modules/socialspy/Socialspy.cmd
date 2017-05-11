@@ -31,7 +31,6 @@ command socialspy {
         run commands_del command;
         help Deletes a command from the list of commands that you're listening to.;
     }
-    
     stripcolor on {
         run stripcolor_on;
     }
@@ -52,4 +51,8 @@ command socialspy {
     }
     perm utils.socialspy;
     type player;
+    migrate {
+        run migrate;
+        type console;
+    }
 }
