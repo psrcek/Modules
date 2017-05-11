@@ -29,7 +29,7 @@ import com.redstoner.modules.message.Message;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 8, compatible = 2)
+@Version(major = 2, minor = 0, revision = 9, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -241,11 +241,15 @@ public class Chatgroups implements Module, Listener
 	{
 		String pname = Utils.getName(sender);
 		String group = getGroup(sender);
-		sendToGroup(name, "&9" + pname + " &7joined the group!");
-		setGroup(sender, name);
 		if (group != null && !group.equals(name))
+		{
+			sendToGroup(name, "&9" + pname + " &7joined the group!");
+			setGroup(sender, name);
 			sendToGroup(group, "&9" + pname + " &7left the group!");
-		Utils.sendMessage(sender, null, "Successfully joined group §6" + name);
+			Utils.sendMessage(sender, null, "Successfully joined group §6" + name);
+		}
+		else
+			Utils.sendErrorMessage(sender, null, "You were already in group §6" + name);
 		return true;
 	}
 	
