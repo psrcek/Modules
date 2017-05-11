@@ -17,7 +17,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 0, revision = 2, compatible = 3)
+@Version(major = 3, minor = 0, revision = 3, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -176,7 +176,6 @@ public class Socialspy implements CoreModule
 				{
 					if (filter == null || filter.sendTo(p))
 						Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
-					Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 				}
 				else
 					DataManager.setData(sender, "enabled", false);
