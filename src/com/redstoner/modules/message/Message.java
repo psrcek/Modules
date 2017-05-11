@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 1, revision = 2, compatible = 3)
+@Version(major = 3, minor = 1, revision = 4, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -167,12 +167,12 @@ public class Message implements Module
 		return true;
 	}
 	
-	public void spyBroadcast(CommandSender sender, CommandSender target, String message, String command)
+	public static void spyBroadcast(CommandSender sender, CommandSender target, String message, String command)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
 			if ((boolean) DataManager.getOrDefault(p, "enabled", false))
-				if (sender.hasPermission("utils.socialspy"))
+				if (p.hasPermission("utils.socialspy"))
 				{
 					if (p.equals(sender) || p.equals(target))
 						continue;
@@ -183,8 +183,24 @@ public class Message implements Module
 		}
 	}
 	
-	private String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target, String message,
-			String command)
+	public static void spyBroadcast(CommandSender sender, String target, String message, String command)
+	{
+		for (Player p : Bukkit.getOnlinePlayers())
+		{
+			if ((boolean) DataManager.getOrDefault(p, "enabled", false))
+				if (p.hasPermission("utils.socialspy"))
+				{
+					if (p.equals(sender) || p.equals(target))
+						continue;
+					Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
+				}
+				else
+					DataManager.setData(sender, "enabled", false);
+		}
+	}
+	
+	private static String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target,
+			String message, String command)
 	{
 		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
 			message = ChatColor.stripColor(message);
@@ -197,6 +213,33 @@ public class Message implements Module
 		// Target name
 		format = format.replace("%t", Utils.getName(target));
 		format = format.replace("%T", target.getName());
+		// Prefix
+		String prefix = (String) DataManager.getOrDefault(formatHolder, "prefix", getDefaultPrefix());
+		format = format.replace("%p", prefix);
+		// Apply colors to halfway replaced String
+		format = ChatColor.translateAlternateColorCodes('&', format);
+		// Insert command and message
+		format = format.replace("%c", command);
+		format = format.replace("%m", message);
+		// Convert placeholder back
+		format = format.replace("§§", "%%");
+		return format;
+	}
+	
+	private static String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
+			String command)
+	{
+		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
+			message = ChatColor.stripColor(message);
+		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
+		// Replace escaped % with placeholder
+		format = format.replace("%%", "§§");
+		// Sender name
+		format = format.replace("%s", Utils.getName(sender));
+		format = format.replace("%S", sender.getName());
+		// Target name
+		format = format.replace("%t", target);
+		format = format.replace("%T", target);
 		// Prefix
 		String prefix = (String) DataManager.getOrDefault(formatHolder, "prefix", getDefaultPrefix());
 		format = format.replace("%p", prefix);
