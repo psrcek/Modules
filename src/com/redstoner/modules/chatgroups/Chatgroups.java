@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,7 +29,7 @@ import com.redstoner.modules.message.Message;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 7, compatible = 2)
+@Version(major = 2, minor = 0, revision = 8, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -242,8 +243,8 @@ public class Chatgroups implements Module, Listener
 		String group = getGroup(sender);
 		sendToGroup(name, "&9" + pname + " &7joined the group!");
 		setGroup(sender, name);
-		if (group != null)
-			sendToGroup(group, "&9" + pname + " &7joined the group!");
+		if (group != null && !group.equals(name))
+			sendToGroup(group, "&9" + pname + " &7left the group!");
 		Utils.sendMessage(sender, null, "Successfully joined group §6" + name);
 		return true;
 	}
@@ -343,6 +344,7 @@ public class Chatgroups implements Module, Listener
 	 * @param message the message to be sent. */
 	private void sendToGroup(CommandSender sender, String message)
 	{
+		message = Utils.colorify(message, sender);
 		String name = Utils.getName(sender);
 		String group = getGroup(sender);
 		Utils.broadcast("§8[§bCG§8] §9", name + "§8: §6" + message, new BroadcastFilter()
@@ -359,7 +361,7 @@ public class Chatgroups implements Module, Listener
 		}, '&');
 		if (ModuleLoader.getModule("Message") != null)
 		{
-			Message.spyBroadcast(sender, "&e" + group + " &a(cg)", message, "/cg", new BroadcastFilter()
+			Message.spyBroadcast(sender, "§e" + group + " §a(cg)", message, "/cg", new BroadcastFilter()
 			{
 				@Override
 				public boolean sendTo(CommandSender recipient)
@@ -380,6 +382,7 @@ public class Chatgroups implements Module, Listener
 	 * @param message the message to be sent. */
 	private void sendToGroup(String group, String message)
 	{
+		message = ChatColor.translateAlternateColorCodes('&', message);
 		Utils.broadcast(null, message, new BroadcastFilter()
 		{
 			@Override
@@ -391,10 +394,10 @@ public class Chatgroups implements Module, Listener
 				else
 					return false;
 			}
-		}, '&');
+		});
 		if (ModuleLoader.getModule("Message") != null)
 		{
-			Message.spyBroadcast(Bukkit.getConsoleSender(), "&e" + group + " &a(cg)", message, "/cg",
+			Message.spyBroadcast(Bukkit.getConsoleSender(), "§e" + group + " §a(cg)", message, "/cg",
 					new BroadcastFilter()
 					{
 						@Override
