@@ -23,13 +23,13 @@ import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
-import com.redstoner.modules.message.Message;
+import com.redstoner.modules.socialspy.Socialspy;
 
 /** The ChatGroups module. Allows people to have private sub-chats that can be accessed via a single char prefix or a toggle.
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 9, compatible = 2)
+@Version(major = 2, minor = 1, revision = 0, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -363,9 +363,9 @@ public class Chatgroups implements Module, Listener
 					return false;
 			}
 		}, '&');
-		if (ModuleLoader.getModule("Message") != null)
+		if (ModuleLoader.getModule("Socialspy") != null)
 		{
-			Message.spyBroadcast(sender, "§e" + group + " §a(cg)", message, "/cg", new BroadcastFilter()
+			Socialspy.spyBroadcast(sender, "§e" + group + " §a(cg)", message, "/cg", new BroadcastFilter()
 			{
 				@Override
 				public boolean sendTo(CommandSender recipient)
@@ -399,9 +399,9 @@ public class Chatgroups implements Module, Listener
 					return false;
 			}
 		});
-		if (ModuleLoader.getModule("Message") != null)
+		if (ModuleLoader.getModule("Socialspy") != null)
 		{
-			Message.spyBroadcast(Bukkit.getConsoleSender(), "§e" + group + " §a(cg)", message, "/cg",
+			Socialspy.spyBroadcast(Bukkit.getConsoleSender(), "§e" + group + " §a(cg)", message, "/cg",
 					new BroadcastFilter()
 					{
 						@Override
