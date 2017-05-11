@@ -368,7 +368,14 @@ public class Chatgroups implements Module, Listener
 		}, '&');
 		if (ModuleLoader.getModule("Message") != null)
 		{
-			Message.spyBroadcast(sender, group + "(cg)", message, "/cg");
+			Message.spyBroadcast(sender, group + "(cg)", message, "/cg", new BroadcastFilter()
+			{
+				@Override
+				public boolean sendTo(CommandSender recipient)
+				{
+					return getGroup(recipient) == null || !getGroup(recipient).equals(group);
+				}
+			});
 		}
 		if (getGroup(Bukkit.getConsoleSender()) == null || !getGroup(Bukkit.getConsoleSender()).equals(group))
 		{
