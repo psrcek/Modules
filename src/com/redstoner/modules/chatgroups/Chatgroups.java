@@ -28,7 +28,7 @@ import com.redstoner.modules.message.Message;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 4, compatible = 2)
+@Version(major = 2, minor = 0, revision = 5, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -247,8 +247,11 @@ public class Chatgroups implements Module, Listener
 			pname = ((Player) sender).getDisplayName();
 		else
 			pname = sender.getName();
+		String group = getGroup(sender);
 		sendToGroup(name, "&9" + pname + " &7joined the group!");
 		setGroup(sender, name);
+		if (group != null)
+			sendToGroup(group, "&9" + pname + " &7joined the group!");
 		Utils.sendMessage(sender, null, "Successfully joined group §6" + name);
 		return true;
 	}
