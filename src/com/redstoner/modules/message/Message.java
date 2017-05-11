@@ -17,7 +17,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.socialspy.Socialspy;
 
-@Version(major = 3, minor = 3, revision = 1, compatible = 3)
+@Version(major = 3, minor = 3, revision = 2, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -85,6 +85,8 @@ public class Message implements Module
 			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(target) + "&6] ", "§f" + message, '&');
 			Utils.sendMessage(target, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§f" + message, '&');
 		}
+		replyTargets.put(sender, target);
+		replyTargets.put(target, sender);
 		return true;
 	}
 }
