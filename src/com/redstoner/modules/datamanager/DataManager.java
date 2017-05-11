@@ -15,17 +15,18 @@ import org.json.simple.JSONObject;
 
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 0, revision = 6, compatible = 3)
+@Version(major = 3, minor = 0, revision = 7, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
-	private static final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
-	private static JSONObject data = new JSONObject();
+	private final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
+	private JSONObject data = new JSONObject();
 	
 	@Override
 	public void postEnable()
@@ -60,7 +61,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void loadData(UUID id)
+	public void loadData(UUID id)
 	{
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id.toString() + ".json"));
 		if (playerData == null)
@@ -68,24 +69,24 @@ public final class DataManager implements CoreModule, Listener
 		data.put(id.toString(), playerData);
 	}
 	
-	public static Object getOrDefault(CommandSender sender, String key, Object fallback)
+	public Object getOrDefault(CommandSender sender, String key, Object fallback)
 	{
 		Object o = getData(sender, Utils.getCaller("DataManager"), key);
 		return o == null ? fallback : o;
 	}
 	
-	public static Object getOrDefault(CommandSender sender, String module, String key, Object fallback)
+	public Object getOrDefault(CommandSender sender, String module, String key, Object fallback)
 	{
 		Object o = getData(sender, module, key);
 		return o == null ? fallback : o;
 	}
 	
-	public static Object getData(CommandSender sender, String key)
+	public Object getData(CommandSender sender, String key)
 	{
 		return getData(sender, Utils.getCaller("DataManager"), key);
 	}
 	
-	public static Object getData(CommandSender sender, String module, String key)
+	public Object getData(CommandSender sender, String module, String key)
 	{
 		String id;
 		if (sender instanceof Player)
@@ -103,7 +104,7 @@ public final class DataManager implements CoreModule, Listener
 			return loadAndGet(id, module, key);
 	}
 	
-	private static Object loadAndGet(String id, String module, String key)
+	private Object loadAndGet(String id, String module, String key)
 	{
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
@@ -111,13 +112,13 @@ public final class DataManager implements CoreModule, Listener
 		return ((JSONObject) playerData.get(module)).get(key);
 	}
 	
-	public static void setData(CommandSender sender, String key, Object value)
+	public void setData(CommandSender sender, String key, Object value)
 	{
 		setData(sender, Utils.getCaller("DataManager"), key, value);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void setData(CommandSender sender, String module, String key, Object value)
+	public void setData(CommandSender sender, String module, String key, Object value)
 	{
 		String id;
 		if (sender instanceof Player)
@@ -140,7 +141,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void loadAndSet(String id, String module, String key, Object value)
+	private void loadAndSet(String id, String module, String key, Object value)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
@@ -156,12 +157,12 @@ public final class DataManager implements CoreModule, Listener
 		JsonManager.save(playerData, dataFile);
 	}
 	
-	public static void removeData(CommandSender sender, String key)
+	public void removeData(CommandSender sender, String key)
 	{
 		removeData(sender, Utils.getCaller("DataManager"), key);
 	}
 	
-	public static void removeData(CommandSender sender, String module, String key)
+	public void removeData(CommandSender sender, String module, String key)
 	{
 		String id;
 		if (sender instanceof Player)
@@ -180,7 +181,7 @@ public final class DataManager implements CoreModule, Listener
 			loadAndRemove(id, module, key);
 	}
 	
-	private static void loadAndRemove(String id, String module, String key)
+	private void loadAndRemove(String id, String module, String key)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
@@ -193,12 +194,12 @@ public final class DataManager implements CoreModule, Listener
 		JsonManager.save(playerData, dataFile);
 	}
 	
-	public static void migrateAll(String oldName)
+	public void migrateAll(String oldName)
 	{
 		migrateAll(oldName, Utils.getCaller("DataManager"));
 	}
 	
-	public static void migrateAll(String oldName, String newName)
+	public void migrateAll(String oldName, String newName)
 	{
 		for (String s : dataFolder.list(new FilenameFilter()
 		{
@@ -213,13 +214,13 @@ public final class DataManager implements CoreModule, Listener
 		}
 	}
 	
-	public static void migrate(String id, String oldName)
+	public void migrate(String id, String oldName)
 	{
 		migrate(id, oldName, Utils.getCaller("DataManager"));
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void migrate(String id, String oldName, String newName)
+	public void migrate(String id, String oldName, String newName)
 	{
 		if (data.containsKey(id))
 		{
@@ -232,7 +233,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void loadAndMigrate(String id, String oldName, String newName)
+	private void loadAndMigrate(String id, String oldName, String newName)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject data = JsonManager.getObject(dataFile);
@@ -241,7 +242,7 @@ public final class DataManager implements CoreModule, Listener
 		JsonManager.save(data, dataFile);
 	}
 	
-	public static void save(CommandSender sender)
+	public void save(CommandSender sender)
 	{
 		String id;
 		if (sender instanceof Player)
@@ -251,7 +252,7 @@ public final class DataManager implements CoreModule, Listener
 		save(id);
 	}
 	
-	public static void save(String id)
+	public void save(String id)
 	{
 		Object raw = data.get(id);
 		if (raw == null || ((JSONObject) raw).size() == 0)
@@ -259,7 +260,7 @@ public final class DataManager implements CoreModule, Listener
 		JsonManager.save((JSONObject) raw, new File(dataFolder, id + ".json"));
 	}
 	
-	private static void saveAndUnload(CommandSender sender)
+	private void saveAndUnload(CommandSender sender)
 	{
 		String id;
 		if (sender instanceof Player)
@@ -269,9 +270,14 @@ public final class DataManager implements CoreModule, Listener
 		saveAndUnload(id);
 	}
 	
-	private static void saveAndUnload(String id)
+	private void saveAndUnload(String id)
 	{
 		save(id);
 		data.remove(id);
+	}
+	
+	public static DataManager getDataManager()
+	{
+		return (DataManager) ModuleLoader.getModule("DataManager");
 	}
 }

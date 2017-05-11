@@ -17,7 +17,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 0, revision = 3, compatible = 3)
+@Version(major = 3, minor = 1, revision = 0, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -36,7 +36,7 @@ public class Socialspy implements CoreModule
 	public boolean prefix(CommandSender sender, String prefix)
 	{
 		Utils.sendMessage(sender, null, "Set your prefix to: " + prefix);
-		DataManager.setData(sender, "prefix", prefix);
+		DataManager.getDataManager().setData(sender, "prefix", prefix);
 		return true;
 	}
 	
@@ -50,7 +50,7 @@ public class Socialspy implements CoreModule
 	public boolean configFormat(CommandSender sender, String format)
 	{
 		Utils.sendMessage(sender, null, "Set your format to: " + format);
-		DataManager.setData(sender, "format", format);
+		DataManager.getDataManager().setData(sender, "format", format);
 		return true;
 	}
 	
@@ -58,7 +58,7 @@ public class Socialspy implements CoreModule
 	public boolean stripcolorOn(CommandSender sender)
 	{
 		Utils.sendMessage(sender, null, "Enabled stripping colors!");
-		DataManager.setData(sender, "stripcolor", true);
+		DataManager.getDataManager().setData(sender, "stripcolor", true);
 		return true;
 	}
 	
@@ -66,16 +66,16 @@ public class Socialspy implements CoreModule
 	public boolean stripcolorOff(CommandSender sender)
 	{
 		Utils.sendMessage(sender, null, "Disabled stripping colors!");
-		DataManager.setData(sender, "stripcolor", false);
+		DataManager.getDataManager().setData(sender, "stripcolor", false);
 		return true;
 	}
 	
 	@Command(hook = "stripcolor")
 	public boolean stripcolor(CommandSender sender)
 	{
-		boolean b = (boolean) DataManager.getOrDefault(sender, "stripcolor", true);
+		boolean b = (boolean) DataManager.getDataManager().getOrDefault(sender, "stripcolor", true);
 		Utils.sendMessage(sender, null, (b ? "Disabled" : "Enabled") + " stripping colors!");
-		DataManager.setData(sender, "stripcolor", !b);
+		DataManager.getDataManager().setData(sender, "stripcolor", !b);
 		return true;
 	}
 	
@@ -83,7 +83,7 @@ public class Socialspy implements CoreModule
 	public boolean spyOn(CommandSender sender)
 	{
 		Utils.sendMessage(sender, null, "Enabled socialspy!");
-		DataManager.setData(sender, "enabled", true);
+		DataManager.getDataManager().setData(sender, "enabled", true);
 		return true;
 	}
 	
@@ -91,16 +91,16 @@ public class Socialspy implements CoreModule
 	public boolean spyOff(CommandSender sender)
 	{
 		Utils.sendMessage(sender, null, "Disabled socialspy!");
-		DataManager.setData(sender, "enabled", false);
+		DataManager.getDataManager().setData(sender, "enabled", false);
 		return true;
 	}
 	
 	@Command(hook = "toggle")
 	public boolean spyToggle(CommandSender sender)
 	{
-		boolean b = (boolean) DataManager.getOrDefault(sender, "enabled", false);
+		boolean b = (boolean) DataManager.getDataManager().getOrDefault(sender, "enabled", false);
 		Utils.sendMessage(sender, null, (b ? "Disabled" : "Enabled") + " socialspy!");
-		DataManager.setData(sender, "enabled", !b);
+		DataManager.getDataManager().setData(sender, "enabled", !b);
 		return true;
 	}
 	
@@ -124,7 +124,8 @@ public class Socialspy implements CoreModule
 	public boolean commands_list(CommandSender sender)
 	{
 		Utils.sendModuleHeader(sender);
-		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
+		JSONArray commands = (JSONArray) DataManager.getDataManager().getOrDefault(sender, "commands",
+				getDefaultCommandList());
 		if (commands == null || commands.size() == 0)
 			Utils.sendErrorMessage(sender, "", "You are not listening to any commands!");
 		else
@@ -149,9 +150,10 @@ public class Socialspy implements CoreModule
 	@Command(hook = "commands_add")
 	public boolean commands_add(CommandSender sender, String command)
 	{
-		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
+		JSONArray commands = (JSONArray) DataManager.getDataManager().getOrDefault(sender, "commands",
+				getDefaultCommandList());
 		commands.add(command);
-		DataManager.setData(sender, "commands", commands);
+		DataManager.getDataManager().setData(sender, "commands", commands);
 		Utils.sendMessage(sender, null, "You are now spying on &e" + command, '&');
 		return true;
 	}
@@ -159,9 +161,10 @@ public class Socialspy implements CoreModule
 	@Command(hook = "commands_del")
 	public boolean commands_del(CommandSender sender, String command)
 	{
-		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
+		JSONArray commands = (JSONArray) DataManager.getDataManager().getOrDefault(sender, "commands",
+				getDefaultCommandList());
 		commands.remove(command);
-		DataManager.setData(sender, "commands", commands);
+		DataManager.getDataManager().setData(sender, "commands", commands);
 		Utils.sendMessage(sender, null, "You are no longer spying on &e" + command, '&');
 		return true;
 	}
@@ -171,14 +174,14 @@ public class Socialspy implements CoreModule
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
-			if ((boolean) DataManager.getOrDefault(p, "enabled", false))
+			if ((boolean) DataManager.getDataManager().getOrDefault(p, "enabled", false))
 				if (p.hasPermission("utils.socialspy"))
 				{
 					if (filter == null || filter.sendTo(p))
 						Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 				}
 				else
-					DataManager.setData(sender, "enabled", false);
+					DataManager.getDataManager().setData(sender, "enabled", false);
 		}
 	}
 	
@@ -187,23 +190,23 @@ public class Socialspy implements CoreModule
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
-			if ((boolean) DataManager.getOrDefault(p, "enabled", false))
+			if ((boolean) DataManager.getDataManager().getOrDefault(p, "enabled", false))
 				if (p.hasPermission("utils.socialspy"))
 				{
 					if (filter == null || filter.sendTo(p))
 						Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
 				}
 				else
-					DataManager.setData(sender, "enabled", false);
+					DataManager.getDataManager().setData(sender, "enabled", false);
 		}
 	}
 	
 	private static String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target,
 			String message, String command)
 	{
-		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
+		if ((boolean) DataManager.getDataManager().getOrDefault(formatHolder, "stripcolor", false))
 			message = ChatColor.stripColor(message);
-		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
+		String format = (String) DataManager.getDataManager().getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
 		// Sender name
@@ -213,7 +216,7 @@ public class Socialspy implements CoreModule
 		format = format.replace("%t", Utils.getName(target));
 		format = format.replace("%T", target.getName());
 		// Prefix
-		String prefix = (String) DataManager.getOrDefault(formatHolder, "prefix", getDefaultPrefix());
+		String prefix = (String) DataManager.getDataManager().getOrDefault(formatHolder, "prefix", getDefaultPrefix());
 		format = format.replace("%p", prefix);
 		// Apply colors to halfway replaced String
 		format = ChatColor.translateAlternateColorCodes('&', format);
@@ -228,9 +231,9 @@ public class Socialspy implements CoreModule
 	private static String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
 			String command)
 	{
-		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
+		if ((boolean) DataManager.getDataManager().getOrDefault(formatHolder, "stripcolor", false))
 			message = ChatColor.stripColor(message);
-		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
+		String format = (String) DataManager.getDataManager().getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
 		// Sender name
@@ -240,7 +243,7 @@ public class Socialspy implements CoreModule
 		format = format.replace("%t", target);
 		format = format.replace("%T", target);
 		// Prefix
-		String prefix = (String) DataManager.getOrDefault(formatHolder, "prefix", getDefaultPrefix());
+		String prefix = (String) DataManager.getDataManager().getOrDefault(formatHolder, "prefix", getDefaultPrefix());
 		format = format.replace("%p", prefix);
 		// Apply colors to halfway replaced String
 		format = ChatColor.translateAlternateColorCodes('&', format);
@@ -265,7 +268,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "migrate")
 	public boolean migrate(CommandSender sender)
 	{
-		DataManager.migrateAll("Message");
+		DataManager.getDataManager().migrateAll("Message");
 		return true;
 	}
 }
