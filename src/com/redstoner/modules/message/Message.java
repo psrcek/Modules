@@ -1,11 +1,13 @@
 package com.redstoner.modules.message;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.json.simple.JSONArray;
 
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
@@ -19,7 +21,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 3, minor = 1, revision = 5, compatible = 3)
+@Version(major = 3, minor = 1, revision = 6, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -185,18 +187,45 @@ public class Message implements Module
 	@Command(hook = "commands_list")
 	public boolean commands_list(CommandSender sender)
 	{
+		Utils.sendModuleHeader(sender, "Socialspy");
+		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
+		if (commands == null || commands.size() == 0)
+			Utils.sendErrorMessage(sender, "", "You are not listening to any commands!");
+		else
+		{
+			Utils.sendMessage(sender, "", "You are listening to the following " + commands.size() + " commands:");
+			Utils.sendMessage(sender, "", Arrays.toString(commands.toArray()));
+		}
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
+	private final JSONArray getDefaultCommandList()
+	{
+		JSONArray commands = new JSONArray();
+		commands.add("/m");
+		commands.add("/r");
+		return commands;
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Command(hook = "commands_add")
 	public boolean commands_add(CommandSender sender, String command)
 	{
+		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
+		commands.add(command);
+		DataManager.setData(sender, "commands", commands);
+		Utils.sendMessage(sender, "&8[&2Socialspy&8]", "You are now spying on &e" + command, '&');
 		return true;
 	}
 	
 	@Command(hook = "commands_del")
 	public boolean commands_del(CommandSender sender, String command)
 	{
+		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
+		commands.remove(command);
+		DataManager.setData(sender, "commands", commands);
+		Utils.sendMessage(sender, "&8[&2Socialspy&8]", "You are no longer spying on &e" + command, '&');
 		return true;
 	}
 	
