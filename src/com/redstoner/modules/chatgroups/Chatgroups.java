@@ -28,7 +28,7 @@ import com.redstoner.modules.message.Message;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 6, compatible = 2)
+@Version(major = 2, minor = 0, revision = 7, compatible = 2)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -392,6 +392,18 @@ public class Chatgroups implements Module, Listener
 					return false;
 			}
 		}, '&');
+		if (ModuleLoader.getModule("Message") != null)
+		{
+			Message.spyBroadcast(Bukkit.getConsoleSender(), "&e" + group + " &a(cg)", message, "/cg",
+					new BroadcastFilter()
+					{
+						@Override
+						public boolean sendTo(CommandSender recipient)
+						{
+							return getGroup(recipient) == null || !getGroup(recipient).equals(group);
+						}
+					});
+		}
 		if (getGroup(Bukkit.getConsoleSender()) == null || !getGroup(Bukkit.getConsoleSender()).equals(group))
 		{
 			Utils.info("In " + group + ": " + message + " §8(hidden)");
