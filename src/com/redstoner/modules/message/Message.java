@@ -17,7 +17,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.socialspy.Socialspy;
 
-@Version(major = 3, minor = 3, revision = 2, compatible = 3)
+@Version(major = 3, minor = 3, revision = 3, compatible = 3)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
@@ -50,7 +50,7 @@ public class Message implements Module
 					@Override
 					public boolean sendTo(CommandSender recipient)
 					{
-						return !(recipient.equals(sender) || recipient.equals(target));
+						return !(recipient.equals(sender) || recipient.equals(p));
 					}
 				});
 			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(p) + "&6] ", "§f" + message, '&');
