@@ -20,7 +20,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 1, revision = 5, compatible = 3)
+@Version(major = 3, minor = 1, revision = 6, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -301,6 +301,26 @@ public class Socialspy implements CoreModule
 	public boolean migrate(CommandSender sender)
 	{
 		DataManager.migrateAll("Message");
+		return true;
+	}
+	
+	@Command(hook = "test")
+	public boolean test(CommandSender sender) throws InterruptedException
+	{
+		DataManager.setData(sender, "test", "&aTest1");
+		Thread.sleep(1);
+		Utils.sendMessage(sender, null,
+				"Wrote \"Test1\", got " + DataManager.getOrDefault(sender, "test", "&4fallback"), '&');
+		DataManager.setData(sender, "test", "&aTest2");
+		Thread.sleep(1);
+		Utils.sendMessage(sender, null,
+				"Wrote \"Test2\", got " + DataManager.getOrDefault(sender, "test", "&4fallback"), '&');
+		DataManager.setData(sender, "test", "&4DATA");
+		Thread.sleep(1);
+		DataManager.removeData(sender, "test");
+		Thread.sleep(1);
+		Utils.sendMessage(sender, null, "Removed data, got " + DataManager.getOrDefault(sender, "test", "&anothing"),
+				'&');
 		return true;
 	}
 }
