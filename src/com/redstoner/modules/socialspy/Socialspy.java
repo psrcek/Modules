@@ -21,7 +21,7 @@ import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 1, revision = 7, compatible = 3)
+@Version(major = 3, minor = 1, revision = 8, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -62,7 +62,7 @@ public class Socialspy implements CoreModule
 	public boolean stripcolorOn(CommandSender sender)
 	{
 		Utils.sendMessage(sender, null, "Enabled stripping colors!");
-		DataManager.setData(sender, "stripcolor", true);
+		DataManager.setData(sender, "stripcolor", "on");
 		return true;
 	}
 	
@@ -70,14 +70,22 @@ public class Socialspy implements CoreModule
 	public boolean stripcolorOff(CommandSender sender)
 	{
 		Utils.sendMessage(sender, null, "Disabled stripping colors!");
-		DataManager.setData(sender, "stripcolor", false);
+		DataManager.setData(sender, "stripcolor", "off");
+		return true;
+	}
+	
+	@Command(hook = "stripcolor_partial")
+	public boolean stripcolor_partial(CommandSender sender)
+	{
+		Utils.sendMessage(sender, null, "Disabled stripping colors!");
+		DataManager.setData(sender, "stripcolor", "partial");
 		return true;
 	}
 	
 	@Command(hook = "stripcolor")
 	public boolean stripcolor(CommandSender sender)
 	{
-		boolean b = (boolean) DataManager.getOrDefault(sender, "stripcolor", true);
+		boolean b = DataManager.getOrDefault(sender, "stripcolor", "on").equals("on");
 		Utils.sendMessage(sender, null, (b ? "Disabled" : "Enabled") + " stripping colors!");
 		DataManager.setData(sender, "stripcolor", !b);
 		return true;
@@ -239,8 +247,21 @@ public class Socialspy implements CoreModule
 	private String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target, String message,
 			String command)
 	{
-		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
+		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
+		if (o instanceof Boolean)
+		{
+			boolean b = (boolean) o;
+			if (b)
+				o = "on";
+			else
+				o = "off";
+			DataManager.setData(formatHolder, "stripcolor", o);
+		}
+		String s = (String) o;
+		if (s.equals("on"))
 			message = ChatColor.stripColor(message);
+		else if (s.equals("partial"))
+			message = message.replace("§", "&");
 		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
@@ -266,8 +287,21 @@ public class Socialspy implements CoreModule
 	private String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
 			String command)
 	{
-		if ((boolean) DataManager.getOrDefault(formatHolder, "stripcolor", false))
+		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
+		if (o instanceof Boolean)
+		{
+			boolean b = (boolean) o;
+			if (b)
+				o = "on";
+			else
+				o = "off";
+			DataManager.setData(formatHolder, "stripcolor", o);
+		}
+		String s = (String) o;
+		if (s.equals("on"))
 			message = ChatColor.stripColor(message);
+		else if (s.equals("partial"))
+			message = message.replace("§", "&");
 		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");

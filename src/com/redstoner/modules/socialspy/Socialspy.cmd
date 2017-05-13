@@ -37,6 +37,9 @@ command socialspy {
     stripcolor off {
         run stripcolor_off;
     }
+    stripcolor partial {
+        run stripcolor_partial;
+    }
     stripcolor {
         run stripcolor;
     }
