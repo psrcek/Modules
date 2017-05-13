@@ -21,13 +21,14 @@ import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
+import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 1, revision = 0, compatible = 3)
+@Version(major = 3, minor = 1, revision = 1, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
-	private final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
-	private JSONObject data = new JSONObject();
+	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
+	protected JSONObject data = new JSONObject();
 	
 	@Override
 	public void postEnable()
@@ -65,8 +66,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("loadData_", String.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), id);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("loadData_", String.class);
+			m.invoke(mod, id);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -91,9 +93,10 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("getOrDefault_", CommandSender.class, String.class,
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("getOrDefault_", CommandSender.class, String.class,
 					String.class, Object.class);
-			return m.invoke(ModuleLoader.getModule("DataManager"), sender, module, key, fallback);
+			return m.invoke(mod, sender, module, key, fallback);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -116,8 +119,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("getData_", CommandSender.class, String.class, String.class);
-			return m.invoke(ModuleLoader.getModule("DataManager"), sender, module, key);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("getData_", CommandSender.class, String.class, String.class);
+			return m.invoke(mod, sender, module, key);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -143,7 +147,7 @@ public final class DataManager implements CoreModule, Listener
 			return loadAndGet(id, module, key);
 	}
 	
-	private Object loadAndGet(String id, String module, String key)
+	protected Object loadAndGet(String id, String module, String key)
 	{
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
@@ -160,9 +164,10 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("setData_", CommandSender.class, String.class, String.class,
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("setData_", CommandSender.class, String.class, String.class,
 					Object.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), sender, module, key, value);
+			m.invoke(mod, sender, module, key, value);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -193,7 +198,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void loadAndSet(String id, String module, String key, Object value)
+	protected void loadAndSet(String id, String module, String key, Object value)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
@@ -218,9 +223,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("removeData_", CommandSender.class, String.class,
-					String.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), sender, module, key);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("removeData_", CommandSender.class, String.class, String.class);
+			m.invoke(mod, sender, module, key);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -246,7 +251,7 @@ public final class DataManager implements CoreModule, Listener
 			loadAndRemove(id, module, key);
 	}
 	
-	private void loadAndRemove(String id, String module, String key)
+	protected void loadAndRemove(String id, String module, String key)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
@@ -268,8 +273,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("migrateAll_", String.class, String.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), oldName, newName);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("migrateAll_", String.class, String.class);
+			m.invoke(mod, oldName, newName);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -300,8 +306,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("migrate_", String.class, String.class, String.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), id, oldName, newName);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("migrate_", String.class, String.class, String.class);
+			m.invoke(mod, id, oldName, newName);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -322,7 +329,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void loadAndMigrate(String id, String oldName, String newName)
+	protected void loadAndMigrate(String id, String oldName, String newName)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject data = JsonManager.getObject(dataFile);
@@ -335,8 +342,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("save_", CommandSender.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), sender);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("save_", CommandSender.class);
+			m.invoke(mod, sender);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -357,8 +365,9 @@ public final class DataManager implements CoreModule, Listener
 	{
 		try
 		{
-			Method m = DataManager.class.getDeclaredMethod("save_", String.class);
-			m.invoke(ModuleLoader.getModule("DataManager"), id);
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("save_", String.class);
+			m.invoke(mod, id);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -373,7 +382,7 @@ public final class DataManager implements CoreModule, Listener
 		JsonManager.save((JSONObject) raw, new File(dataFolder, id + ".json"));
 	}
 	
-	private void saveAndUnload(CommandSender sender)
+	protected void saveAndUnload(CommandSender sender)
 	{
 		String id;
 		if (sender instanceof Player)
@@ -383,7 +392,7 @@ public final class DataManager implements CoreModule, Listener
 		saveAndUnload(id);
 	}
 	
-	private void saveAndUnload(String id)
+	protected void saveAndUnload(String id)
 	{
 		save_(id);
 		data.remove(id);
