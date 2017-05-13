@@ -18,9 +18,10 @@ import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
+import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 1, revision = 6, compatible = 3)
+@Version(major = 3, minor = 1, revision = 7, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -174,9 +175,10 @@ public class Socialspy implements CoreModule
 	{
 		try
 		{
-			Method m = Socialspy.class.getDeclaredMethod("spyBroadcast_", CommandSender.class, CommandSender.class,
+			Module mod = ModuleLoader.getModule("Socialspy");
+			Method m = mod.getClass().getDeclaredMethod("spyBroadcast_", CommandSender.class, CommandSender.class,
 					String.class, String.class, BroadcastFilter.class);
-			m.invoke(ModuleLoader.getModule("Socialspy"), sender, target, message, command, filter);
+			m.invoke(mod, sender, target, message, command, filter);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -206,9 +208,10 @@ public class Socialspy implements CoreModule
 	{
 		try
 		{
-			Method m = Socialspy.class.getDeclaredMethod("spyBroadcast_", CommandSender.class, String.class,
+			Module mod = ModuleLoader.getModule("Socialspy");
+			Method m = mod.getClass().getDeclaredMethod("spyBroadcast_", CommandSender.class, String.class,
 					String.class, String.class, BroadcastFilter.class);
-			m.invoke(ModuleLoader.getModule("Socialspy"), sender, target, message, command, filter);
+			m.invoke(mod, sender, target, message, command, filter);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
