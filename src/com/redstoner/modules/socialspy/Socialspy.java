@@ -20,7 +20,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 1, revision = 3, compatible = 3)
+@Version(major = 3, minor = 1, revision = 4, compatible = 3)
 public class Socialspy implements CoreModule
 {
 	@Override
@@ -114,12 +114,12 @@ public class Socialspy implements CoreModule
 		Utils.sendMessage(sender, "", " Format placeholders:");
 		Utils.sendMessage(sender, "", " &c%s&eender &7(display name) | &c%S&eender &7(real name)", '&');
 		Utils.sendMessage(sender, "", " &c%t&earget &7(display name) | &c%T&earget &7(real name)", '&');
-		Utils.sendMessage(sender, "", " &p%s&erefix &7(see prefix option)", '&');
-		Utils.sendMessage(sender, "", " &m%s&eessage", '&');
+		Utils.sendMessage(sender, "", " &c%p&erefix &7(see prefix option)", '&');
+		Utils.sendMessage(sender, "", " &c%m&eessage", '&');
 		Utils.sendMessage(sender, "", " &c%s&eommand", '&');
 		Utils.sendMessage(sender, "", " Any other text will be put as literal text. Use %% to escape any %.", '&');
-		Utils.sendMessage(sender, "", " The default format is: '§e" + getDefaultFormat());
-		Utils.sendMessage(sender, "", " The default prefix is: '§e" + getDefaultPrefix());
+		Utils.sendMessage(sender, "", " The default format is: §e" + getDefaultFormat());
+		Utils.sendMessage(sender, "", " The default prefix is: §e" + getDefaultPrefix());
 		return true;
 	}
 	
@@ -289,7 +289,7 @@ public class Socialspy implements CoreModule
 	
 	private final String getDefaultFormat()
 	{
-		return "%s &7to %t %p: %m";
+		return " %s &7to %t%p: %m";
 	}
 	
 	private final String getDefaultPrefix()
