@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.json.simple.JSONObject;
 
+import com.nemez.cmdmgr.Command;
+import com.nemez.cmdmgr.CommandManager;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
@@ -24,7 +27,7 @@ import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 1, revision = 1, compatible = 3)
+@Version(major = 3, minor = 1, revision = 2, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -39,6 +42,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			loadData_(p.getUniqueId().toString());
 		}
+		CommandManager.registerCommand(getClass().getResourceAsStream("DataManager.cmd"), this, Main.plugin);
 	}
 	
 	@Override
@@ -48,6 +52,21 @@ public final class DataManager implements CoreModule, Listener
 		{
 			saveAndUnload(p);
 		}
+	}
+	
+	@Command(hook = "import_file")
+	public boolean importFile(CommandSender sender, String file, String module)
+	{
+		try
+		{
+			JSONObject object = JsonManager.getObject(new File(file));
+			importObject_(module, object);
+		}
+		catch (Exception e)
+		{
+			Utils.sendErrorMessage(sender, null, "Could not import data!");
+		}
+		return true;
 	}
 	
 	@EventHandler
@@ -141,7 +160,10 @@ public final class DataManager implements CoreModule, Listener
 			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
 			if (moduleData == null)
 				return null;
-			return moduleData.get(key);
+			if (key == null)
+				return moduleData;
+			else
+				return moduleData.get(key);
 		}
 		else
 			return loadAndGet(id, module, key);
@@ -152,7 +174,10 @@ public final class DataManager implements CoreModule, Listener
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
 			return null;
-		return ((JSONObject) playerData.get(module)).get(key);
+		if (key == null)
+			return playerData.get(module);
+		else
+			return ((JSONObject) playerData.get(module)).get(key);
 	}
 	
 	public static void setData(CommandSender sender, String key, Object value)
@@ -174,7 +199,6 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void setData_(CommandSender sender, String module, String key, Object value)
 	{
 		String id;
@@ -182,6 +206,12 @@ public final class DataManager implements CoreModule, Listener
 			id = ((Player) sender).getUniqueId().toString();
 		else
 			id = "CONSOLE";
+		setData_(id, module, key, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void setData_(String id, String module, String key, Object value)
+	{
 		if (data.containsKey(id))
 		{
 			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
@@ -190,11 +220,56 @@ public final class DataManager implements CoreModule, Listener
 				moduleData = new JSONObject();
 				((JSONObject) data.get(id)).put(module, moduleData);
 			}
-			moduleData.put(key, value);
-			save_(sender);
+			if (key == null)
+				setDirectly_(id, module, value);
+			else
+				moduleData.put(key, value);
+			save_(id);
 		}
 		else
 			loadAndSet(id, module, key, value);
+	}
+	
+	public static void setDirectly(CommandSender sender, Object value)
+	{
+		setData(sender, Utils.getCaller("DataManager"), value);
+	}
+	
+	public static void setDirectly(CommandSender sender, String module, Object value)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("setDirectly_", CommandSender.class, String.class,
+					Object.class);
+			m.invoke(mod, sender, module, value);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+	}
+	
+	public void setDirectly_(CommandSender sender, String module, Object value)
+	{
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
+		setDirectly_(id, module, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void setDirectly_(String id, String module, Object value)
+	{
+		if (data.containsKey(id))
+		{
+			JSONObject playerdata = (JSONObject) data.get(id);
+			playerdata.put(module, value);
+			save_(id);
+		}
+		else
+			loadAndSetDirectly(id, module, value);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -211,6 +286,17 @@ public final class DataManager implements CoreModule, Listener
 			playerData.put(module, moduleData);
 		}
 		moduleData.put(key, value);
+		JsonManager.save(playerData, dataFile);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void loadAndSetDirectly(String id, String module, Object value)
+	{
+		File dataFile = new File(dataFolder, id + ".json");
+		JSONObject playerData = JsonManager.getObject(dataFile);
+		if (playerData == null)
+			playerData = new JSONObject();
+		playerData.put(module, value);
 		JsonManager.save(playerData, dataFile);
 	}
 	
@@ -262,6 +348,39 @@ public final class DataManager implements CoreModule, Listener
 			return;
 		moduleData.remove(key);
 		JsonManager.save(playerData, dataFile);
+	}
+	
+	public static void importObject(JSONObject object)
+	{
+		importObject(object, Utils.getCaller("DataManager"));
+	}
+	
+	public static void importObject(JSONObject object, String module)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("importObject_", String.class, String.class, String.class);
+			m.invoke(mod, module, object);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+	}
+	
+	protected void importObject_(String module, JSONObject object)
+	{
+		for (Object o : object.keySet())
+		{
+			String uid = null;
+			if (o instanceof String)
+				uid = (String) o;
+			else if (o instanceof UUID)
+				uid = ((UUID) o).toString();
+			if (uid == null)
+				continue;
+			setDirectly_(uid, module, object.get(o));
+		}
 	}
 	
 	public static void migrateAll(String oldName)
