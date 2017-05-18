@@ -27,7 +27,7 @@ import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 1, revision = 2, compatible = 3)
+@Version(major = 3, minor = 2, revision = 0, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -81,6 +81,11 @@ public final class DataManager implements CoreModule, Listener
 		saveAndUnload(event.getPlayer());
 	}
 	
+	public static void loadData(CommandSender sender)
+	{
+		loadData(getID(sender));
+	}
+	
 	public static void loadData(String id)
 	{
 		try
@@ -95,7 +100,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void loadData_(String id)
+	protected void loadData_(String id)
 	{
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
@@ -105,17 +110,22 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static Object getOrDefault(CommandSender sender, String key, Object fallback)
 	{
-		return getOrDefault(sender, Utils.getCaller("DataManager"), key, fallback);
+		return getOrDefault(getID(sender), Utils.getCaller("DataManager"), key, fallback);
 	}
 	
-	public static Object getOrDefault(CommandSender sender, String module, String key, Object fallback)
+	public static Object getOrDefault(String id, String key, Object fallback)
+	{
+		return getOrDefault(id, Utils.getCaller("DataManager"), key, fallback);
+	}
+	
+	public static Object getOrDefault(String id, String module, String key, Object fallback)
 	{
 		try
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
-			Method m = mod.getClass().getDeclaredMethod("getOrDefault_", CommandSender.class, String.class,
-					String.class, Object.class);
-			return m.invoke(mod, sender, module, key, fallback);
+			Method m = mod.getClass().getDeclaredMethod("getOrDefault_", String.class, String.class, String.class,
+					Object.class);
+			return m.invoke(mod, id, module, key, fallback);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -123,24 +133,29 @@ public final class DataManager implements CoreModule, Listener
 		return fallback;
 	}
 	
-	public Object getOrDefault_(CommandSender sender, String module, String key, Object fallback)
+	protected Object getOrDefault_(String id, String module, String key, Object fallback)
 	{
-		Object o = getData_(sender, module, key);
+		Object o = getData_(id, module, key);
 		return o == null ? fallback : o;
 	}
 	
 	public static Object getData(CommandSender sender, String key)
 	{
-		return getData(sender, Utils.getCaller("DataManager"), key);
+		return getData(getID(sender), Utils.getCaller("DataManager"), key);
 	}
 	
-	public static Object getData(CommandSender sender, String module, String key)
+	public static Object getData(String id, String key)
+	{
+		return getData(id, Utils.getCaller("DataManager"), key);
+	}
+	
+	public static Object getData(String id, String module, String key)
 	{
 		try
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
-			Method m = mod.getClass().getDeclaredMethod("getData_", CommandSender.class, String.class, String.class);
-			return m.invoke(mod, sender, module, key);
+			Method m = mod.getClass().getDeclaredMethod("getData_", String.class, String.class, String.class);
+			return m.invoke(mod, id, module, key);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
@@ -148,13 +163,8 @@ public final class DataManager implements CoreModule, Listener
 		return null;
 	}
 	
-	public Object getData_(CommandSender sender, String module, String key)
+	protected Object getData_(String id, String module, String key)
 	{
-		String id;
-		if (sender instanceof Player)
-			id = ((Player) sender).getUniqueId().toString();
-		else
-			id = "CONSOLE";
 		if (data.containsKey(id))
 		{
 			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
@@ -182,31 +192,26 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void setData(CommandSender sender, String key, Object value)
 	{
-		setData(sender, Utils.getCaller("DataManager"), key, value);
+		setData(getID(sender), Utils.getCaller("DataManager"), key, value);
 	}
 	
-	public static void setData(CommandSender sender, String module, String key, Object value)
+	public static void setData(String id, String key, Object value)
+	{
+		setData(id, Utils.getCaller("DataManager"), key, value);
+	}
+	
+	public static void setData(String id, String module, String key, Object value)
 	{
 		try
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
-			Method m = mod.getClass().getDeclaredMethod("setData_", CommandSender.class, String.class, String.class,
+			Method m = mod.getClass().getDeclaredMethod("setData_", String.class, String.class, String.class,
 					Object.class);
-			m.invoke(mod, sender, module, key, value);
+			m.invoke(mod, id, module, key, value);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
 		{}
-	}
-	
-	public void setData_(CommandSender sender, String module, String key, Object value)
-	{
-		String id;
-		if (sender instanceof Player)
-			id = ((Player) sender).getUniqueId().toString();
-		else
-			id = "CONSOLE";
-		setData_(id, module, key, value);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -232,31 +237,25 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void setDirectly(CommandSender sender, Object value)
 	{
-		setData(sender, Utils.getCaller("DataManager"), value);
+		setDirectly(getID(sender), Utils.getCaller("DataManager"), value);
 	}
 	
-	public static void setDirectly(CommandSender sender, String module, Object value)
+	public static void setDirectly(String id, Object value)
+	{
+		setDirectly(id, Utils.getCaller("DataManager"), value);
+	}
+	
+	public static void setDirectly(String id, String module, Object value)
 	{
 		try
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
-			Method m = mod.getClass().getDeclaredMethod("setDirectly_", CommandSender.class, String.class,
-					Object.class);
-			m.invoke(mod, sender, module, value);
+			Method m = mod.getClass().getDeclaredMethod("setDirectly_", String.class, String.class, Object.class);
+			m.invoke(mod, id, module, value);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
 		{}
-	}
-	
-	public void setDirectly_(CommandSender sender, String module, Object value)
-	{
-		String id;
-		if (sender instanceof Player)
-			id = ((Player) sender).getUniqueId().toString();
-		else
-			id = "CONSOLE";
-		setDirectly_(id, module, value);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -302,36 +301,36 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static void removeData(CommandSender sender, String key)
 	{
-		removeData(sender, Utils.getCaller("DataManager"), key);
+		removeData(getID(sender), Utils.getCaller("DataManager"), key);
 	}
 	
-	public static void removeData(CommandSender sender, String module, String key)
+	public static void removeData(String id, String key)
+	{
+		removeData(id, Utils.getCaller("DataManager"), key);
+	}
+	
+	public static void removeData(String id, String module, String key)
 	{
 		try
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
-			Method m = mod.getClass().getDeclaredMethod("removeData_", CommandSender.class, String.class, String.class);
-			m.invoke(mod, sender, module, key);
+			Method m = mod.getClass().getDeclaredMethod("removeData_", String.class, String.class, String.class);
+			m.invoke(mod, id, module, key);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
 		{}
 	}
 	
-	public void removeData_(CommandSender sender, String module, String key)
+	protected void removeData_(String id, String module, String key)
 	{
-		String id;
-		if (sender instanceof Player)
-			id = ((Player) sender).getUniqueId().toString();
-		else
-			id = "CONSOLE";
-		if (data.containsKey(id.toString()))
+		if (data.containsKey(id))
 		{
 			JSONObject moduleData = ((JSONObject) ((JSONObject) data.get(id)).get(module));
 			if (moduleData == null)
 				return;
 			moduleData.remove(key);
-			save_(sender);
+			save_(id);
 		}
 		else
 			loadAndRemove(id, module, key);
@@ -401,7 +400,7 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	public void migrateAll_(String oldName, String newName)
+	protected void migrateAll_(String oldName, String newName)
 	{
 		for (String s : dataFolder.list(new FilenameFilter()
 		{
@@ -435,7 +434,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void migrate_(String id, String oldName, String newName)
+	protected void migrate_(String id, String oldName, String newName)
 	{
 		if (data.containsKey(id))
 		{
@@ -470,14 +469,9 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	public void save_(CommandSender sender)
+	protected void save_(CommandSender sender)
 	{
-		String id;
-		if (sender instanceof Player)
-			id = ((Player) sender).getUniqueId().toString();
-		else
-			id = "CONSOLE";
-		save_(id);
+		save_(getID(sender));
 	}
 	
 	public static void save(String id)
@@ -493,7 +487,7 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	public void save_(String id)
+	protected void save_(String id)
 	{
 		Object raw = data.get(id);
 		if (raw == null || ((JSONObject) raw).size() == 0)
@@ -503,17 +497,22 @@ public final class DataManager implements CoreModule, Listener
 	
 	protected void saveAndUnload(CommandSender sender)
 	{
-		String id;
-		if (sender instanceof Player)
-			id = ((Player) sender).getUniqueId().toString();
-		else
-			id = "CONSOLE";
-		saveAndUnload(id);
+		saveAndUnload(getID(sender));
 	}
 	
 	protected void saveAndUnload(String id)
 	{
 		save_(id);
 		data.remove(id);
+	}
+	
+	private static String getID(CommandSender sender)
+	{
+		String id;
+		if (sender instanceof Player)
+			id = ((Player) sender).getUniqueId().toString();
+		else
+			id = "CONSOLE";
+		return id;
 	}
 }
