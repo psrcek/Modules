@@ -110,7 +110,7 @@ public final class BlockPlaceMods implements Module, Listener
 			if (args.length > 0) {
 				Mod target = ModAbstract.getMod(args[0].toLowerCase());
 				if (target != null) {
-					prefix += "&7[&2" + target.getName() + "&7]&a";
+					prefix += "&7[&2" + capitalize(target.getName()) + "&7]&a";
 					if (!(sender instanceof Player)) {
 						message = "&cYou must be a player to use any block place mod";
 					} else {
@@ -156,6 +156,19 @@ public final class BlockPlaceMods implements Module, Listener
 					.append(mod.getDescription());
 		}
 		return result.toString();
+	}
+	
+	private static String capitalize(String modName) {
+		if (modName.isEmpty()) {
+			return modName;
+		}
+		char first = modName.charAt(0);
+		if (first != (first = Character.toUpperCase(first))) {
+			char[] result = modName.toCharArray();
+			result[0] = first;
+			return String.valueOf(result);
+		}
+		return modName;
 	}
 	
 }
