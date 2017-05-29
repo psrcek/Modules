@@ -1,7 +1,8 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import java.util.ArrayList;
-
+import com.redstoner.modules.blockplacemods.util.CommandException;
+import com.redstoner.modules.blockplacemods.util.ItemProperties;
+import com.redstoner.modules.datamanager.DataManager;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
@@ -15,21 +16,16 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.redstoner.modules.blockplacemods.util.CommandException;
-import com.redstoner.modules.blockplacemods.util.ItemProperties;
-import com.redstoner.modules.datamanager.DataManager;
+import java.util.Arrays;
 
-public abstract class ModInventoryAbstract extends ModAbstract<ItemStack[]>
+public class ModInventory extends ModAbstract
 {
 	protected InventoryType inventoryType;
 	
-	@Override
-	protected void preConstruction()
-	{
-		inventoryType = getInventoryType();
+	public ModInventory(String name, InventoryType inventoryType) {
+		super(name);
+		this.inventoryType = inventoryType;
 	}
-	
-	protected abstract InventoryType getInventoryType();
 	
 	private static int highestUsedIndex(ItemStack[] items)
 	{
@@ -80,16 +76,12 @@ public abstract class ModInventoryAbstract extends ModAbstract<ItemStack[]>
 					item = null;
 					if (present(sender))
 					{
-						ItemStack[] data = get(sender);
-						data[slot] = null;
-						set(sender, data);
+						set(sender, slot, null);
 					}
 				}
 				else
 				{
-					ItemStack[] data = get(sender);
-					data[slot] = item.clone();
-					set(sender, data);
+					set(sender, slot, item);// don't need to clone because the reference isn't kept
 				}
 				String itemName = item == null ? "nothing"
 						: item.getAmount() + " " + item.getType().toString().toLowerCase().replace("_", "");
@@ -137,19 +129,33 @@ public abstract class ModInventoryAbstract extends ModAbstract<ItemStack[]>
 	{
 		Object obj = DataManager.getData(player.getUniqueId().toString(), "BlockPlaceMods", getName());
 		if (obj == null)
-			return new ItemStack[inventoryType.getDefaultSize()];
+			return getDefault();
 		JSONArray array = (JSONArray) obj;
-		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		for (Object obj2 : array.toArray())
-		{
-			items.add((new ItemProperties()).loadFrom((JSONObject) obj2).toItemStack());
+		
+		ItemStack[] items = new ItemStack[Math.min(inventoryType.getDefaultSize(), array.size())];
+		for (int i = 0, n = items.length; i < n; i++) {
+			Object obj2 = array.get(i);
+			if (obj2 instanceof JSONObject) { // if null, items[i] remains null
+				items[i] = new ItemProperties().loadFrom((JSONObject) obj2).toItemStack();
+			}
 		}
-		ItemStack[] itemArray = new ItemStack[array.size()];
-		for (int i = 0; i < itemArray.length; i++)
-		{
-			itemArray[i] = items.get(i);
+		
+		return items;
+	}
+	
+	protected void set(Player player, int index, ItemStack item) {
+		ItemStack[] data = get(player);
+		if (item == null) {
+			if (index < data.length) {
+				data[index] = null;
+			}
+		} else {
+			if (index >= data.length) {
+				data = Arrays.copyOf(data, index + 1);
+			}
+			data[index] = item;
 		}
-		return itemArray;
+		set(player, data);
 	}
 	
 	protected void set(Player player, ItemStack[] data)
@@ -159,9 +165,9 @@ public abstract class ModInventoryAbstract extends ModAbstract<ItemStack[]>
 		else
 		{
 			JSONArray array = new JSONArray();
-			for (ItemStack stack : data)
-			{
-				array.add((new ItemProperties(stack)).toJSONObject());
+			for (int i = 0, n = highestUsedIndex(data); i < n; i++) {
+				ItemStack item = data[i];
+				array.add(item == null ? null : new ItemProperties(item).toJSONObject());
 			}
 			DataManager.setData(player.getUniqueId().toString(), "BlockPlaceMods", getName(), array);
 		}
@@ -171,4 +177,10 @@ public abstract class ModInventoryAbstract extends ModAbstract<ItemStack[]>
 	{
 		return get(player) != null;
 	}
+	
+	@Override
+	public ItemStack[] getDefault() {
+		return new ItemStack[0];
+	}
+	
 }

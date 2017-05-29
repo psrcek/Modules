@@ -1,12 +1,11 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import java.util.Set;
-
+import com.redstoner.modules.blockplacemods.util.CommandException;
 import org.bukkit.entity.Player;
 
-import com.redstoner.modules.blockplacemods.util.CommandException;
+import java.util.Set;
 
-public interface Mod<T>
+public interface Mod
 {
 	String getName();
 	
@@ -18,7 +17,7 @@ public interface Mod<T>
 	
 	String runCommand(Player sender, String[] args) throws CommandException;
 	
-	void register();
+	void registerListeners();
 	
-	void unregister();
+	void unregisterListeners();
 }

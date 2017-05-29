@@ -1,15 +1,7 @@
 package com.redstoner.modules.blockplacemods;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
@@ -18,9 +10,17 @@ import com.redstoner.modules.blockplacemods.mods.Mod;
 import com.redstoner.modules.blockplacemods.mods.ModAbstract;
 import com.redstoner.modules.blockplacemods.util.CommandException;
 import com.redstoner.modules.blockplacemods.util.CommandMap;
-import com.redstoner.modules.blockplacemods.util.ThrowingSupplier;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
-@Version(major = 3, minor = 1, revision = 0, compatible = 3)
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+
+@AutoRegisterListener
+@Version(major = 3, minor = 2, revision = 0, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -29,10 +29,10 @@ public final class BlockPlaceMods implements Module, Listener
 	@Override
 	public boolean onEnable()
 	{
-		ModAbstract.constructAll();
+		ModAbstract.registerAll();
 		for (Mod mod : new ArrayList<>(ModAbstract.getMods().values()))
 		{
-			mod.register();
+			mod.registerListeners();
 		}
 		// CommandManager.registerCommand(getCommandString(), this, Main.plugin);
 		// Sorry but this stuff isn't working for me. Not gonna spend more time on it.
@@ -66,7 +66,7 @@ public final class BlockPlaceMods implements Module, Listener
 	{
 		for (Mod mod : ModAbstract.getMods().values())
 		{
-			mod.unregister();
+			mod.unregisterListeners();
 		}
 		try
 		{
@@ -91,6 +91,7 @@ public final class BlockPlaceMods implements Module, Listener
 	 * "}\n" +
 	 * "}\n";
 	 * } */
+	
 	@Command(hook = "mod_empty")
 	public void onModEmptyCommand(CommandSender sender)
 	{
@@ -103,36 +104,36 @@ public final class BlockPlaceMods implements Module, Listener
 		String[] args = new ArrayList<>(Arrays.asList(input.split(" "))).stream()
 				.filter(x -> x != null && !x.trim().isEmpty()).toArray(String[]::new);
 		String prefix = PREFIX;
-		ThrowingSupplier<String> supplier;
-		if (args.length > 0)
-		{
-			Mod target = ModAbstract.getMod(args[0].toLowerCase());
-			if (target != null)
-			{
-				prefix += "&7[&2" + target.getName() + "&7]&a";
-				if (!(sender instanceof Player))
-				{
-					supplier = () -> "&cYou must be a player to use any block place mod";
+		String message;
+		
+		try {
+			
+			if (args.length > 0) {
+				Mod target = ModAbstract.getMod(args[0].toLowerCase());
+				if (target != null) {
+					prefix += "&7[&2" + target.getName() + "&7]&a";
+					if (!(sender instanceof Player)) {
+						message = "&cYou must be a player to use any block place mod";
+					} else {
+						message = target.runCommand((Player) sender, Arrays.copyOfRange(args, 1, args.length));
+					}
+				} else if (args[0].equalsIgnoreCase("help")) {
+					message = commandHelp(sender, args);
+				} else {
+					message = "&cThat argument could not be recognized";
 				}
-				else
-				{
-					supplier = () -> target.runCommand((Player) sender, Arrays.copyOfRange(args, 1, args.length));
-				}
+			} else {
+				message = commandHelp(sender, args);
 			}
-			else if (args[0].equalsIgnoreCase("help"))
-			{
-				supplier = () -> commandHelp(sender, args);
-			}
-			else
-			{
-				supplier = () -> "&cThat argument could not be recognized";
-			}
+			
+		} catch (CommandException ex) {
+			message = " &c" + ex.getMessage();
+		} catch (Throwable t) {
+			message = " &cAn unexpected error occurred while executing this command.";
+			t.printStackTrace();
 		}
-		else
-		{
-			supplier = () -> commandHelp(sender, args);
-		}
-		handleCommand(sender, prefix, supplier);
+		
+		Utils.sendMessage(sender, prefix, message, '&');
 	}
 	
 	private String commandHelp(CommandSender sender, String[] args)
@@ -148,22 +149,4 @@ public final class BlockPlaceMods implements Module, Listener
 		return result.toString();
 	}
 	
-	public static void handleCommand(CommandSender sender, String prefix, ThrowingSupplier<String> supplier)
-	{
-		String message;
-		try
-		{
-			message = " &a" + supplier.get();
-		}
-		catch (CommandException e)
-		{
-			message = " &c" + e.getMessage();
-		}
-		catch (Throwable t)
-		{
-			message = " &cAn unexpected error occurred while executing this command.";
-			t.printStackTrace();
-		}
-		Utils.sendMessage(sender, prefix, message, '&');
-	}
 }

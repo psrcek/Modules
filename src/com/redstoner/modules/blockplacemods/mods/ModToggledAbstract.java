@@ -5,16 +5,18 @@ import org.bukkit.entity.Player;
 import com.redstoner.modules.blockplacemods.util.CommandException;
 import com.redstoner.modules.datamanager.DataManager;
 
-public abstract class ModBooleanAbstract extends ModAbstract<Boolean>
+public abstract class ModToggledAbstract extends ModAbstract
 {
 	protected boolean enabledByDefault;
 	
-	protected abstract boolean enabledByDefault();
+	public ModToggledAbstract(String name, boolean enabledByDefault) {
+		super(name);
+		this.enabledByDefault = enabledByDefault;
+	}
 	
 	@Override
-	protected void preConstruction()
-	{
-		enabledByDefault = enabledByDefault();
+	public Boolean getDefault() {
+		return enabledByDefault;
 	}
 	
 	protected boolean hasEnabled(Player player)
@@ -27,7 +29,7 @@ public abstract class ModBooleanAbstract extends ModAbstract<Boolean>
 	{
 		if (enabled == hasEnabled(sender))
 			return false;
-		if (enabled == (boolean) getDefault())
+		if (enabled == enabledByDefault)
 			reset(sender);
 		else
 			DataManager.setData(sender.getUniqueId().toString(), "BlockPlaceMods", getName(), enabled);

@@ -9,24 +9,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-public class ModBooleanPiston extends ModBooleanAbstract
+public class ModToggledPiston extends ModToggledAbstract
 {
-	@Override
-	public String getName()
-	{
-		return "Piston";
+	
+	public ModToggledPiston() {
+		super("piston", false);
 	}
 	
 	@Override
 	public String getDescription()
 	{
 		return "makes pistons face the block you placed it against";
-	}
-	
-	@Override
-	protected boolean enabledByDefault()
-	{
-		return false;
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -67,9 +60,4 @@ public class ModBooleanPiston extends ModBooleanAbstract
 		}
 	}
 	
-	@Override
-	public Object getDefault()
-	{
-		return false;
-	}
 }

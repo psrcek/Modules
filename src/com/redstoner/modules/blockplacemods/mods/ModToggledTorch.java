@@ -1,9 +1,6 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.redstoner.misc.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -14,32 +11,23 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-import com.redstoner.misc.Main;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-public class ModBooleanTorch extends ModBooleanAbstract
+public class ModToggledTorch extends ModToggledAbstract
 {
-	{
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.plugin, this::updateTorches, 2, 2);
-	}
-	
 	private final Set<Block> torchesPlaced = new HashSet<>();
 	
-	@Override
-	public String getName()
-	{
-		return "Torch";
+	public ModToggledTorch() {
+		super("torch", true);
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.plugin, this::updateTorches, 2, 2);
 	}
 	
 	@Override
 	public String getDescription()
 	{
 		return "removes redstone torches placed against a redstone block";
-	}
-	
-	@Override
-	protected boolean enabledByDefault()
-	{
-		return true;
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -98,9 +86,4 @@ public class ModBooleanTorch extends ModBooleanAbstract
 		}
 	}
 	
-	@Override
-	public Object getDefault()
-	{
-		return true;
-	}
 }

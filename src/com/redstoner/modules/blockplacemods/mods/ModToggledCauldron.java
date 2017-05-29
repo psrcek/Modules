@@ -8,24 +8,17 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class ModBooleanCauldron extends ModBooleanAbstract
+public class ModToggledCauldron extends ModToggledAbstract
 {
-	@Override
-	public String getName()
-	{
-		return "Cauldron";
+	
+	public ModToggledCauldron() {
+		super("cauldron", false);
 	}
 	
 	@Override
 	public String getDescription()
 	{
 		return "fills cauldrons upon placement and cycles upon right click";
-	}
-	
-	@Override
-	protected boolean enabledByDefault()
-	{
-		return false;
 	}
 	
 	@EventHandler
@@ -49,9 +42,4 @@ public class ModBooleanCauldron extends ModBooleanAbstract
 		}
 	}
 	
-	@Override
-	public Object getDefault()
-	{
-		return false;
-	}
 }
