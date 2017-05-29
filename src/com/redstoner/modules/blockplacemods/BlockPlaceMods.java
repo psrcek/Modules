@@ -19,7 +19,7 @@ import org.bukkit.event.Listener;
 import java.util.*;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 2, compatible = 3)
+@Version(major = 3, minor = 2, revision = 3, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"

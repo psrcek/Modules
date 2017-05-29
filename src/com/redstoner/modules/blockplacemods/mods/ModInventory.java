@@ -96,7 +96,7 @@ public class ModInventory extends ModAbstract
 			}
 		}
 		StringBuilder message = new StringBuilder();
-		message.append("&a### &3").append(getName()).append("&a Help ###\n");
+		message.append("&a### &3Container&a Help ###\n");
 		message.append("&8").append(getDescription()).append('\n');
 		message.append("&6/mod ").append(getName().toLowerCase())
 				.append("&o <slot> &bsets the item in slot to your hand\n");
