@@ -143,7 +143,7 @@ public final class BlockPlaceMods implements Module, Listener
 		for (Mod mod : ModAbstract.getMods().values())
 		{
 			result.append("\n").append(ChatColor.AQUA.toString()).append("/mod ").append(ChatColor.ITALIC.toString())
-					.append(mod.getName().toLowerCase()).append(ChatColor.GRAY.toString()).append(" - ")
+					.append(mod.getName()).append(ChatColor.GRAY.toString()).append(" - ")
 					.append(mod.getDescription());
 		}
 		return result.toString();
