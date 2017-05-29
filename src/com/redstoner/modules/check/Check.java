@@ -34,7 +34,7 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 1, compatible = 3)
+@Version(major = 3, minor = 0, revision = 2, compatible = 3)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -80,7 +80,7 @@ public class Check implements Module, Listener
 			oPlayer = Bukkit.getServer().getOfflinePlayer(player);
 		sendData(sender, oPlayer);
 		if (ModuleLoader.getModule("Tag") != null)
-			Bukkit.dispatchCommand(sender, "tag check" + player);
+			Bukkit.dispatchCommand(sender, "tag check " + player);
 	}
 	
 	public String read(URL url)
