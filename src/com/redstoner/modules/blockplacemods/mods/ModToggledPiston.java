@@ -19,7 +19,7 @@ public class ModToggledPiston extends ModToggledAbstract
 	@Override
 	public String getDescription()
 	{
-		return "makes pistons face the block you placed it against";
+		return "If active, pistons face the block you place them against";
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

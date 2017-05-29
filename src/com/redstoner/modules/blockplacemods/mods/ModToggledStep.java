@@ -16,7 +16,7 @@ public class ModToggledStep extends ModToggledAbstract
 	@Override
 	public String getDescription()
 	{
-		return "turns steps upside-down upon placement";
+		return "If active, placed steps will always turn upside-down";
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

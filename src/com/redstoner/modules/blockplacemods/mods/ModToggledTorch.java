@@ -27,7 +27,7 @@ public class ModToggledTorch extends ModToggledAbstract
 	@Override
 	public String getDescription()
 	{
-		return "removes redstone torches placed against a redstone block";
+		return "If active, redstone torches placed on a redstone block disappear quickly";
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

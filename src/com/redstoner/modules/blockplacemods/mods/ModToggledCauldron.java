@@ -18,7 +18,7 @@ public class ModToggledCauldron extends ModToggledAbstract
 	@Override
 	public String getDescription()
 	{
-		return "fills cauldrons upon placement and cycles upon right click";
+		return "If active, placed cauldrons are filled, and they cycle on right click";
 	}
 	
 	@EventHandler

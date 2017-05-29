@@ -42,7 +42,7 @@ public class ModInventory extends ModAbstract
 	@Override
 	public String getDescription()
 	{
-		return "Controls contents of " + inventoryType.name().toLowerCase() + "s upon placement";
+		return "Controls " + inventoryType.name().toLowerCase() + " placement content";
 	}
 	
 	@Override
