@@ -10,7 +10,7 @@ public class ModToggledStep extends ModToggledAbstract
 	
 	public ModToggledStep() {
 		super("step", true);
-		getAliases().add("Slab");
+		getAliases().add("slab");
 	}
 	
 	@Override

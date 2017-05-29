@@ -8,6 +8,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.blockplacemods.mods.Mod;
 import com.redstoner.modules.blockplacemods.mods.ModAbstract;
+import com.redstoner.modules.blockplacemods.mods.ModToggledAbstract;
 import com.redstoner.modules.blockplacemods.util.CommandException;
 import com.redstoner.modules.blockplacemods.util.CommandMap;
 import org.bukkit.ChatColor;
@@ -15,9 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 @AutoRegisterListener
 @Version(major = 3, minor = 2, revision = 0, compatible = 3)
@@ -140,10 +139,20 @@ public final class BlockPlaceMods implements Module, Listener
 	{
 		StringBuilder result = new StringBuilder("§7BlockPlaceMods adds some redstone-centric utilities");
 		result.append("\n").append(ChatColor.GRAY.toString()).append("Available mods:");
-		for (Mod mod : ModAbstract.getMods().values())
+		
+		List<Mod> mods = new ArrayList<>(ModAbstract.getMods().values());
+		mods.sort(Comparator.<Mod>comparingInt(m -> ModToggledAbstract.class.isInstance(m) ? 1 : -1).thenComparing(Mod::getName));
+		
+		for (Mod mod : mods)
 		{
 			result.append("\n").append(ChatColor.AQUA.toString()).append("/mod ").append(ChatColor.ITALIC.toString())
-					.append(mod.getName()).append(ChatColor.GRAY.toString()).append(" - ")
+					.append(mod.getName());
+			
+			for (String alias : mod.getAliases()) {
+				result.append('|').append(alias);
+			}
+			
+			result.append(ChatColor.GRAY.toString()).append(" - ")
 					.append(mod.getDescription());
 		}
 		return result.toString();
