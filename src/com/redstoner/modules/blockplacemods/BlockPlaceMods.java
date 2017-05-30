@@ -1,5 +1,17 @@
 package com.redstoner.modules.blockplacemods;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Version;
@@ -11,15 +23,9 @@ import com.redstoner.modules.blockplacemods.mods.ModAbstract;
 import com.redstoner.modules.blockplacemods.mods.ModToggledAbstract;
 import com.redstoner.utils.CommandException;
 import com.redstoner.utils.CommandMap;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-
-import java.util.*;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 8, compatible = 3)
+@Version(major = 3, minor = 2, revision = 9, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -56,7 +62,6 @@ public final class BlockPlaceMods implements Module, Listener
 		{
 			mod.unregisterListeners();
 		}
-		
 		try
 		{
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
@@ -191,5 +196,4 @@ public final class BlockPlaceMods implements Module, Listener
 			return true;
 		}
 	}
-	
 }
