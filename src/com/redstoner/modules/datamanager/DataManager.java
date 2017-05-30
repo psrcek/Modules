@@ -27,7 +27,7 @@ import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 0, compatible = 3)
+@Version(major = 3, minor = 2, revision = 1, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -322,6 +322,7 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void removeData_(String id, String module, String key)
 	{
 		if (data.containsKey(id))
@@ -330,6 +331,7 @@ public final class DataManager implements CoreModule, Listener
 			if (moduleData == null)
 				return;
 			moduleData.remove(key);
+			data.put(module, data);
 			save_(id);
 		}
 		else
