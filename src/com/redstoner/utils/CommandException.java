@@ -1,4 +1,4 @@
-package com.redstoner.modules.blockplacemods.util;
+package com.redstoner.utils;
 
 public class CommandException extends Exception {
     

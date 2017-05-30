@@ -1,4 +1,4 @@
-package com.redstoner.modules.blockplacemods.util;
+package com.redstoner.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

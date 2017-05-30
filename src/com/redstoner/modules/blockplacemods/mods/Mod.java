@@ -1,7 +1,8 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import com.redstoner.modules.blockplacemods.util.CommandException;
 import org.bukkit.entity.Player;
+
+import com.redstoner.utils.CommandException;
 
 import java.util.Set;
 

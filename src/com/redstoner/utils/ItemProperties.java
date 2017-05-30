@@ -1,4 +1,4 @@
-package com.redstoner.modules.blockplacemods.util;
+package com.redstoner.utils;
 
 import java.util.HashMap;
 import java.util.List;

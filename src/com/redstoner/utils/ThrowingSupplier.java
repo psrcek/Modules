@@ -1,4 +1,4 @@
-package com.redstoner.modules.blockplacemods.util;
+package com.redstoner.utils;
 
 /**
  * A supplier with a throws declaration.

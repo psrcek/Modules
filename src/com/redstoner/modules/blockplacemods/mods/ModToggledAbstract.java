@@ -2,8 +2,8 @@ package com.redstoner.modules.blockplacemods.mods;
 
 import org.bukkit.entity.Player;
 
-import com.redstoner.modules.blockplacemods.util.CommandException;
 import com.redstoner.modules.datamanager.DataManager;
+import com.redstoner.utils.CommandException;
 
 public abstract class ModToggledAbstract extends ModAbstract
 {

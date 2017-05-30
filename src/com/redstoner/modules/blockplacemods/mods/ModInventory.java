@@ -1,8 +1,9 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import com.redstoner.modules.blockplacemods.util.CommandException;
-import com.redstoner.modules.blockplacemods.util.ItemProperties;
 import com.redstoner.modules.datamanager.DataManager;
+import com.redstoner.utils.CommandException;
+import com.redstoner.utils.ItemProperties;
+
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
