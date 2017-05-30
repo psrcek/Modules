@@ -1,16 +1,5 @@
 package com.redstoner.modules.blockplacemods;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Version;
@@ -22,9 +11,15 @@ import com.redstoner.modules.blockplacemods.mods.ModAbstract;
 import com.redstoner.modules.blockplacemods.mods.ModToggledAbstract;
 import com.redstoner.utils.CommandException;
 import com.redstoner.utils.CommandMap;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+
+import java.util.*;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 6, compatible = 3)
+@Version(major = 3, minor = 2, revision = 7, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -41,30 +36,15 @@ public final class BlockPlaceMods implements Module, Listener
 		try
 		{
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
-			// @noformat
-			String pluginName = Main.plugin.getName().toLowerCase();
-			String[] aliases = {"mod", 		pluginName + ":mod",
-								"set", 		pluginName + ":mod",
-								"toggle",	pluginName + ":toggle"
-			};
-			// @format
-			org.bukkit.command.Command command = new org.bukkit.command.Command("mod")
-			{
-				@Override
-				public boolean execute(CommandSender sender, String label, String[] args)
-				{
-					onModCommand(sender, String.join(" ", args));
-					return true;
-				}
-			};
-			for (String alias : aliases)
+			org.bukkit.command.Command command = new BlockPlaceModsCommand();
+			for (String alias : getCommandAliases())
 			{
 				commandMap.put(alias, command);
 			}
 		}
 		catch (ReflectiveOperationException ex)
 		{
-			throw new Error(ex);
+			return false;
 		}
 		return true;
 	}
@@ -76,14 +56,31 @@ public final class BlockPlaceMods implements Module, Listener
 		{
 			mod.unregisterListeners();
 		}
+		
 		try
 		{
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
-			commandMap.remove("mod");
-			commandMap.remove(Main.plugin.getName().toLowerCase() + ":mod");
+			for (String alias : getCommandAliases())
+			{
+				if (commandMap.get(alias).getClass() == BlockPlaceModsCommand.class)
+				{
+					commandMap.remove(alias);
+				}
+			}
 		}
 		catch (Exception ignored)
 		{}
+	}
+	
+	private static String[] getCommandAliases()
+	{
+		String pluginName = Main.plugin.getName().toLowerCase();
+		// @noformat
+		return new String[]{"mod", 		pluginName + ":mod",
+				"set", 		pluginName + ":mod",
+				"toggle",	pluginName + ":toggle"
+		};
+		// @format
 	}
 	
 	@Command(hook = "mod_empty")
@@ -177,4 +174,22 @@ public final class BlockPlaceMods implements Module, Listener
 		}
 		return modName;
 	}
+	
+	private class BlockPlaceModsCommand extends org.bukkit.command.Command
+	{
+		public BlockPlaceModsCommand()
+		{
+			super("mod");
+			String[] aliases = getCommandAliases();
+			setAliases(Arrays.asList(Arrays.copyOfRange(aliases, 1, aliases.length)));
+		}
+		
+		@Override
+		public boolean execute(CommandSender sender, String label, String[] args)
+		{
+			onModCommand(sender, String.join(" ", args));
+			return true;
+		}
+	}
+	
 }
