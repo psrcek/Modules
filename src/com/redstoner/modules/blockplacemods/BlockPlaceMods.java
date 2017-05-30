@@ -24,7 +24,7 @@ import com.redstoner.utils.CommandException;
 import com.redstoner.utils.CommandMap;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 5, compatible = 3)
+@Version(major = 3, minor = 2, revision = 6, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -41,7 +41,13 @@ public final class BlockPlaceMods implements Module, Listener
 		try
 		{
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
-			String[] aliases = {"mod", Main.plugin.getName().toLowerCase() + ":mod"};
+			// @noformat
+			String pluginName = Main.plugin.getName().toLowerCase();
+			String[] aliases = {"mod", 		pluginName + ":mod",
+								"set", 		pluginName + ":mod",
+								"toggle",	pluginName + ":toggle"
+			};
+			// @format
 			org.bukkit.command.Command command = new org.bukkit.command.Command("mod")
 			{
 				@Override
