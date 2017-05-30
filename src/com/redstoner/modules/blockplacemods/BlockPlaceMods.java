@@ -19,7 +19,7 @@ import org.bukkit.event.Listener;
 import java.util.*;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 7, compatible = 3)
+@Version(major = 3, minor = 2, revision = 8, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -143,7 +143,7 @@ public final class BlockPlaceMods implements Module, Listener
 	{
 		StringBuilder result = new StringBuilder("§7BlockPlaceMods adds some redstone-centric utilities");
 		result.append("\n").append(ChatColor.GRAY.toString()).append("Available mods:");
-		List<Mod> mods = new ArrayList<>(ModAbstract.getMods().values());
+		List<Mod> mods = new ArrayList<>(new HashSet<>(ModAbstract.getMods().values()));
 		mods.sort(Comparator.<Mod> comparingInt(m -> ModToggledAbstract.class.isInstance(m) ? 1 : -1)
 				.thenComparing(Mod::getName));
 		for (Mod mod : mods)
