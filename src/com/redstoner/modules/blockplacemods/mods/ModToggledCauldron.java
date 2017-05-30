@@ -10,8 +10,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class ModToggledCauldron extends ModToggledAbstract
 {
-	
-	public ModToggledCauldron() {
+	public ModToggledCauldron()
+	{
 		super("cauldron", false);
 	}
 	
@@ -21,6 +21,7 @@ public class ModToggledCauldron extends ModToggledAbstract
 		return "If active, placed cauldrons are filled, and they cycle on right click";
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
@@ -32,6 +33,7 @@ public class ModToggledCauldron extends ModToggledAbstract
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event)
 	{
@@ -41,5 +43,4 @@ public class ModToggledCauldron extends ModToggledAbstract
 			event.getBlock().setData((byte) 3);
 		}
 	}
-	
 }

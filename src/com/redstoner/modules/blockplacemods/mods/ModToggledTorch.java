@@ -1,6 +1,9 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import com.redstoner.misc.Main;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -11,15 +14,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import com.redstoner.misc.Main;
 
 public class ModToggledTorch extends ModToggledAbstract
 {
 	private final Set<Block> torchesPlaced = new HashSet<>();
 	
-	public ModToggledTorch() {
+	public ModToggledTorch()
+	{
 		super("torch", true);
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.plugin, this::updateTorches, 2, 2);
 	}
@@ -44,6 +46,7 @@ public class ModToggledTorch extends ModToggledAbstract
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private boolean isAttachedToRedstoneBlock(Block block)
 	{
 		BlockFace towardsAgainst = getFaceTowardsBlockAgainst(block.getData());
@@ -85,5 +88,4 @@ public class ModToggledTorch extends ModToggledAbstract
 			}
 		}
 	}
-	
 }

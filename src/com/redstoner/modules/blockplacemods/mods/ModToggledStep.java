@@ -7,8 +7,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 public class ModToggledStep extends ModToggledAbstract
 {
-	
-	public ModToggledStep() {
+	public ModToggledStep()
+	{
 		super("step", true);
 		getAliases().add("slab");
 	}
@@ -19,6 +19,7 @@ public class ModToggledStep extends ModToggledAbstract
 		return "If active, placed steps will always turn upside-down";
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event)
 	{
@@ -36,5 +37,4 @@ public class ModToggledStep extends ModToggledAbstract
 	{
 		return block == Material.STEP || block == Material.STONE_SLAB2;
 	}
-	
 }

@@ -11,8 +11,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 public class ModToggledPiston extends ModToggledAbstract
 {
-	
-	public ModToggledPiston() {
+	public ModToggledPiston()
+	{
 		super("piston", false);
 	}
 	
@@ -22,6 +22,7 @@ public class ModToggledPiston extends ModToggledAbstract
 		return "If active, pistons face the block you place them against";
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event)
 	{
@@ -59,5 +60,4 @@ public class ModToggledPiston extends ModToggledAbstract
 				return 0;
 		}
 	}
-	
 }

@@ -29,6 +29,7 @@ public class ItemProperties
 	public ItemProperties()
 	{}
 	
+	@SuppressWarnings("deprecation")
 	public ItemProperties(ItemStack item)
 	{
 		if (item == null)
@@ -55,6 +56,7 @@ public class ItemProperties
 		unbreakable = meta.isUnbreakable();
 	}
 	
+	@SuppressWarnings("deprecation")
 	public ItemStack toItemStack()
 	{
 		ItemStack result = new ItemStack(id, amount, data);

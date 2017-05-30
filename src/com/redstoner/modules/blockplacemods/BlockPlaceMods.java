@@ -24,7 +24,7 @@ import com.redstoner.utils.CommandException;
 import com.redstoner.utils.CommandMap;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 4, compatible = 3)
+@Version(major = 3, minor = 2, revision = 5, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -38,8 +38,6 @@ public final class BlockPlaceMods implements Module, Listener
 		{
 			mod.registerListeners();
 		}
-		// CommandManager.registerCommand(getCommandString(), this, Main.plugin);
-		// Sorry but this stuff isn't working for me. Not gonna spend more time on it.
 		try
 		{
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
@@ -82,19 +80,6 @@ public final class BlockPlaceMods implements Module, Listener
 		{}
 	}
 	
-	/* @Override
-	 * public String getCommandString() {
-	 * return "command mod {\n" +
-	 * "perm utils.blockplacemods.command;\n" +
-	 * "type player;\n" +
-	 * "[empty] {\n" +
-	 * "run mod_empty;\n" +
-	 * "}\n" +
-	 * "[string:args...] {\n" +
-	 * "run mod args;\n" +
-	 * "}\n" +
-	 * "}\n";
-	 * } */
 	@Command(hook = "mod_empty")
 	public void onModEmptyCommand(CommandSender sender)
 	{

@@ -1,8 +1,6 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import com.redstoner.modules.datamanager.DataManager;
-import com.redstoner.utils.CommandException;
-import com.redstoner.utils.ItemProperties;
+import java.util.Arrays;
 
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -17,13 +15,16 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.Arrays;
+import com.redstoner.modules.datamanager.DataManager;
+import com.redstoner.utils.CommandException;
+import com.redstoner.utils.ItemProperties;
 
 public class ModInventory extends ModAbstract
 {
 	protected InventoryType inventoryType;
 	
-	public ModInventory(String name, InventoryType inventoryType) {
+	public ModInventory(String name, InventoryType inventoryType)
+	{
 		super(name);
 		this.inventoryType = inventoryType;
 	}
@@ -69,7 +70,7 @@ public class ModInventory extends ModAbstract
 					throw new CommandException("Slot number " + slot + " is negative");
 				}
 				// Set the stored item to the item in the sender's hand
-				ItemStack item = sender.getItemInHand();
+				ItemStack item = sender.getInventory().getItemInMainHand();
 				if (item == null || item.getType() == Material.AIR || item.getAmount() == 0)
 				{
 					// Remove the item.
@@ -125,33 +126,38 @@ public class ModInventory extends ModAbstract
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected ItemStack[] get(Player player)
 	{
 		Object obj = DataManager.getData(player.getUniqueId().toString(), "BlockPlaceMods", getName());
 		if (obj == null)
 			return getDefault();
 		JSONArray array = (JSONArray) obj;
-		
 		ItemStack[] items = new ItemStack[Math.min(inventoryType.getDefaultSize(), array.size())];
-		for (int i = 0, n = items.length; i < n; i++) {
+		for (int i = 0, n = items.length; i < n; i++)
+		{
 			Object obj2 = array.get(i);
-			if (obj2 instanceof JSONObject) { // if null, items[i] remains null
+			if (obj2 instanceof JSONObject)
+			{ // if null, items[i] remains null
 				items[i] = new ItemProperties().loadFrom((JSONObject) obj2).toItemStack();
 			}
 		}
-		
 		return items;
 	}
 	
-	protected void set(Player player, int index, ItemStack item) {
+	protected void set(Player player, int index, ItemStack item)
+	{
 		ItemStack[] data = get(player);
-		if (item == null) {
-			if (index < data.length) {
+		if (item == null)
+		{
+			if (index < data.length)
+			{
 				data[index] = null;
 			}
-		} else {
-			if (index >= data.length) {
+		}
+		else
+		{
+			if (index >= data.length)
+			{
 				data = Arrays.copyOf(data, index + 1);
 			}
 			data[index] = item;
@@ -159,6 +165,7 @@ public class ModInventory extends ModAbstract
 		set(player, data);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void set(Player player, ItemStack[] data)
 	{
 		if (highestUsedIndex(data) == -1)
@@ -166,7 +173,8 @@ public class ModInventory extends ModAbstract
 		else
 		{
 			JSONArray array = new JSONArray();
-			for (int i = 0, n = highestUsedIndex(data); i < n; i++) {
+			for (int i = 0, n = highestUsedIndex(data); i < n; i++)
+			{
 				ItemStack item = data[i];
 				array.add(item == null ? null : new ItemProperties(item).toJSONObject());
 			}
@@ -180,8 +188,8 @@ public class ModInventory extends ModAbstract
 	}
 	
 	@Override
-	public ItemStack[] getDefault() {
+	public ItemStack[] getDefault()
+	{
 		return new ItemStack[0];
 	}
-	
 }
