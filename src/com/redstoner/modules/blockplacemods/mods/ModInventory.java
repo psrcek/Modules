@@ -3,6 +3,7 @@ package com.redstoner.modules.blockplacemods.mods;
 import com.redstoner.modules.datamanager.DataManager;
 import com.redstoner.utils.CommandException;
 import com.redstoner.utils.ItemProperties;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
@@ -109,7 +110,7 @@ public class ModInventory extends ModAbstract
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event)
 	{
-		if (present(event.getPlayer()))
+		if (present(event.getPlayer()) && event.getPlayer().getGameMode() == GameMode.CREATIVE)
 		{
 			BlockState state = event.getBlock().getState();
 			if (state instanceof InventoryHolder)
