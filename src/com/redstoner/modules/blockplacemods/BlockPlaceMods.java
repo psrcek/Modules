@@ -67,7 +67,8 @@ public final class BlockPlaceMods implements Module, Listener
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
 			for (String alias : getCommandAliases())
 			{
-				if (commandMap.get(alias).getClass() == BlockPlaceModsCommand.class)
+				org.bukkit.command.Command command = commandMap.get(alias);
+				if (command != null && command.getClass() == BlockPlaceModsCommand.class)
 				{
 					commandMap.remove(alias);
 				}

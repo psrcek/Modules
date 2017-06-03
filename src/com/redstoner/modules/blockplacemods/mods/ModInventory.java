@@ -1,7 +1,8 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import java.util.Arrays;
-
+import com.redstoner.modules.datamanager.DataManager;
+import com.redstoner.utils.CommandException;
+import com.redstoner.utils.ItemProperties;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -16,9 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.redstoner.modules.datamanager.DataManager;
-import com.redstoner.utils.CommandException;
-import com.redstoner.utils.ItemProperties;
+import java.util.Arrays;
 
 public class ModInventory extends ModAbstract
 {
@@ -99,8 +98,8 @@ public class ModInventory extends ModAbstract
 			}
 		}
 		StringBuilder message = new StringBuilder();
-		message.append("&a### &3Container&a Help ###\n");
-		message.append("&8").append(getDescription()).append('\n');
+		message.append(" &a### &3Container Mod&a Help ###\n");
+		message.append("&7").append(getDescription()).append('\n');
 		message.append("&6/mod ").append(getName().toLowerCase())
 				.append("&o <slot> &bsets the item in slot to your hand\n");
 		message.append("&6/mod ").append(getName().toLowerCase()).append("&o clear &bclears the data\n");

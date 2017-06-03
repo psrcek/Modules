@@ -18,7 +18,7 @@ public class ModToggledCauldron extends ModToggledAbstract
 	@Override
 	public String getDescription()
 	{
-		return "If active, placed cauldrons are filled, and they cycle on right click";
+		return "If active, placed cauldrons are filled, and they cycle on shiftless right click with redstone or fist";
 	}
 	
 	@SuppressWarnings("deprecation")
