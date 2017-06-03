@@ -19,7 +19,7 @@ import org.bukkit.event.Listener;
 import java.util.*;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 8, compatible = 3)
+@Version(major = 3, minor = 2, revision = 9, compatible = 3)
 public final class BlockPlaceMods implements Module, Listener
 {
 	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
@@ -62,7 +62,8 @@ public final class BlockPlaceMods implements Module, Listener
 			Map<String, org.bukkit.command.Command> commandMap = CommandMap.getCommandMap();
 			for (String alias : getCommandAliases())
 			{
-				if (commandMap.get(alias).getClass() == BlockPlaceModsCommand.class)
+				org.bukkit.command.Command command = commandMap.get(alias);
+				if (command != null && command.getClass() == BlockPlaceModsCommand.class)
 				{
 					commandMap.remove(alias);
 				}

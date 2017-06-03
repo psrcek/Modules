@@ -1,9 +1,8 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import org.bukkit.entity.Player;
-
 import com.redstoner.modules.datamanager.DataManager;
 import com.redstoner.utils.CommandException;
+import org.bukkit.entity.Player;
 
 public abstract class ModToggledAbstract extends ModAbstract
 {
@@ -48,36 +47,29 @@ public abstract class ModToggledAbstract extends ModAbstract
 		if (args[0].equalsIgnoreCase("help"))
 		{
 			StringBuilder message = new StringBuilder();
-			message.append("&a### &3").append(getName()).append("&a Help ###");
-			message.append("\n&8If enabled, ").append(getDescription());
-			message.append("\n&6/mod ").append(getName().toLowerCase()).append("&o toggle &btoggles state");
-			message.append("\n&6/mod ").append(getName().toLowerCase()).append("&o on/off &bsets state");
-			message.append("\n&6/mod ").append(getName().toLowerCase()).append("&o help &bshows this help page");
+			message.append(" &a### &3Toggled Mod&a Help ###");
+			message.append("\n&7").append(getDescription());
+			message.append("\n&6/mod ").append(getName()).append("&o (toggle) &btoggles state");
+			message.append("\n&6/mod ").append(getName()).append("&o on/off &bsets state");
+			message.append("\n&6/mod ").append(getName()).append("&o help &bshows this help page");
 			return message.toString();
 		}
 		final boolean enable;
-		if (args[0] == null)
+		switch (args[0].toLowerCase())
 		{
-			throw new CommandException("Missing argument");
-		}
-		else
-		{
-			switch (args[0].toLowerCase())
-			{
-				case "on":
-				case "enable":
-				case "true":
-					enable = true;
-					break;
-				case "off":
-				case "disable":
-				case "false":
-					enable = false;
-					break;
-				default:
-					throw new CommandException("Input '" + args[0] + "' was not understood. "
-							+ "Use one of: \non, enable, true, off, disable, false.");
-			}
+			case "on":
+			case "enable":
+			case "true":
+				enable = true;
+				break;
+			case "off":
+			case "disable":
+			case "false":
+				enable = false;
+				break;
+			default:
+				throw new CommandException("Input '" + args[0] + "' was not understood. "
+						+ "Use one of: \non, enable, true, off, disable, false.");
 		}
 		if (!setEnabled(sender, enable))
 		{
