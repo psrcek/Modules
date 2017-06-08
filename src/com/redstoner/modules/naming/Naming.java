@@ -22,7 +22,8 @@ import net.minecraft.server.v1_11_R1.EntityHuman;
 import net.minecraft.server.v1_11_R1.EntityPlayer;
 import net.minecraft.server.v1_11_R1.PacketPlayOutOpenWindow;
 
-@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+@Version(major = 2, minor = 0, revision = 4, compatible = 2)
+
 public class Naming implements Module
 {
 	@Command(hook = "anvil")
@@ -114,8 +115,7 @@ public class Naming implements Module
 		"	}\n" + 
 		"}\n" +
 		"command lore {\n" + 
-		"	[flag:-a] [string:name...] {\n" + 
-		"		run lore name;\n" + 
+		"		run lore -a name;\n" + 
 		"		type player;\n" + 
 		"		help Adds lore to item in hand.;\n" + 
 		"		perm utils.lore;\n" + 
