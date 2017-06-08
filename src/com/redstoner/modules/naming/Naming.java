@@ -22,7 +22,7 @@ import net.minecraft.server.v1_11_R1.EntityHuman;
 import net.minecraft.server.v1_11_R1.EntityPlayer;
 import net.minecraft.server.v1_11_R1.PacketPlayOutOpenWindow;
 
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 2, minor = 0, revision = 3, compatible = 2)
 public class Naming implements Module
 {
 	@Command(hook = "anvil")
@@ -55,11 +55,8 @@ public class Naming implements Module
 	}
 	
 	@Command(hook = "lore")
-	public void lore(CommandSender sender, String name)
+	public void lore(CommandSender sender, boolean append, String name)
 	{
-		List<String> lore = new ArrayList<String>();
-		name = ChatColor.translateAlternateColorCodes('&', name);
-		lore.add(name);
 		ItemStack item = ((Player) sender).getInventory().getItemInMainHand();
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null)
@@ -67,6 +64,15 @@ public class Naming implements Module
 			Utils.sendErrorMessage(sender, null, "You can not change the lore of that item!");
 			return;
 		}
+		List<String> lore;
+		if (append)
+			lore = meta.getLore();
+		else
+			lore = new ArrayList<String>();
+		if (lore == null)
+			lore = new ArrayList<String>();
+		name = ChatColor.translateAlternateColorCodes('&', name);
+		lore.add(name);
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		item.getItemMeta().setLore(lore);
@@ -108,7 +114,7 @@ public class Naming implements Module
 		"	}\n" + 
 		"}\n" +
 		"command lore {\n" + 
-		"	[string:name...] {\n" + 
+		"	[flag:-a] [string:name...] {\n" + 
 		"		run lore name;\n" + 
 		"		type player;\n" + 
 		"		help Adds lore to item in hand.;\n" + 
