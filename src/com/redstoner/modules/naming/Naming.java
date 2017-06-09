@@ -3,9 +3,11 @@ package com.redstoner.modules.naming;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -15,28 +17,17 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_11_R1.BlockPosition;
-import net.minecraft.server.v1_11_R1.ChatMessage;
-import net.minecraft.server.v1_11_R1.ContainerAnvil;
-import net.minecraft.server.v1_11_R1.EntityHuman;
-import net.minecraft.server.v1_11_R1.EntityPlayer;
-import net.minecraft.server.v1_11_R1.PacketPlayOutOpenWindow;
 
-@Version(major = 2, minor = 0, revision = 4, compatible = 2)
+@Version(major = 2, minor = 1, revision = 0, compatible = 2)
 
 public class Naming implements Module
 {
 	@Command(hook = "anvil")
 	public void anvil(CommandSender sender)
 	{
-		EntityPlayer p = ((CraftPlayer) sender).getHandle();
-		AnvilContainer container = new AnvilContainer(p);
-		int c = p.nextContainerCounter();
-		p.playerConnection.sendPacket(
-				new PacketPlayOutOpenWindow(c, "minecraft:anvil", new ChatMessage("Repairing", new Object[] {}), 0));
-		p.activeContainer = container;
-		p.activeContainer.windowId = c;
-		p.activeContainer.addSlotListener(p);
+		Player player = (Player) sender;
+		Inventory inv = Bukkit.getServer().createInventory(player, InventoryType.ANVIL);
+		player.openInventory(inv);
 	}
 	
 	@Command(hook = "name")
@@ -78,20 +69,6 @@ public class Naming implements Module
 		item.setItemMeta(meta);
 		item.getItemMeta().setLore(lore);
 		Utils.sendMessage(sender, null, "Lore set to " + name);
-	}
-	
-	public class AnvilContainer extends ContainerAnvil
-	{
-		public AnvilContainer(EntityHuman entity)
-		{
-			super(entity.inventory, entity.world, new BlockPosition(0, 0, 0), entity);
-		}
-		
-		@Override
-		public boolean a(EntityHuman entityhuman)
-		{
-			return true;
-		}
 	}
 	
 	// @noformat
