@@ -18,7 +18,7 @@ import com.redstoner.modules.Module;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 2, minor = 1, revision = 1, compatible = 2)
+@Version(major = 2, minor = 1, revision = 3, compatible = 2)
 
 public class Naming implements Module
 {
@@ -47,7 +47,7 @@ public class Naming implements Module
 	}
 	
 	@Command(hook = "lore")
-	public void lore(CommandSender sender, boolean append, String name)
+	public void lore(CommandSender sender, boolean append, String lore)
 	{
 		ItemStack item = ((Player) sender).getInventory().getItemInMainHand();
 		ItemMeta meta = item.getItemMeta();
@@ -56,19 +56,18 @@ public class Naming implements Module
 			Utils.sendErrorMessage(sender, null, "You can not change the lore of that item!");
 			return;
 		}
-		List<String> lore;
+		List<String> currentLore;
 		if (append)
-			lore = meta.getLore();
+			currentLore = meta.getLore();
 		else
-			lore = new ArrayList<String>();
-		if (lore == null)
-			lore = new ArrayList<String>();
-		name = ChatColor.translateAlternateColorCodes('&', name);
-		lore.add(name);
-		meta.setLore(lore);
+			currentLore = new ArrayList<String>();
+		if (currentLore == null)
+			currentLore = new ArrayList<String>();
+		lore = ChatColor.translateAlternateColorCodes('&', lore);
+		currentLore.add(lore);
+		meta.setLore(currentLore);
 		item.setItemMeta(meta);
-		item.getItemMeta().setLore(lore);
-		Utils.sendMessage(sender, null, "Lore set to " + name);
+		Utils.sendMessage(sender, null, "Lore set to " + lore);
 	}
 	
 	// @noformat
@@ -92,8 +91,8 @@ public class Naming implements Module
 		"	}\n" + 
 		"}\n" +
 		"command lore {\n" + 
-		"    [empty] {\n" + 
-		"		run lore -a name;\n" + 
+		"    [optional:-a] [string:lore...] {\n" + 
+		"		run lore -a lore;\n" + 
 		"		type player;\n" + 
 		"		help Adds lore to item in hand.;\n" + 
 		"		perm utils.lore;\n" + 
