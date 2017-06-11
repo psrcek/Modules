@@ -12,7 +12,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 2, minor = 0, revision = 2, compatible = 2)
 public class Motd implements Module
 {
 	private String default_motd, motd;
@@ -31,7 +31,7 @@ public class Motd implements Module
 	@Command(hook = "getmotd")
 	public boolean getMotd(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, motd, '&');
+		Utils.sendMessage(sender, null, motd == null ? default_motd : motd, '&');
 		return true;
 	}
 	
