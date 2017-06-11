@@ -27,7 +27,7 @@ import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 1, compatible = 3)
+@Version(major = 3, minor = 2, revision = 2, compatible = 3)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -92,6 +92,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("loadData_", String.class);
+			m.setAccessible(true);
 			m.invoke(mod, id);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -125,6 +126,7 @@ public final class DataManager implements CoreModule, Listener
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("getOrDefault_", String.class, String.class, String.class,
 					Object.class);
+			m.setAccessible(true);
 			return m.invoke(mod, id, module, key, fallback);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -155,6 +157,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("getData_", String.class, String.class, String.class);
+			m.setAccessible(true);
 			return m.invoke(mod, id, module, key);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -207,6 +210,7 @@ public final class DataManager implements CoreModule, Listener
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("setData_", String.class, String.class, String.class,
 					Object.class);
+			m.setAccessible(true);
 			m.invoke(mod, id, module, key, value);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -251,6 +255,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("setDirectly_", String.class, String.class, Object.class);
+			m.setAccessible(true);
 			m.invoke(mod, id, module, value);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -315,6 +320,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("removeData_", String.class, String.class, String.class);
+			m.setAccessible(true);
 			m.invoke(mod, id, module, key);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -362,6 +368,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("importObject_", String.class, String.class, String.class);
+			m.setAccessible(true);
 			m.invoke(mod, module, object);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -395,6 +402,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("migrateAll_", String.class, String.class);
+			m.setAccessible(true);
 			m.invoke(mod, oldName, newName);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -428,6 +436,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("migrate_", String.class, String.class, String.class);
+			m.setAccessible(true);
 			m.invoke(mod, id, oldName, newName);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -464,6 +473,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("save_", CommandSender.class);
+			m.setAccessible(true);
 			m.invoke(mod, sender);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
@@ -482,6 +492,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("save_", String.class);
+			m.setAccessible(true);
 			m.invoke(mod, id);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
