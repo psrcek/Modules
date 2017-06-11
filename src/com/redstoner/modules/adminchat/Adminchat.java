@@ -24,7 +24,7 @@ import com.redstoner.modules.Module;
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 2, minor = 0, revision = 2, compatible = 2)
 public class Adminchat implements Module, Listener
 {
 	private static final char defaultKey = ',';
@@ -54,6 +54,14 @@ public class Adminchat implements Module, Listener
 				"		help Sends a message in Admin Chat;\n" + 
 				"		perm utils.ac;\n" + 
 				"		run ac_msg message;\n" + 
+				"	}\n" + 
+				"}\n" + 
+				"command acn {\n" + 
+				"	[string:name] [string:message...] {\n" + 
+				"		help Sends a message in Admin Chat;\n" + 
+				"		perm utils.ac;\n" + 
+				"		type console;\n" +
+				"		run acn_msg name message;\n" + 
 				"	}\n" + 
 				"}\n" + 
 				"		\n" + 
@@ -94,6 +102,20 @@ public class Adminchat implements Module, Listener
 			name = ((Player) sender).getDisplayName();
 		else
 			name = sender.getName();
+		Utils.broadcast("§8[§cAC§8] §9" + name + "§8: §b", message, new BroadcastFilter()
+		{
+			@Override
+			public boolean sendTo(CommandSender recipient)
+			{
+				return recipient.hasPermission("utils.ac");
+			}
+		}, '&');
+		return true;
+	}
+	
+	@Command(hook = "acn_msg")
+	public boolean acnSay(CommandSender sender, String name, String message)
+	{
 		Utils.broadcast("§8[§cAC§8] §9" + name + "§8: §b", message, new BroadcastFilter()
 		{
 			@Override
