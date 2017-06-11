@@ -18,7 +18,7 @@ import com.redstoner.modules.Module;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 2, minor = 1, revision = 0, compatible = 2)
+@Version(major = 2, minor = 1, revision = 1, compatible = 2)
 
 public class Naming implements Module
 {
@@ -92,6 +92,7 @@ public class Naming implements Module
 		"	}\n" + 
 		"}\n" +
 		"command lore {\n" + 
+		"    [empty] {\n" + 
 		"		run lore -a name;\n" + 
 		"		type player;\n" + 
 		"		help Adds lore to item in hand.;\n" + 
