@@ -19,7 +19,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 2, compatible = 2)
+@Version(major = 2, minor = 0, revision = 3, compatible = 2)
 public class Nametags implements Module, Listener
 {
 	@EventHandler
@@ -57,6 +57,7 @@ public class Nametags implements Module, Listener
 	@EventHandler
 	public void consoleCommand(ServerCommandEvent event)
 	{
+		ArrayList<Player> toSort = new ArrayList<Player>();
 		if (event.getCommand().contains("promote") || event.getCommand().contains("demote")
 				|| event.getCommand().matches("pex user .* group (set|add|leave)"))
 		{
@@ -65,9 +66,18 @@ public class Nametags implements Module, Listener
 			{
 				Player p = Bukkit.getPlayer(s);
 				if (p != null)
-					sortSpecific(p);
+					toSort.add(p);
 			}
 		}
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				for (Player p : toSort)
+					sortSpecific(p);
+			}
+		});
 	}
 	
 	@Command(hook = "sort")
