@@ -22,7 +22,7 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+@Version(major = 2, minor = 0, revision = 4, compatible = 2)
 public class WebToken implements Module
 {
 	private static final int TOKEN_LENGTH = 6;
@@ -186,8 +186,19 @@ public class WebToken implements Module
 			}
 			catch (Exception e)
 			{
-				Utils.sendErrorMessage(player, null, "Error getting your token, please contact an admin!");
-				e.printStackTrace();
+				try
+				{
+					String id = getNextId();
+					table.delete(new MysqlConstraint("uuid", ConstraintOperator.EQUAL, uuid));
+					table.insert(id, uuid, token, email);
+					player.sendMessage(ChatColor.GREEN + "Token generated!");
+					printToken(player, email, token);
+				}
+				catch (Exception e2)
+				{
+					Utils.sendErrorMessage(player, null, "Error getting your token, please contact an admin!");
+					e.printStackTrace();
+				}
 			}
 		}
 		else
