@@ -3,6 +3,7 @@ package com.redstoner.modules.motd;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 
 import com.nemez.cmdmgr.Command;
@@ -12,8 +13,8 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 2, compatible = 2)
-public class Motd implements Module
+@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+public class Motd implements Module, Listener
 {
 	private String default_motd, motd;
 	
