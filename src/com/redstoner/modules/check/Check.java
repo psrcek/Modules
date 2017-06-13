@@ -34,7 +34,7 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 2, compatible = 3)
+@Version(major = 3, minor = 0, revision = 3, compatible = 3)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -165,6 +165,15 @@ public class Check implements Module, Listener
 		}
 		catch (Exception e)
 		{
+			try
+			{
+				int id = (int) table.get("id", constraint)[0];
+				String email = (String) table.get("email", constraint)[0];
+				boolean confirmed = (boolean) table.get("confirmed", constraint)[0];
+				return new Object[] {"https://redstoner.com/users/" + id, email, confirmed};
+			}
+			catch (Exception e2)
+			{}
 			return new Object[] {null};
 		}
 	}
