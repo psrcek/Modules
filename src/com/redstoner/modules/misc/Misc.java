@@ -1,5 +1,7 @@
 package com.redstoner.modules.misc;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,7 +24,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 21, compatible = 2)
+@Version(major = 2, minor = 0, revision = 22, compatible = 2)
 public class Misc implements Module, Listener
 {
 	private final String[] sudoBlacklist = new String[] {".?+:?esudo", ".?+:?sudo", ".?+:?script.*", ".?+:?stop",
@@ -191,6 +193,33 @@ public class Misc implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "hasperm")
+	public boolean hasPerm(CommandSender sender, boolean noformat, String name, String node)
+	{
+		Player p;
+		if (name.contains("-"))
+			try
+			{
+				p = Bukkit.getPlayer(UUID.fromString(name));
+			}
+			catch (Exception e)
+			{
+				Utils.sendErrorMessage(sender, noformat ? "" : null,
+						noformat ? "&rERR: Invalid UUID" : "&rThat UUID is not valid!!", '&');
+				return true;
+			}
+		else
+			p = Bukkit.getPlayer(name);
+		if (p == null)
+		{
+			Utils.sendErrorMessage(sender, noformat ? "" : null,
+					noformat ? "&rERR: Invalid player" : "&rThat player couldn't be found!", '&');
+			return true;
+		}
+		Utils.sendMessage(sender, noformat ? "" : null, "&r" + p.hasPermission(node), '&');
+		return true;
+	}
+	
 	public boolean canBuild(Player player, Location location)
 	{
 		BlockBreakEvent event = new BlockBreakEvent(location.getBlock(), player);
@@ -233,6 +262,13 @@ public class Misc implements Module, Listener
 				"        run sudo name command;\n" + 
 				"    }\n" + 
 				"}\n" + 
+				"command hasperm {\n" +
+				"    [flag:-f] [string:name] [string:node] {\n" + 
+				"        perm utils.hasperm;\n" + 
+				"        run hasperm -f name node;\n" +
+				"        help Checks if a player has a given permission node or not. Returns \"true/false\" in chat. When -f is set, it returns it unformatted.;\n" + 
+				"    }\n" + 
+				"}" + 
 				"command say {\n" +
 				"    [string:message...] {\n" + 
 				"        perm utils.say;\n" + 
