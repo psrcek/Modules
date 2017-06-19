@@ -14,7 +14,7 @@ import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 0, compatible = 3)
+@Version(major = 3, minor = 0, revision = 1, compatible = 3)
 public class List implements Module
 {
 	private HashMap<String, Integer> onConsole;
@@ -148,7 +148,7 @@ public class List implements Module
 		}
 		if (players != null)
 		{
-			Utils.sendMessage(sender, "", rank + "&7: " + players, '&');
+			Utils.sendMessage(sender, "", "&8[" + rank + "&8]&7: " + players, '&');
 			return true;
 		}
 		return false;
