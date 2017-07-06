@@ -122,7 +122,7 @@ public class List implements Module
 			Utils.sendErrorMessage(sender, "",
 					"Looks like I couldn't figure out what you meant. Try again with different parameters maybe?", '&');
 			Utils.sendMessage(sender, "",
-					"Possible parameters are: &eAll&7, &eStaff&7, &eVisitor&7, &Member&7, &eBuilder&7, &eTrusted&7, &eMit&7, &eMod&7, &eAdmin&7 and &eLead",
+					"Possible parameters are: &eAll&7, &eStaff&7, &eVisitor&7, &fMember&7, &eBuilder&7, &eTrusted&7, &eMit&7, &eMod&7, &eAdmin&7 and &eLead",
 					'&');
 			Utils.sendMessage(sender, "", "You can also combine any of the parameters, like this: &eMember, Staff",
 					'&');
