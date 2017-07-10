@@ -20,11 +20,11 @@ import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
-/** AdminChat module. Allows the build team to chat privately using /bc \<message\> as well as a one char prefix or a toggle.
+/** BuildTeamChat module. Allows the build team to chat privately using /bc \<message\> as well as a one char prefix or a toggle.
  * 
  * @author Pepich */
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 0, compatible = 2)
+@Version(major = 2, minor = 0, revision = 1, compatible = 2)
 public class BuildChat implements Module, Listener
 {
 	private static final char defaultKey = ';';
