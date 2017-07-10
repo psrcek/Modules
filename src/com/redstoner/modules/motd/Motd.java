@@ -13,7 +13,7 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+@Version(major = 2, minor = 0, revision = 4, compatible = 2)
 public class Motd implements Module, Listener
 {
 	private String default_motd, motd;
@@ -39,7 +39,7 @@ public class Motd implements Module, Listener
 	@EventHandler
 	public void onServerPing(ServerListPingEvent event)
 	{
-		event.setMotd(motd);
+		event.setMotd(motd == null ? default_motd : motd);
 	}
 	
 	@Override
