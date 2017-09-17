@@ -19,7 +19,7 @@ import com.redstoner.misc.Main;
 import com.redstoner.modules.Module;
 
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 @SuppressWarnings("unchecked")
 public class OnlinePlayers implements Module, Listener
 {
@@ -73,7 +73,7 @@ public class OnlinePlayers implements Module, Listener
 		for (Object obj : players)
 		{
 			JSONObject o = (JSONObject) obj;
-			if (((String) o.get("uuid")).equals(player.getUniqueId().toString()))
+			if (((String) o.get("UUID")).equals(player.getUniqueId().toString()))
 				toRemove.add(obj);
 		}
 		players.removeAll(toRemove);
