@@ -8,11 +8,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
-@Version(major = 1, minor = 0, revision = 1, compatible = 1)
+@Commands(CommandHolderType.None)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 @AutoRegisterListener
 public class SkullClick implements Module, Listener
 {
@@ -22,7 +24,7 @@ public class SkullClick implements Module, Listener
 	@EventHandler
 	public void onClick(PlayerInteractEvent e)
 	{
-		// For some reason the event gets fired twice, this fixes it. Lol.
+		// The event gets fired twice, once for mainhand and once for offhand. This fixes that.
 		if (seen)
 		{
 			seen = false;
@@ -38,11 +40,11 @@ public class SkullClick implements Module, Listener
 				String owner = skull.getOwner();
 				if (owner == null || owner.equals(""))
 				{
-					Utils.sendMessage(e.getPlayer(), null, "§eThat skull has no owner.");
+					getLogger().message(e.getPlayer(), true, "That skull has no owner.");
 				}
 				else
 				{
-					Utils.sendMessage(e.getPlayer(), null, "§eThat's " + owner + ".");
+					getLogger().message(e.getPlayer(), "That's " + owner + ".");
 				}
 				if (!e.getPlayer().isSneaking())
 				{
@@ -50,11 +52,5 @@ public class SkullClick implements Module, Listener
 				}
 			}
 		}
-	}
-	
-	@Override
-	public String getCommandString()
-	{
-		return null;
 	}
 }

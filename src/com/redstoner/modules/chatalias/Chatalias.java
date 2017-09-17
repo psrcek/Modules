@@ -1,6 +1,7 @@
 package com.redstoner.modules.chatalias;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -20,21 +21,22 @@ import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+import net.nemez.chatapi.ChatAPI;
+
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 6, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Chatalias implements Module, Listener
 {
-	// to export chatalias data to json:
-	// pyeval [save_json_file("aliases/" + uuid, shared['modules']['chatalias'].data[uuid]) for uuid in shared['modules']['chatalias'].data]
-	// HANDLE WITH CARE! This will create an array of null entries the size of len(data)!
-	private final String[] commands = new String[] {"e?r", "e?m .+? ", "e?t", "e?w", "e?msg .+? ", "e?message .+? ",
-			"e?whisper .+? ", "e?me", "cg say", "ac"};
+	private final String[] commands = new String[] {"e?r", "e?m .+?", "e?t", "e?w", "e?msg .+?", "e?message .+?",
+			"e?whisper .+?", "e?me", "cgsay", "ac", "bc"};
 	private JSONObject aliases = new JSONObject();
 	
 	@Override
@@ -114,12 +116,12 @@ public class Chatalias implements Module, Listener
 			}
 			if (event.getMessage().length() > maxLength)
 			{
-				Utils.sendErrorMessage(player, null, "The generated message is too long!");
+				getLogger().message(player, true, "The generated message is too long!");
 				event.setCancelled(true);
 				return;
 			}
 		}
-		event.setMessage(Utils.colorify(event.getMessage(), player));
+		event.setMessage(ChatAPI.colorify(null, event.getMessage()));
 		if (changed)
 			saveAliases(uuid);
 	}
@@ -130,11 +132,11 @@ public class Chatalias implements Module, Listener
 		if (event.isCancelled())
 			return;
 		boolean listening = false;
-		String regex = "";
+		String command = "";
 		for (String s : commands)
 		{
-			regex = "^\\/(.*:)?" + s + ".*";
-			if (event.getMessage().matches(regex))
+			command = "^\\/(.*:)?" + s + " ";
+			if (event.getMessage().matches(command + ".*"))
 			{
 				listening = true;
 				break;
@@ -145,9 +147,9 @@ public class Chatalias implements Module, Listener
 		Player player = event.getPlayer();
 		UUID uuid = player.getUniqueId();
 		JSONObject playerAliases = (JSONObject) aliases.get(uuid.toString());
-		String command = event.getMessage().replaceFirst(regex.replaceAll("\\.\\*$", ""), "");
-		command = event.getMessage().replace(command, "");
-		event.setMessage(event.getMessage().replaceFirst(Pattern.quote(command), "§§"));
+		String temp = event.getMessage().replaceAll(command, "");
+		command = event.getMessage().replaceAll(Pattern.quote(temp) + "$", "");
+		event.setMessage(event.getMessage().replaceFirst(Pattern.quote(command), ""));
 		for (Object key : playerAliases.keySet())
 		{
 			String keyword = (String) key;
@@ -174,12 +176,12 @@ public class Chatalias implements Module, Listener
 			}
 			if (event.getMessage().length() > maxLength)
 			{
-				Utils.sendErrorMessage(player, null, "The generated message is too long!");
+				getLogger().message(player, true, "The generated message is too long!");
 				event.setCancelled(true);
 				return;
 			}
 		}
-		event.setMessage(command + event.getMessage().substring(2));
+		event.setMessage(command + event.getMessage());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -188,7 +190,7 @@ public class Chatalias implements Module, Listener
 	{
 		if (regex && keyword.equals(".*"))
 		{
-			Utils.sendErrorMessage(sender, null, "You may not define the wildcard regex as an alias.");
+			getLogger().message(sender, true, "You may not define the wildcard regex as an alias.");
 			return true;
 		}
 		Player player = (Player) sender;
@@ -208,16 +210,16 @@ public class Chatalias implements Module, Listener
 			}
 			if (data.size() == maxAmount)
 			{
-				Utils.sendErrorMessage(sender, null, "You already reached your maximum of aliases!");
+				getLogger().message(sender, true, "You already reached your maximum of aliases!");
 				return true;
 			}
 		}
 		data.put(keyword, replacement);
 		if (sender.hasPermission("essentials.chat.color"))
-			Utils.sendMessage(sender, null,
-					"Successfully created alias " + keyword.substring(3) + " §7-> " + replacement + " §7for you.", '&');
+			getLogger().message(sender,
+					"Successfully created alias " + keyword.substring(3) + " §7-> " + replacement + " §7for you.");
 		else
-			Utils.sendMessage(sender, null,
+			getLogger().message(sender,
 					"Successfully created alias " + keyword.substring(3) + " §7-> " + replacement + " §7for you.");
 		saveAliases(uuid);
 		return true;
@@ -232,14 +234,13 @@ public class Chatalias implements Module, Listener
 		keyword = (regex ? "R: " : "N: ") + keyword;
 		if (data.remove(keyword) != null)
 		{
-			Utils.sendMessage(sender, null, "Successfully removed the alias!");
+			getLogger().message(sender, "Successfully removed the alias!");
 			saveAliases(uuid);
 			return true;
 		}
 		else
 		{
-			Utils.sendErrorMessage(sender, null,
-					"That alias doesn't exist! Hint: regex/no regex does matter for this.");
+			getLogger().message(sender, true, "That alias doesn't exist! Hint: regex/no regex does matter for this.");
 			return true;
 		}
 	}
@@ -247,17 +248,13 @@ public class Chatalias implements Module, Listener
 	@Command(hook = "listaliases")
 	public boolean listAliases(CommandSender sender)
 	{
-		Utils.sendModuleHeader(sender);
+		ArrayList<String> message = new ArrayList<String>();
 		Player player = (Player) sender;
 		UUID uuid = player.getUniqueId();
 		JSONObject data = (JSONObject) aliases.get(uuid.toString());
 		for (Object key : data.keySet())
-		{
-			if (sender.hasPermission("essentials.chat.color"))
-				Utils.sendMessage(sender, "", (String) key + " §7-> " + data.get(key), '&');
-			else
-				Utils.sendMessage(sender, "", (String) key + " §7-> " + data.get(key));
-		}
+			message.add((String) key + " §7-> " + data.get(key));
+		getLogger().message(sender, message.toArray(new String[] {}));
 		return true;
 	}
 	
@@ -303,7 +300,7 @@ public class Chatalias implements Module, Listener
 			aliases.put(uuid.toString(), playerAliases.get("data"));
 		else
 		{
-			Utils.error("Unknown data format for alias set of player " + uuid.toString());
+			getLogger().error("Unknown data format for alias set of player " + uuid.toString());
 			aliases.put(uuid.toString(), ((JSONObject) defaults.get("data")).clone());
 			saveAliases(uuid);
 		}

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -18,20 +19,24 @@ import org.json.simple.JSONObject;
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.CommandManager;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 2, compatible = 3)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
 	protected JSONObject data = new JSONObject();
+	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<String, HashMap<String, Boolean>>();
 	
 	@Override
 	public void postEnable()
@@ -42,6 +47,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			loadData_(p.getUniqueId().toString());
 		}
+		states.put(getID(Bukkit.getConsoleSender()), new HashMap<String, Boolean>());
 		CommandManager.registerCommand(getClass().getResourceAsStream("DataManager.cmd"), this, Main.plugin);
 	}
 	
@@ -64,7 +70,7 @@ public final class DataManager implements CoreModule, Listener
 		}
 		catch (Exception e)
 		{
-			Utils.sendErrorMessage(sender, null, "Could not import data!");
+			getLogger().error("Could not import data!");
 		}
 		return true;
 	}
@@ -107,6 +113,7 @@ public final class DataManager implements CoreModule, Listener
 		if (playerData == null)
 			playerData = new JSONObject();
 		data.put(id.toString(), playerData);
+		states.put(id.toString(), new HashMap<String, Boolean>());
 	}
 	
 	public static Object getOrDefault(CommandSender sender, String key, Object fallback)
@@ -511,6 +518,7 @@ public final class DataManager implements CoreModule, Listener
 	protected void saveAndUnload(CommandSender sender)
 	{
 		saveAndUnload(getID(sender));
+		states.remove(getID(sender));
 	}
 	
 	protected void saveAndUnload(String id)
@@ -527,5 +535,51 @@ public final class DataManager implements CoreModule, Listener
 		else
 			id = "CONSOLE";
 		return id;
+	}
+	
+	public static void setState(CommandSender sender, String key, boolean value)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("setState_", CommandSender.class, String.class, boolean.class);
+			m.setAccessible(true);
+			m.invoke(mod, sender, key);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+	}
+	
+	protected void setState_(CommandSender sender, String key, boolean value)
+	{
+		String id = getID(sender);
+		HashMap<String, Boolean> lstates = states.get(id);
+		lstates.put(key, value);
+		states.put(id, lstates);
+	}
+	
+	public static boolean getState(CommandSender sender, String key)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("getState_", CommandSender.class, String.class);
+			m.setAccessible(true);
+			return (boolean) m.invoke(mod, sender, key);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+		return false;
+	}
+	
+	protected boolean getState_(CommandSender sender, String key)
+	{
+		String id = getID(sender);
+		HashMap<String, Boolean> lstates = states.get(id);
+		if (lstates == null)
+			return false;
+		return lstates.containsKey(key) ? lstates.get(key) : false;
 	}
 }

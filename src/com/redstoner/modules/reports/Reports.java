@@ -13,7 +13,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.modules.Module;
@@ -23,7 +25,8 @@ import net.md_5.bungee.api.ChatColor;
 /** Report module. Allows reports to be created and handled by staff
  * 
  * @author Redempt */
-@Version(major = 2, minor = 0, revision = 0, compatible = 2)
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Reports implements Module
 {
 	private int task = 0;

@@ -14,12 +14,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Pmtoggle implements Module, Listener
 {
 	HashMap<Player, String> toggles = new HashMap<Player, String>();
@@ -29,9 +31,9 @@ public class Pmtoggle implements Module, Listener
 	{
 		Player player = (Player) sender;
 		if (toggles.remove(player) != null)
-			Utils.sendMessage(player, null, "Your pmtoggle was removed!");
+			getLogger().message(player, "Your pmtoggle was removed!");
 		else
-			Utils.sendMessage(player, null, "You didn't have pmtoggle enabled! Use /pmtoggle <player> to enabled it.");
+			getLogger().message(player, "You didn't have pmtoggle enabled! Use /pmtoggle <player> to enabled it.");
 		return true;
 	}
 	
@@ -41,11 +43,11 @@ public class Pmtoggle implements Module, Listener
 		Player p = Bukkit.getPlayer(player);
 		if (p == null && !player.equals("CONSOLE"))
 		{
-			Utils.sendMessage(sender, null, "§cThat player couldn't be found!");
+			getLogger().message(sender, "§cThat player couldn't be found!");
 			return true;
 		}
 		toggles.put((Player) sender, player);
-		Utils.sendMessage(sender, null, "Locked your pmtoggle onto §6" + player + "§7.");
+		getLogger().message(sender, "Locked your pmtoggle onto §6" + player + "§7.");
 		return true;
 	}
 	
@@ -72,8 +74,8 @@ public class Pmtoggle implements Module, Listener
 				if (entry.getValue().equals(player))
 				{
 					toggles.remove(player);
-					Utils.sendMessage(entry.getKey(), null,
-							"We removed your pmtoggle for &6" + player + "&7, as they left the game.", '&');
+					getLogger().message(entry.getKey(),
+							"We removed your pmtoggle for &6" + player + "&7, as they left the game.");
 				}
 			}
 		}

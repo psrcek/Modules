@@ -16,9 +16,11 @@ import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
@@ -28,8 +30,9 @@ import com.redstoner.modules.socialspy.Socialspy;
 /** The ChatGroups module. Allows people to have private sub-chats that can be accessed via a single char prefix or a toggle.
  * 
  * @author Pepich */
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 1, revision = 2, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -116,11 +119,11 @@ public class Chatgroups implements Module, Listener
 	{
 		String group = getGroup(sender);
 		if (group == null)
-			Utils.sendErrorMessage(sender, null, "You are not in a chatgroup!");
+			getLogger().message(sender, true, "You are not in a chatgroup!");
 		else
 		{
-			Utils.sendModuleHeader(sender);
-			Utils.sendMessage(sender, "", "Your current chatgroup is: §6" + group);
+			ArrayList<String> message = new ArrayList<String>();
+			message.add("§7Your current chatgroup is: §6" + group);
 			ArrayList<String> players = new ArrayList<String>();
 			Iterator<String> iter = groups.keySet().iterator();
 			while (iter.hasNext())
@@ -148,7 +151,8 @@ public class Chatgroups implements Module, Listener
 				sb.append("&7, &9");
 			}
 			sb.delete(sb.length() - 2, sb.length());
-			Utils.sendMessage(sender, "", sb.toString(), '&');
+			message.add(sb.toString());
+			getLogger().message(sender, message.toArray(new String[] {}));
 		}
 		return true;
 	}
@@ -158,7 +162,7 @@ public class Chatgroups implements Module, Listener
 	 * @param sender the issuer of the command. */
 	public void getCgKey(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Your current cgkey is §6" + getKey((Player) sender));
+		getLogger().message(sender, "Your current cgkey is §6" + getKey((Player) sender));
 	}
 	
 	/** Sets the cgkey of a Player.
@@ -172,7 +176,7 @@ public class Chatgroups implements Module, Listener
 	{
 		if (key.length() > 1)
 		{
-			Utils.sendErrorMessage(sender, null,
+			getLogger().message(sender, true,
 					"Could not set your key to §6" + key + " §7, it can be at most one char.");
 			return true;
 		}
@@ -181,7 +185,7 @@ public class Chatgroups implements Module, Listener
 			getCgKey(sender);
 			return true;
 		}
-		Utils.sendMessage(sender, null, "Set your key to §6" + key);
+		getLogger().message(sender, "Set your key to §6" + key);
 		keys.put(((Player) sender).getUniqueId().toString(), key + "");
 		saveKeys();
 		return true;
@@ -198,15 +202,15 @@ public class Chatgroups implements Module, Listener
 			if (cgtoggled.contains(((Player) sender).getUniqueId()))
 			{
 				cgtoggled.remove(((Player) sender).getUniqueId());
-				Utils.sendMessage(sender, null, "CGT now §cdisabled");
+				getLogger().message(sender, "CGT now §cdisabled");
 			}
 			else
 			{
 				cgtoggled.add(((Player) sender).getUniqueId());
-				Utils.sendMessage(sender, null, "CGT now §aenabled");
+				getLogger().message(sender, "CGT now §aenabled");
 			}
 		else
-			Utils.sendErrorMessage(sender, null, "You are not in a chatgroup!");
+			getLogger().message(sender, true, "You are not in a chatgroup!");
 		return true;
 	}
 	
@@ -220,12 +224,12 @@ public class Chatgroups implements Module, Listener
 		String group = removeGroup(sender);
 		if (group == null)
 		{
-			Utils.sendErrorMessage(sender, null, "You were not in a chatgroup!");
+			getLogger().message(sender, true, "You were not in a chatgroup!");
 			return true;
 		}
 		String name = Utils.getName(sender);
 		sendToGroup(group, "&9" + name + " &7left the group!");
-		Utils.sendMessage(sender, null, "Successfully removed you from your group!");
+		getLogger().message(sender, "Successfully removed you from your group!");
 		if (sender instanceof Player)
 			cgtoggled.remove(((Player) sender).getUniqueId());
 		return true;
@@ -242,7 +246,7 @@ public class Chatgroups implements Module, Listener
 		String pname = Utils.getName(sender);
 		String group = getGroup(sender);
 		if (group != null && group.equals(name))
-			Utils.sendErrorMessage(sender, null, "You were already in group §6" + name);
+			getLogger().message(sender, true, "You were already in group §6" + name);
 		else
 		{
 			setGroup(sender, null);
@@ -250,7 +254,7 @@ public class Chatgroups implements Module, Listener
 				sendToGroup(group, "&9" + pname + " &7left the group!");
 			sendToGroup(name, "&9" + pname + " &7joined the group!");
 			setGroup(sender, name);
-			Utils.sendMessage(sender, null, "Successfully joined group §6" + name);
+			getLogger().message(sender, "Successfully joined group §6" + name);
 		}
 		return true;
 	}
@@ -267,7 +271,7 @@ public class Chatgroups implements Module, Listener
 		if (group != null)
 			sendToGroup(sender, message);
 		else
-			Utils.sendErrorMessage(sender, null, "You are not in a chatgroup right now!");
+			getLogger().message(sender, true, "You are not in a chatgroup right now!");
 		return true;
 	}
 	
@@ -350,7 +354,6 @@ public class Chatgroups implements Module, Listener
 	 * @param message the message to be sent. */
 	private void sendToGroup(CommandSender sender, String message)
 	{
-		message = Utils.colorify(message, sender);
 		String name = Utils.getName(sender);
 		String group = getGroup(sender);
 		Utils.broadcast("§8[§bCG§8] §9", name + "§8: §6" + message, new BroadcastFilter()
@@ -364,7 +367,7 @@ public class Chatgroups implements Module, Listener
 				else
 					return false;
 			}
-		}, '&');
+		});
 		if (ModuleLoader.getModule("Socialspy") != null)
 		{
 			Socialspy.spyBroadcast(sender, "§e" + group + " §a(cg)", message, "/cg", new BroadcastFilter()
@@ -378,7 +381,7 @@ public class Chatgroups implements Module, Listener
 		}
 		if (getGroup(Bukkit.getConsoleSender()) == null || !getGroup(Bukkit.getConsoleSender()).equals(group))
 		{
-			Utils.info(name + " in " + group + ": " + message + " §8(hidden)");
+			getLogger().info(name + " in " + group + ": " + message + " §8(hidden)");
 		}
 	}
 	
@@ -415,7 +418,7 @@ public class Chatgroups implements Module, Listener
 		}
 		if (getGroup(Bukkit.getConsoleSender()) == null || !getGroup(Bukkit.getConsoleSender()).equals(group))
 		{
-			Utils.info("In " + group + ": " + message + " §8(hidden)");
+			getLogger().info("In " + group + ": " + message + " §8(hidden)");
 		}
 	}
 	

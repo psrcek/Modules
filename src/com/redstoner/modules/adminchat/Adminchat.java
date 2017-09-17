@@ -3,6 +3,7 @@ package com.redstoner.modules.adminchat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -13,8 +14,10 @@ import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.BroadcastFilter;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
@@ -23,8 +26,9 @@ import com.redstoner.modules.Module;
 /** AdminChat module. Allows staff to chat to other staff using /ac \<message\> as well as a one char prefix or a toggle.
  * 
  * @author Pepich */
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 2, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Adminchat implements Module, Listener
 {
 	private static final char defaultKey = ',';
@@ -109,7 +113,7 @@ public class Adminchat implements Module, Listener
 			{
 				return recipient.hasPermission("utils.ac");
 			}
-		}, '&');
+		});
 		return true;
 	}
 	
@@ -123,7 +127,7 @@ public class Adminchat implements Module, Listener
 			{
 				return recipient.hasPermission("utils.ac");
 			}
-		}, '&');
+		});
 		return true;
 	}
 	
@@ -138,12 +142,12 @@ public class Adminchat implements Module, Listener
 		if (actoggled.contains(((Player) sender).getUniqueId()))
 		{
 			actoggled.remove(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "ACT now §cdisabled");
+			getLogger().message(sender, "ACT now §cdisabled");
 		}
 		else
 		{
 			actoggled.add(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "ACT now §aenabled");
+			getLogger().message(sender, "ACT now §aenabled");
 		}
 		return true;
 	}
@@ -158,10 +162,10 @@ public class Adminchat implements Module, Listener
 		if (!actoggled.contains(((Player) sender).getUniqueId()))
 		{
 			actoggled.add(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "ACT now §aenabled");
+			getLogger().message(sender, "ACT now §aenabled");
 		}
 		else
-			Utils.sendMessage(sender, null, "ACT was already enabled");
+			getLogger().message(sender, "ACT was already enabled");
 		return true;
 	}
 	
@@ -175,11 +179,11 @@ public class Adminchat implements Module, Listener
 		if (actoggled.contains(((Player) sender).getUniqueId()))
 		{
 			actoggled.remove(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "ACT now §cdisabled");
+			getLogger().message(sender, "ACT now §cdisabled");
 		}
 		else
 		{
-			Utils.sendMessage(sender, null, "ACT was already disabled");
+			getLogger().message(sender, "ACT was already disabled");
 		}
 		return true;
 	}
@@ -196,7 +200,7 @@ public class Adminchat implements Module, Listener
 		if (event.getMessage().startsWith(getKey(player)))
 		{
 			event.setCancelled(true);
-			acSay(event.getPlayer(), event.getMessage().replaceFirst(getKey(player), ""));
+			acSay(event.getPlayer(), event.getMessage().replaceFirst(Pattern.quote(getKey(player)), ""));
 		}
 		else if (actoggled.contains(event.getPlayer().getUniqueId()))
 		{
@@ -216,7 +220,7 @@ public class Adminchat implements Module, Listener
 	{
 		if (key.length() > 1)
 		{
-			Utils.sendErrorMessage(sender, null,
+			getLogger().message(sender, true,
 					"Could not set your key to §6" + key + " §7, it can be at most one char.");
 			return true;
 		}
@@ -225,7 +229,7 @@ public class Adminchat implements Module, Listener
 			getAcKey(sender);
 			return true;
 		}
-		Utils.sendMessage(sender, null, "Set your key to §6" + key);
+		getLogger().message(sender, "Set your key to §6" + key);
 		keys.put(((Player) sender).getUniqueId().toString(), key + "");
 		saveKeys();
 		return true;
@@ -246,7 +250,7 @@ public class Adminchat implements Module, Listener
 	 * @param sender the issuer of the command. */
 	public void getAcKey(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Your current ackey is §6" + getKey((Player) sender));
+		getLogger().message(sender, "Your current ackey is §6" + getKey((Player) sender));
 	}
 	
 	/** Saves the keys. */

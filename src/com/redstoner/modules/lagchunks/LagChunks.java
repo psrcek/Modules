@@ -12,11 +12,13 @@ import org.bukkit.entity.Player;
 
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class LagChunks implements Module
 {
 	private List<LaggyChunk> laggyChunks = new ArrayList<LaggyChunk>();
@@ -43,16 +45,17 @@ public class LagChunks implements Module
 	{
 		if (laggyChunks.size() > 0)
 		{
-			Utils.sendModuleHeader(sender);
+			ArrayList<String> message = new ArrayList<String>();
 			for (LaggyChunk lc : laggyChunks)
 			{
-				Utils.sendMessage(sender, "", "§b[§a" + laggyChunks.indexOf(lc) + "§b]: §a" + lc.x + "§7, §a" + lc.y
-						+ "§7, §a" + lc.z + " §7(" + lc.world.getName() + ") §a- §b" + lc.amount + " entities");
+				message.add("§b[§a" + laggyChunks.indexOf(lc) + "§b]: §a" + lc.x + "§7, §a" + lc.y + "§7, §a" + lc.z
+						+ " §7(" + lc.world.getName() + ") §a- §b" + lc.amount + " entities");
 			}
-			Utils.sendMessage(sender, "", "§2-------------------");
+			message.add("§2-------------------");
+			getLogger().message(sender, message.toArray(new String[] {}));
 		}
 		else
-			Utils.sendMessage(sender, null, "Couldn't find any chunks with that many entities.");
+			getLogger().message(sender, true, "Couldn't find any chunks with that many entities.");
 	}
 	
 	@Command(hook = "scan_cmd", async = AsyncType.ALWAYS)
@@ -69,11 +72,11 @@ public class LagChunks implements Module
 		if (number < laggyChunks.size())
 		{
 			player.teleport(laggyChunks.get(number).getLocation());
-			Utils.sendMessage(player, null, "§aTeleported to chunk " + number + "!");
+			getLogger().message(player, "§aTeleported to chunk " + number + "!");
 		}
 		else
 		{
-			Utils.sendErrorMessage(sender, null, "§4Invalid chunk number! Use §e/lc list §4to show laggy chunks!");
+			getLogger().message(sender, true, "§4Invalid chunk number! Use §e/lc list §4to show laggy chunks!");
 		}
 	}
 	

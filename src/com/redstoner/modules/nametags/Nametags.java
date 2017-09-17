@@ -13,13 +13,15 @@ import org.bukkit.event.server.ServerCommandEvent;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Nametags implements Module, Listener
 {
 	@EventHandler
@@ -85,7 +87,7 @@ public class Nametags implements Module, Listener
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 			sortSpecific(p);
-		Utils.sendMessage(sender, null, "Sorted tab for ya!");
+		getLogger().message(sender, "Sorted tab for ya!");
 		return true;
 	}
 	
@@ -95,12 +97,12 @@ public class Nametags implements Module, Listener
 		Player p = Bukkit.getPlayer(player);
 		if (p == null)
 		{
-			Utils.sendErrorMessage(sender, null, "That player couldn't be found!");
+			getLogger().message(sender, true, "That player couldn't be found!");
 			return true;
 		}
 		else
 			sortSpecific(p);
-		Utils.sendMessage(sender, null, "Sorted §e" + player + " §7for ya!");
+		getLogger().message(sender, "Sorted §e" + player + " §7for ya!");
 		return true;
 	}
 	

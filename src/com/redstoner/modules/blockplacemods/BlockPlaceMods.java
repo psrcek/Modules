@@ -14,9 +14,10 @@ import org.bukkit.event.Listener;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.blockplacemods.mods.Mod;
 import com.redstoner.modules.blockplacemods.mods.ModAbstract;
@@ -24,17 +25,15 @@ import com.redstoner.modules.blockplacemods.mods.ModToggledAbstract;
 import com.redstoner.utils.CommandException;
 import com.redstoner.utils.CommandMap;
 
+@Commands(CommandHolderType.None)
 @AutoRegisterListener
-@Version(major = 3, minor = 2, revision = 9, compatible = 3)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public final class BlockPlaceMods implements Module, Listener
 {
-	public static String PREFIX = ChatColor.GRAY + "[" + ChatColor.DARK_GREEN + "BPM" + ChatColor.GRAY + "]"
-			+ ChatColor.GREEN;
-			
 	@Override
 	public boolean onEnable()
 	{
-		ModAbstract.registerAll();
+		ModAbstract.registerAll(getLogger());
 		for (Mod mod : new ArrayList<>(ModAbstract.getMods().values()))
 		{
 			mod.registerListeners();
@@ -50,9 +49,16 @@ public final class BlockPlaceMods implements Module, Listener
 		}
 		catch (ReflectiveOperationException ex)
 		{
+			ex.printStackTrace();
 			return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public void postEnable()
+	{
+		setPrefix("BPM");
 	}
 	
 	@Override
@@ -100,7 +106,7 @@ public final class BlockPlaceMods implements Module, Listener
 	{
 		String[] args = new ArrayList<>(Arrays.asList(input.split(" "))).stream()
 				.filter(x -> x != null && !x.trim().isEmpty()).toArray(String[]::new);
-		String prefix = PREFIX;
+		String prefix = "";
 		String message;
 		try
 		{
@@ -109,7 +115,7 @@ public final class BlockPlaceMods implements Module, Listener
 				Mod target = ModAbstract.getMod(args[0].toLowerCase());
 				if (target != null)
 				{
-					prefix += "&7[&2" + capitalize(target.getName()) + "&7]&a";
+					prefix += "&7[&2" + capitalize(target.getName()) + "&7]:&a ";
 					if (!(sender instanceof Player))
 					{
 						message = "&cYou must be a player to use any block place mod";
@@ -142,7 +148,7 @@ public final class BlockPlaceMods implements Module, Listener
 			message = " &cAn unexpected error occurred while executing this command.";
 			t.printStackTrace();
 		}
-		Utils.sendMessage(sender, prefix, message, '&');
+		getLogger().message(sender, prefix + message);
 	}
 	
 	private String commandHelp(CommandSender sender, String[] args)

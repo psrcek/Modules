@@ -16,20 +16,15 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import com.nemez.cmdmgr.Command;
-import com.nemez.cmdmgr.CommandManager;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 0, compatible = 3)
+@Commands(CommandHolderType.File)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class SignalStrength implements Module
 {
-	@Override
-	public void postEnable()
-	{
-		CommandManager.registerCommand(this.getClass().getResourceAsStream("SignalStrength.cmd"), this, Main.plugin);
-	}
 	
 	@Command(hook = "ss")
 	public boolean ss(CommandSender sender, int strength)
@@ -45,13 +40,13 @@ public class SignalStrength implements Module
 		Block target_block = player.getTargetBlock(new HashSet<Material>(), 5);
 		if (target_block == null)
 		{
-			Utils.sendErrorMessage(sender, null, "That command can only be used if a container is targeted!");
+			getLogger().message(sender, true, "That command can only be used if a container is targeted!");
 			return true;
 		}
 		Inventory inventory = getInventory(target_block);
 		if (inventory == null)
 		{
-			Utils.sendErrorMessage(sender, null, "That command can only be used if a container is targeted!");
+			getLogger().message(sender, true, "That command can only be used if a container is targeted!");
 			return true;
 		}
 		// --------Get the stack size and required amount of items to achieve the desired signal strength---------
@@ -60,7 +55,7 @@ public class SignalStrength implements Module
 		int item_count = required_item_count(strength, stack_size, slot_count);
 		if (item_count == -1)
 		{
-			Utils.sendErrorMessage(sender, null,
+			getLogger().message(sender, true,
 					"The desired signal strength could not be achieved with the requested item type");
 			return true;
 		}
@@ -70,7 +65,7 @@ public class SignalStrength implements Module
 		{
 			if (!canBuild(player, b))
 			{
-				Utils.sendErrorMessage(sender, "", "You can not build here!");
+				getLogger().message(sender, true, "You can not build here!");
 				return true;
 			}
 		}
@@ -86,7 +81,7 @@ public class SignalStrength implements Module
 			if (remaining > 0)
 				inv.setItem(full_stack_count, new ItemStack(item_type, remaining));
 		}
-		Utils.sendMessage(sender, null,
+		getLogger().message(sender,
 				"Comparators attached to this Inventory will now put out a signal strength of" + strength);
 		return true;
 	}

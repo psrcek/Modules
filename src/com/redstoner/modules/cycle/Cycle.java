@@ -15,14 +15,16 @@ import org.json.simple.JSONArray;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 0, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Cycle implements Module, Listener
 {
 	private File cycleFile = new File(Main.plugin.getDataFolder(), "cycle.json");
@@ -54,11 +56,11 @@ public class Cycle implements Module, Listener
 		UUID uid = ((Player) sender).getUniqueId();
 		if (no_cyclers.remove(uid.toString()))
 		{
-			Utils.sendMessage(sender, null, "Cycle enabled!");
+			getLogger().message(sender, "Cycle enabled!");
 			saveCyclers();
 		}
 		else
-			Utils.sendMessage(sender, null, "Cycle was already enabled!");
+			getLogger().message(sender, "Cycle was already enabled!");
 		return true;
 	}
 	
@@ -69,12 +71,12 @@ public class Cycle implements Module, Listener
 		UUID uid = ((Player) sender).getUniqueId();
 		if (!no_cyclers.contains(uid.toString()))
 		{
-			Utils.sendMessage(sender, null, "Cycle disabled!");
+			getLogger().message(sender, "Cycle disabled!");
 			no_cyclers.add(uid.toString());
 			saveCyclers();
 		}
 		else
-			Utils.sendMessage(sender, null, "Cycle was already disabled!");
+			getLogger().message(sender, "Cycle was already disabled!");
 		return true;
 	}
 	
@@ -89,9 +91,9 @@ public class Cycle implements Module, Listener
 		int prev_slot = event.getPreviousSlot();
 		int new_slot = event.getNewSlot();
 		if (prev_slot == 0 && new_slot == 8)
-			shift(player, true);
-		else if (prev_slot == 8 && new_slot == 0)
 			shift(player, false);
+		else if (prev_slot == 8 && new_slot == 0)
+			shift(player, true);
 	}
 	
 	private void shift(Player player, boolean down)

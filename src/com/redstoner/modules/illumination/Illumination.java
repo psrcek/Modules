@@ -6,11 +6,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Illumination implements Module
 {
 	PotionEffect effect = new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false);
@@ -22,12 +24,12 @@ public class Illumination implements Module
 		if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION))
 		{
 			player.removePotionEffect(PotionEffectType.NIGHT_VISION);
-			Utils.sendMessage(sender, null, "Night Vision Disabled.");
+			getLogger().message(sender, "Night Vision Disabled.");
 		}
 		else
 		{
 			player.addPotionEffect(effect, true);
-			Utils.sendMessage(sender, null, "Night Vision Enabled.");
+			getLogger().message(sender, "Night Vision Enabled.");
 		}
 	}
 	
