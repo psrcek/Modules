@@ -7,11 +7,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Imout implements Module
 {
 	List<String> imout_toggle_list = new ArrayList<String>();
@@ -25,8 +28,7 @@ public class Imout implements Module
 		if (imout_toggle_list.contains(name))
 		{
 			symbol = "§a§l+";
-			Utils.sendModuleHeader(sender);
-			Utils.sendMessage(sender, "", "§eWelcome back! You are no longer hidden");
+			getLogger().message(sender, "§eWelcome back! You are no longer hidden", "");
 			s.performCommand("vanish off");
 			s.performCommand("act off");
 			imout_toggle_list.remove(name);
@@ -34,7 +36,7 @@ public class Imout implements Module
 		else
 		{
 			symbol = "§c§l-";
-			sender.sendMessage("§eYou just left... Or didn't you?");
+			getLogger().message(sender, "§e§oPoof!§e You are now gone!", "");
 			s.performCommand("vanish on");
 			s.performCommand("act on");
 			imout_toggle_list.add(name);

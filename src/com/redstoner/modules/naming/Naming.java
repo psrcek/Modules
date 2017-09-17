@@ -12,14 +12,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
 import net.md_5.bungee.api.ChatColor;
 
-@Version(major = 2, minor = 1, revision = 3, compatible = 2)
-
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Naming implements Module
 {
 	@Command(hook = "anvil")
@@ -38,12 +39,13 @@ public class Naming implements Module
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null)
 		{
-			Utils.sendErrorMessage(sender, null, "You can not rename that item!");
+			getLogger().message(sender, true, "You can not rename that item!");
 			return;
 		}
 		meta.setDisplayName(name);
 		item.setItemMeta(meta);
-		Utils.sendMessage(sender, null, "Name set to " + name);
+		getLogger().message(sender, "Name set to " + name);
+		((Player) sender).updateInventory();
 	}
 	
 	@Command(hook = "lore")
@@ -53,7 +55,7 @@ public class Naming implements Module
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null)
 		{
-			Utils.sendErrorMessage(sender, null, "You can not change the lore of that item!");
+			getLogger().message(sender, true, "You can not change the lore of that item!");
 			return;
 		}
 		List<String> currentLore;
@@ -67,7 +69,8 @@ public class Naming implements Module
 		currentLore.add(lore);
 		meta.setLore(currentLore);
 		item.setItemMeta(meta);
-		Utils.sendMessage(sender, null, "Lore set to " + lore);
+		getLogger().message(sender, "Lore set to " + lore);
+		((Player) sender).updateInventory();
 	}
 	
 	// @noformat

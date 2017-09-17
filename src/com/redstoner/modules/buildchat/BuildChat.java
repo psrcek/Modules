@@ -3,6 +3,7 @@ package com.redstoner.modules.buildchat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -13,8 +14,10 @@ import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.BroadcastFilter;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
@@ -23,8 +26,9 @@ import com.redstoner.modules.Module;
 /** BuildTeamChat module. Allows the build team to chat privately using /bc \<message\> as well as a one char prefix or a toggle.
  * 
  * @author Pepich */
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class BuildChat implements Module, Listener
 {
 	private static final char defaultKey = ';';
@@ -109,7 +113,7 @@ public class BuildChat implements Module, Listener
 			{
 				return recipient.hasPermission("utils.bc");
 			}
-		}, '&');
+		});
 		return true;
 	}
 	
@@ -123,7 +127,7 @@ public class BuildChat implements Module, Listener
 			{
 				return recipient.hasPermission("utils.bc");
 			}
-		}, '&');
+		});
 		return true;
 	}
 	
@@ -138,12 +142,12 @@ public class BuildChat implements Module, Listener
 		if (bctoggled.contains(((Player) sender).getUniqueId()))
 		{
 			bctoggled.remove(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "BCT now §cdisabled");
+			getLogger().message(sender, "BCT now §cdisabled");
 		}
 		else
 		{
 			bctoggled.add(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "BCT now §aenabled");
+			getLogger().message(sender, "BCT now §aenabled");
 		}
 		return true;
 	}
@@ -158,10 +162,10 @@ public class BuildChat implements Module, Listener
 		if (!bctoggled.contains(((Player) sender).getUniqueId()))
 		{
 			bctoggled.add(((Player) sender).getUniqueId());
-			Utils.sendMessage(sender, null, "BCT now §aenabled");
+			getLogger().message(sender, "BCT now §aenabled");
 		}
 		else
-			Utils.sendMessage(sender, null, "BCT was already enabled");
+			getLogger().message(sender, "BCT was already enabled");
 		return true;
 	}
 	
@@ -173,9 +177,9 @@ public class BuildChat implements Module, Listener
 	public boolean bcToggleOffCommand(CommandSender sender)
 	{
 		if (bctoggled.remove(((Player) sender).getUniqueId().toString()))
-			Utils.sendMessage(sender, null, "BCT now §cdisabled");
+			getLogger().message(sender, "BCT now §cdisabled");
 		else
-			Utils.sendMessage(sender, null, "BCT was already disabled");
+			getLogger().message(sender, "BCT was already disabled");
 		return true;
 	}
 	
@@ -191,7 +195,7 @@ public class BuildChat implements Module, Listener
 		if (event.getMessage().startsWith(getKey(player)))
 		{
 			event.setCancelled(true);
-			bcSay(event.getPlayer(), event.getMessage().replaceFirst(getKey(player), ""));
+			bcSay(event.getPlayer(), event.getMessage().replaceFirst(Pattern.quote(getKey(player)), ""));
 		}
 		else if (bctoggled.contains(event.getPlayer().getUniqueId()))
 		{
@@ -211,7 +215,7 @@ public class BuildChat implements Module, Listener
 	{
 		if (key.length() > 1)
 		{
-			Utils.sendErrorMessage(sender, null,
+			getLogger().message(sender, true,
 					"Could not set your key to §6" + key + " §7, it can be at most one char.");
 			return true;
 		}
@@ -220,7 +224,7 @@ public class BuildChat implements Module, Listener
 			getBcKey(sender);
 			return true;
 		}
-		Utils.sendMessage(sender, null, "Set your key to §6" + key);
+		getLogger().message(sender, "Set your key to §6" + key);
 		keys.put(((Player) sender).getUniqueId().toString(), key + "");
 		saveKeys();
 		return true;
@@ -241,7 +245,7 @@ public class BuildChat implements Module, Listener
 	 * @param sender the issuer of the command. */
 	public void getBcKey(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Your current bckey is §6" + getKey((Player) sender));
+		getLogger().message(sender, "Your current bckey is §6" + getKey((Player) sender));
 	}
 	
 	/** Saves the keys. */

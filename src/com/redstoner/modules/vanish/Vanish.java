@@ -16,12 +16,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 3, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Vanish implements Module, Listener
 {
 	private ArrayList<UUID> vanished = new ArrayList<UUID>();
@@ -34,13 +36,13 @@ public class Vanish implements Module, Listener
 		if (vanished.contains(uid))
 		{
 			vanished.remove(uid);
-			Utils.sendMessage(sender, null, "You are no longer vanished!");
+			getLogger().message(sender, "You are no longer vanished!");
 			unvanishPlayer((Player) sender);
 		}
 		else
 		{
 			vanished.add(uid);
-			Utils.sendMessage(sender, null, "You are now vanished!");
+			getLogger().message(sender, "You are now vanished!");
 			vanishPlayer((Player) sender);
 		}
 		return true;
@@ -51,12 +53,12 @@ public class Vanish implements Module, Listener
 	{
 		UUID uid = ((Player) sender).getUniqueId();
 		if (vanished.contains(uid))
-			Utils.sendMessage(sender, null,
+			getLogger().message(sender,
 					"You were already vanished, however we refreshed the vanish for you just to be sure!");
 		else
 		{
 			vanished.add(uid);
-			Utils.sendMessage(sender, null, "You are now vanished!");
+			getLogger().message(sender, "You are now vanished!");
 		}
 		vanishPlayer((Player) sender);
 		return true;
@@ -67,12 +69,12 @@ public class Vanish implements Module, Listener
 	{
 		UUID uid = ((Player) sender).getUniqueId();
 		if (!vanished.contains(uid))
-			Utils.sendMessage(sender, null,
+			getLogger().message(sender,
 					"You were not vanished, however we refreshed the vanish for you just to be sure!");
 		else
 		{
 			vanished.remove(uid);
-			Utils.sendMessage(sender, null, "You are no longer vanished!");
+			getLogger().message(sender, "You are no longer vanished!");
 		}
 		unvanishPlayer((Player) sender);
 		return true;
@@ -84,7 +86,7 @@ public class Vanish implements Module, Listener
 		Player player = Bukkit.getPlayer(name);
 		if (player == null)
 		{
-			Utils.sendMessage(sender, null, "&cPlayer &6" + name + " &ccould not be found!", '&');
+			getLogger().message(sender, "&cPlayer &6" + name + " &ccould not be found!");
 			return true;
 		}
 		UUID uid = player.getUniqueId();
@@ -93,14 +95,14 @@ public class Vanish implements Module, Listener
 			if (vanished.contains(uid))
 			{
 				vanished.remove(uid);
-				Utils.sendMessage(sender, null, "Successfully unvanished player &6" + name, '&');
-				Utils.sendMessage(player, null, "You are no longer vanished!");
+				getLogger().message(sender, "Successfully unvanished &e" + player.getDisplayName());
+				getLogger().message(player, "You are no longer vanished!");
 			}
 			else
 			{
 				vanished.add(uid);
-				Utils.sendMessage(sender, null, "Successfully vanished player &6" + name, '&');
-				Utils.sendMessage(player, null, "You are now vanished!");
+				getLogger().message(sender, "Successfully vanished &e" + player.getDisplayName());
+				getLogger().message(player, "You are now vanished!");
 			}
 			return true;
 		}
@@ -109,8 +111,8 @@ public class Vanish implements Module, Listener
 			if (entry.getValue().contains(uid))
 			{
 				entry.getValue().remove(uid);
-				Utils.sendMessage(sender, null, "Successfully unvanished player &6" + name, '&');
-				Utils.sendMessage(player, null, "You are no longer vanished!");
+				getLogger().message(sender, "Successfully unvanished &e" + player.getDisplayName());
+				getLogger().message(player, "You are no longer vanished!");
 				if (entry.getValue().size() == 0)
 					vanishOthers.remove(entry.getKey());
 				return true;
@@ -122,8 +124,8 @@ public class Vanish implements Module, Listener
 			toAddTo = new ArrayList<UUID>();
 		toAddTo.add(uid);
 		vanishOthers.put(uuid, toAddTo);
-		Utils.sendMessage(sender, null, "Successfully vanished player &6" + name, '&');
-		Utils.sendMessage(player, null, "You are now vanished!");
+		getLogger().message(sender, "Successfully vanished &e" + player.getDisplayName());
+		getLogger().message(player, "You are now vanished!");
 		return true;
 	}
 	

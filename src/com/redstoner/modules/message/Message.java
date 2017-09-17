@@ -8,25 +8,22 @@ import org.bukkit.command.CommandSender;
 
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
-import com.nemez.cmdmgr.CommandManager;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
-import com.redstoner.misc.Main;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.socialspy.Socialspy;
 
-@Version(major = 3, minor = 3, revision = 4, compatible = 3)
+import net.nemez.chatapi.ChatAPI;
+
+@Commands(CommandHolderType.File)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
-	
-	@Override
-	public void postEnable()
-	{
-		CommandManager.registerCommand(getClass().getResourceAsStream("Message.cmd"), this, Main.plugin);
-	}
 	
 	@Command(hook = "message", async = AsyncType.ALWAYS)
 	public boolean message(CommandSender sender, String target, String message)
@@ -38,12 +35,12 @@ public class Message implements Module
 			p = Bukkit.getPlayer(target);
 		if (p == null)
 		{
-			Utils.sendErrorMessage(sender, null, "That player couldn't be found!");
+			getLogger().message(sender, true, "That player couldn't be found!");
 			return true;
 		}
 		else
 		{
-			message = Utils.colorify(message, sender);
+			message = ChatAPI.colorify(sender, message);
 			if (ModuleLoader.getModule("Socialspy") != null)
 				Socialspy.spyBroadcast(sender, p, message, "/m", new BroadcastFilter()
 				{
@@ -53,8 +50,15 @@ public class Message implements Module
 						return !(recipient.equals(sender) || recipient.equals(p));
 					}
 				});
-			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(p) + "&6] ", "§f" + message, '&');
-			Utils.sendMessage(p, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§f" + message, '&');
+				
+			net.nemez.chatapi.click.Message m = new net.nemez.chatapi.click.Message(sender, null);
+			m.appendText("&6[&cme &6-> " + Utils.getName(p) + "&6] " + "§f" + message);
+			m.send();
+			
+			net.nemez.chatapi.click.Message m2 = new net.nemez.chatapi.click.Message(p, null);
+			m2.appendText("&6[" + Utils.getName(sender) + " &6-> &cme&6] " + "§f" + message);
+			m2.send();
+			
 			replyTargets.put(sender, p);
 			replyTargets.put(p, sender);
 		}
@@ -67,12 +71,12 @@ public class Message implements Module
 		CommandSender target = replyTargets.get(sender);
 		if (target == null || ((target instanceof OfflinePlayer) && !((OfflinePlayer) target).isOnline()))
 		{
-			Utils.sendErrorMessage(sender, null, "You don't have anyone to reply to!");
+			getLogger().message(sender, true, "You don't have anyone to reply to!");
 			return true;
 		}
 		else
 		{
-			message = Utils.colorify(message, sender);
+			message = ChatAPI.colorify(sender, message);
 			if (ModuleLoader.getModule("Socialspy") != null)
 				Socialspy.spyBroadcast(sender, target, message, "/r", new BroadcastFilter()
 				{
@@ -82,8 +86,14 @@ public class Message implements Module
 						return !(recipient.equals(sender) || recipient.equals(target));
 					}
 				});
-			Utils.sendMessage(sender, "&6[&cme &6-> " + Utils.getName(target) + "&6] ", "§f" + message, '&');
-			Utils.sendMessage(target, "&6[" + Utils.getName(sender) + " &6-> &cme&6] ", "§f" + message, '&');
+				
+			net.nemez.chatapi.click.Message m = new net.nemez.chatapi.click.Message(sender, null);
+			m.appendText("&6[&cme &6-> " + Utils.getName(target) + "&6] " + "§f" + message);
+			m.send();
+			
+			net.nemez.chatapi.click.Message m2 = new net.nemez.chatapi.click.Message(target, null);
+			m2.appendText("&6[" + Utils.getName(sender) + " &6-> &cme&6] " + "§f" + message);
+			m2.send();
 		}
 		replyTargets.put(sender, target);
 		replyTargets.put(target, sender);

@@ -1,6 +1,7 @@
 package com.redstoner.modules.mentio;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -16,14 +17,18 @@ import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+import net.nemez.chatapi.click.Message;
+
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 2, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Mentio implements Module, Listener
 {
 	private File mentioLocation = new File(Main.plugin.getDataFolder(), "mentio.json");
@@ -56,11 +61,11 @@ public class Mentio implements Module, Listener
 			playerMentios.add(player.getDisplayName().split(" ")[0].replaceAll("§[0-9a-fk-o]", ""));
 		}
 		if (playerMentios.contains(trigger))
-			Utils.sendErrorMessage(sender, null, "You already had that as a mentio!");
+			getLogger().message(sender, true, "You already had that as a mentio!");
 		else
 		{
 			playerMentios.add(trigger);
-			Utils.sendMessage(sender, null, "Successfully added the trigger §e" + trigger + " §7for you!");
+			getLogger().message(sender, "Successfully added the trigger §e" + trigger + " §7for you!");
 			mentios.put(uuid.toString(), playerMentios);
 			saveMentios();
 		}
@@ -81,10 +86,10 @@ public class Mentio implements Module, Listener
 			playerMentios.add(player.getDisplayName().split(" ")[0].replaceAll("§[0-9a-fk-o]", ""));
 		}
 		if (!playerMentios.remove(trigger))
-			Utils.sendErrorMessage(sender, null, "You didn't have that as a mentio!");
+			getLogger().message(sender, true, "You didn't have that as a mentio!");
 		else
 		{
-			Utils.sendMessage(sender, null, "Successfully removed the trigger §e" + trigger + " §7for you!");
+			getLogger().message(sender, "Successfully removed the trigger §e" + trigger + " §7for you!");
 			mentios.put(uuid.toString(), playerMentios);
 			saveMentios();
 		}
@@ -95,7 +100,7 @@ public class Mentio implements Module, Listener
 	@Command(hook = "listmentios")
 	public boolean listMentios(CommandSender sender)
 	{
-		Utils.sendModuleHeader(sender);
+		ArrayList<String> message = new ArrayList<String>();
 		Player player = (Player) sender;
 		UUID uuid = player.getUniqueId();
 		JSONArray playerMentios = (JSONArray) mentios.get(uuid.toString());
@@ -108,8 +113,9 @@ public class Mentio implements Module, Listener
 		for (Object raw : playerMentios)
 		{
 			String mentio = (String) raw;
-			Utils.sendMessage(sender, "&2 -> &e", mentio, '&');
+			message.add("&2 -> &e" + mentio);
 		}
+		getLogger().message(sender, message.toArray(new String[] {}));
 		return true;
 	}
 	
@@ -144,10 +150,11 @@ public class Mentio implements Module, Listener
 							lastColorCodes += "§" + c;
 						lastChar = c;
 					}
-					Utils.sendMessage(player, "",
-							event.getFormat().replace("%1$s", event.getPlayer().getDisplayName()).replace("%2$s",
-									event.getMessage().replaceFirst("(?i)(" + Pattern.quote(mentio) + ")([^ ]*)",
-											"§a§o$1$2" + lastColorCodes)));
+					Message m = new Message(player, null);
+					m.appendText(event.getFormat().replace("%1$s", event.getPlayer().getDisplayName()).replace("%2$s",
+							event.getMessage().replaceFirst("(?i)(" + Pattern.quote(mentio) + ")([^ ]*)",
+									"§a§o$1$2" + lastColorCodes)));
+					m.send();
 					player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 					return;
 				}

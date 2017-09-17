@@ -1,21 +1,28 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
-import com.redstoner.modules.datamanager.DataManager;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryType;
 
-import java.util.*;
+import com.redstoner.misc.Main;
+import com.redstoner.modules.ModuleLogger;
+import com.redstoner.modules.datamanager.DataManager;
 
 public abstract class ModAbstract implements Mod, Listener
 {
 	private static final Map<String, Mod> mods = new HashMap<>();
 	private final String name;
 	private final Set<String> aliases;
+	private static ModuleLogger logger;
 	
 	public static Map<String, Mod> getMods()
 	{
@@ -27,15 +34,18 @@ public abstract class ModAbstract implements Mod, Listener
 		return mods.get(name);
 	}
 	
-	public static void registerMod(Mod mod) {
+	public static void registerMod(Mod mod)
+	{
 		mods.put(mod.getName(), mod);
-		for (String alias : mod.getAliases()) {
+		for (String alias : mod.getAliases())
+		{
 			mods.putIfAbsent(alias, mod);
 		}
 	}
 	
-	public static void registerAll()
+	public static void registerAll(final ModuleLogger logger)
 	{
+		ModAbstract.logger = logger;
 		registerMod(new ModToggledCauldron());
 		registerMod(new ModToggledPiston());
 		registerMod(new ModToggledStep());
@@ -49,11 +59,12 @@ public abstract class ModAbstract implements Mod, Listener
 	{
 		this.name = Objects.requireNonNull(name);
 		this.aliases = new HashSet<>(2);
-		Utils.info("Loaded mod " + name);
+		logger.info("Loaded mod " + name);
 	}
 	
 	@Override
-	public String getName() {
+	public String getName()
+	{
 		return name;
 	}
 	

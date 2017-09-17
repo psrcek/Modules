@@ -31,13 +31,15 @@ import org.json.simple.parser.ParseException;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class DamnSpam implements Module, Listener
 {
 	File configFile = new File(Main.plugin.getDataFolder(), "DamnSpam.json");
@@ -47,7 +49,7 @@ public class DamnSpam implements Module, Listener
 	HashMap<Material, int[][]> attachedBlocks;
 	HashMap<Player, SpamInput> players;
 	int maxTimeout = 240;
-	String timeoutErrorString = "&cThe timeout must be -1 or within 0 and " + maxTimeout;
+	String timeoutErrorString = "The timeout must be -1 or within 0 and " + maxTimeout;
 	
 	@Override
 	public boolean onEnable()
@@ -141,10 +143,10 @@ public class DamnSpam implements Module, Listener
 			destroyingInput = true;
 		else if (!isAcceptableTimeout(seconds))
 		{
-			Utils.sendMessage(sender, null, "&cThe timeout must be -1 or within 0 and " + maxTimeout, '&');
+			getLogger().message(sender, true, "The timeout must be -1 or within 0 and " + maxTimeout);
 			return;
 		}
-		Utils.sendMessage(sender, null, "&aPlease click the input you would like to set.", '&');
+		getLogger().message(sender, "Please click the input you would like to set.");
 		setPlayer((Player) sender, destroyingInput, seconds, seconds);
 	}
 	
@@ -160,10 +162,10 @@ public class DamnSpam implements Module, Listener
 		}
 		else if (!(isAcceptableTimeout(secondsOn) && isAcceptableTimeout(secondsOff)))
 		{
-			Utils.sendMessage(sender, null, "&cThe timeout must be -1 or within 0 and " + maxTimeout, '&');
+			getLogger().message(sender, true, "The timeout must be -1 or within 0 and " + maxTimeout);
 			return;
 		}
-		Utils.sendMessage(sender, null, "&aPlease click the input you would like to set.", '&');
+		getLogger().message(sender, "Please click the input you would like to set.");
 		setPlayer((Player) sender, destroyingInput, secondsOff, secondsOn);
 	}
 	
@@ -183,7 +185,7 @@ public class DamnSpam implements Module, Listener
 		{
 			if (!acceptedInputs.contains(block.getType()))
 			{
-				Utils.sendMessage(player, null, "&cThat block is not an acceptable input!", '&');
+				getLogger().message(player, true, "That block is not an acceptable input!");
 				return true;
 			}
 			String typeStr = block.getType().toString().toLowerCase().replace("_", " ");
@@ -193,8 +195,9 @@ public class DamnSpam implements Module, Listener
 			changingInput = false;
 			if (!buildCheck)
 			{
-				Utils.sendMessage(player, null,
-						"&cThere is no timeout to remove on this " + typeStr + "(by setting the timeout to 0)", '&');
+				getLogger().message(player, true,
+						"Something went wrong trying to change the timeout on this " + typeStr + "!");
+				event.setCancelled(true);
 				return true;
 			}
 			SpamInput input = players.get(player);
@@ -202,18 +205,18 @@ public class DamnSpam implements Module, Listener
 			{
 				if (!inputs.containsKey(locationStr))
 				{
-					Utils.sendMessage(player, null,
-							"&cThere is no timeout to remove on this " + typeStr + "(by setting the timeout to 0)",
-							'&');
+					getLogger().message(player, true,
+							"Something went wrong trying to change the timeout on this " + typeStr + "!");
+					event.setCancelled(true);
 					return true;
 				}
 				inputs.remove(locationStr);
-				Utils.sendMessage(player, null, "&aSuccessfully removed the timeout for this " + typeStr, '&');
+				getLogger().message(player, "Successfully removed the timeout for this " + typeStr);
 			}
 			else
 			{
 				inputs.put(locationStr, players.get(player));
-				Utils.sendMessage(player, null, "&aSuccessfully set a timeout for this " + typeStr, '&');
+				getLogger().message(player, "Successfully set a timeout for this " + typeStr);
 			}
 			event.setCancelled(true);
 			players.remove(player);
@@ -237,9 +240,8 @@ public class DamnSpam implements Module, Listener
 				: "the " + typeStr + " attached to that block");
 		if (!sender.isSneaking())
 		{
-			Utils.sendMessage(sender, null, "&cYou cannot destroy " + inputStr, '&');
-			Utils.sendMessage(sender, "", "&c&nSneak&c and break or set the timeout to 0 if you want to remove it.",
-					'&');
+			getLogger().message(sender, true, "You cannot destroy " + inputStr);
+			getLogger().message(sender, true, "Sneak and break or set the timeout to 0 if you want to remove it.");
 			event.setCancelled(true);
 			return;
 		}
@@ -247,11 +249,11 @@ public class DamnSpam implements Module, Listener
 		{
 			inputs.remove(posStr);
 			saveInputs();
-			Utils.sendMessage(sender, null, "&aSuccesfully removed " + inputStr, '&');
+			getLogger().message(sender, "Succesfully removed " + inputStr);
 		}
 		else
 		{
-			Utils.sendMessage(sender, null, "&cYou are not allowed to remove " + inputStr, '&');
+			getLogger().message(sender, true, "You are not allowed to remove " + inputStr);
 			event.setCancelled(true);
 		}
 	}
@@ -305,6 +307,8 @@ public class DamnSpam implements Module, Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInteract(PlayerInteractEvent event)
 	{
+		if (event.getClickedBlock() == null)
+			return;
 		boolean register = attemptInputRegister(event.getPlayer(), event.getClickedBlock(), event);
 		if (!register && event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && !event.isCancelled())
 		{
@@ -326,13 +330,13 @@ public class DamnSpam implements Module, Listener
 				if (checktime == -1)
 				{
 					event.setCancelled(true);
-					Utils.sendMessage(sender, null, "&cThis " + btype + " is locked permanently by /damnspam.", '&');
+					getLogger().message(sender, "This " + btype + " is locked permanently by /damnspam.");
 				}
 				else if (timeLeft > 0)
 				{
 					event.setCancelled(true);
-					Utils.sendMessage(sender, null, "&cThis " + btype + " has a damnspam timeout of " + checktime
-							+ ", with " + timeLeft + " left.", '&');
+					getLogger().message(sender, "This " + btype + " has a damnspam timeout of " + checktime + ", with "
+							+ timeLeft + " left.");
 				}
 				else
 				{

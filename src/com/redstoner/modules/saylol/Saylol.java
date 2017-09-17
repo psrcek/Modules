@@ -3,38 +3,60 @@ package com.redstoner.modules.saylol;
 import java.io.File;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.BroadcastFilter;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 0, compatible = 2)
+import net.nemez.chatapi.click.ClickCallback;
+import net.nemez.chatapi.click.Message;
+
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Saylol implements Module
 {
 	private long lastLol = 0;
 	private File lolLocation = new File(Main.plugin.getDataFolder(), "lol.json");
-	private JSONArray lols;
+	private JSONArray lols, handlers;
+	private final String LOL_PREFIX = "§8[§blol§8] ";
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean onEnable()
 	{
 		lols = JsonManager.getArray(lolLocation);
 		if (lols == null)
 			lols = new JSONArray();
+		handlers = new JSONArray();
+		for (int i = 0; i < lols.size(); i++)
+			handlers.add(new ClickCallback(true, true, "")
+			{
+				@Override
+				public void run(CommandSender sender)
+				{
+					if (handlers.contains(this))
+						clickAction((Player) sender, handlers.indexOf(this));
+					else
+						getLogger().message(sender, true, "That lol no longer exists!");
+				}
+			});
 		return true;
 	}
 	
 	@Override
 	public void onDisable()
 	{
-		saveLols();
+		saveLolsSync();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -42,11 +64,22 @@ public class Saylol implements Module
 	public boolean addLol(CommandSender sender, String text)
 	{
 		if (lols.contains(text))
-			Utils.sendErrorMessage(sender, null, "This lol already exists!");
+			getLogger().message(sender, true, "This lol already exists!");
 		else
 		{
-			Utils.sendMessage(sender, null, "Successfully added a new lol!");
+			getLogger().message(sender, "Successfully added a new lol!");
 			lols.add("&e" + text);
+			handlers.add(new ClickCallback(true, true, "")
+			{
+				@Override
+				public void run(CommandSender sender)
+				{
+					if (handlers.contains(this))
+						clickAction((Player) sender, handlers.indexOf(this));
+					else
+						getLogger().message(sender, true, "That lol no longer exists!");
+				}
+			});
 			saveLols();
 		}
 		return true;
@@ -57,15 +90,16 @@ public class Saylol implements Module
 	{
 		if (lols.size() == 0)
 		{
-			Utils.sendErrorMessage(sender, null, "There are no lols yet!");
+			getLogger().message(sender, true, "There are no lols yet!");
 			return true;
 		}
 		if (id < 0 || id >= lols.size())
 		{
-			Utils.sendErrorMessage(sender, null, "The ID must be at least 0 and at most " + (lols.size() - 1));
+			getLogger().message(sender, true, "The ID must be at least 0 and at most " + (lols.size() - 1));
 			return true;
 		}
-		Utils.sendMessage(sender, null, "Successfully deleted the lol: " + lols.remove(id), '&');
+		getLogger().message(sender, "Successfully deleted the lol: " + lols.remove(id));
+		handlers.remove(id);
 		saveLols();
 		return true;
 	}
@@ -76,15 +110,15 @@ public class Saylol implements Module
 	{
 		if (lols.size() == 0)
 		{
-			Utils.sendErrorMessage(sender, null, "There are no lols yet!");
+			getLogger().message(sender, true, "There are no lols yet!");
 			return true;
 		}
 		if (id < 0 || id >= lols.size())
 		{
-			Utils.sendErrorMessage(sender, null, "The ID must be at least 0 and at most " + (lols.size() - 1));
+			getLogger().message(sender, true, "The ID must be at least 0 and at most " + (lols.size() - 1));
 			return true;
 		}
-		Utils.sendMessage(sender, null, "Successfully changed the lol: &e" + lols.get(id) + " &7to: &e" + text, '&');
+		getLogger().message(sender, "Successfully changed the lol: &e" + lols.get(id) + " &7to: &e" + text);
 		lols.set(id, text);
 		saveLols();
 		return true;
@@ -95,19 +129,19 @@ public class Saylol implements Module
 	{
 		if (lols.size() == 0)
 		{
-			Utils.sendErrorMessage(sender, null, "There are no lols yet!");
+			getLogger().message(sender, true, "There are no lols yet!");
 			return true;
 		}
 		long time = System.currentTimeMillis();
 		if (time - lastLol < 15000)
 		{
-			Utils.sendErrorMessage(sender, null,
+			getLogger().message(sender, true,
 					"You can't use saylol for another " + (14 - (int) Math.ceil((time - lastLol) / 1000)) + "s.");
 			return true;
 		}
 		if (id < 0 || id >= lols.size())
 		{
-			Utils.sendErrorMessage(sender, null, "The ID must be at least 0 and at most " + (lols.size() - 1));
+			getLogger().message(sender, true, "The ID must be at least 0 and at most " + (lols.size() - 1));
 			return true;
 		}
 		String name;
@@ -115,14 +149,14 @@ public class Saylol implements Module
 			name = ((Player) sender).getDisplayName();
 		else
 			name = "&9" + sender.getName();
-		Utils.broadcast("&8[&blol&8] ", name + "&8: &e" + lols.get(id), new BroadcastFilter()
+		Utils.broadcast(LOL_PREFIX, name + "&8: &e" + lols.get(id), new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
 			{
 				return recipient.hasPermission("utils.lol.see");
 			}
-		}, '&');
+		});
 		lastLol = time;
 		return true;
 	}
@@ -132,13 +166,13 @@ public class Saylol implements Module
 	{
 		if (lols.size() == 0)
 		{
-			Utils.sendErrorMessage(sender, null, "There are no lols yet!");
+			getLogger().message(sender, true, "There are no lols yet!");
 			return true;
 		}
 		long time = System.currentTimeMillis();
 		if (time - lastLol < 15000)
 		{
-			Utils.sendErrorMessage(sender, null,
+			getLogger().message(sender, true,
 					"You can't use saylol for another " + (14 - (int) Math.ceil((time - lastLol) / 1000)) + "s.");
 			return true;
 		}
@@ -149,14 +183,14 @@ public class Saylol implements Module
 			name = "&9" + sender.getName();
 		Random random = new Random();
 		int id = random.nextInt(lols.size());
-		Utils.broadcast("&8[&blol&8] ", name + "&8: &e" + lols.get(id), new BroadcastFilter()
+		Utils.broadcast(LOL_PREFIX, name + "&8: &e" + lols.get(id), new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
 			{
 				return recipient.hasPermission("utils.lol.see");
 			}
-		}, '&');
+		});
 		lastLol = time;
 		return true;
 	}
@@ -166,7 +200,7 @@ public class Saylol implements Module
 	{
 		if (lols.size() == 0)
 		{
-			Utils.sendErrorMessage(sender, null, "There are no lols yet!");
+			getLogger().message(sender, true, "There are no lols yet!");
 			return true;
 		}
 		page = page - 1;
@@ -175,18 +209,20 @@ public class Saylol implements Module
 		int pages = (int) Math.ceil(lols.size() / 10d);
 		if (start < 0)
 		{
-			Utils.sendErrorMessage(sender, null, "Page number too small, must be at least 0!");
+			getLogger().message(sender, true, "Page number too small, must be at least 0!");
 			return true;
 		}
 		if (start > lols.size())
 		{
-			Utils.sendErrorMessage(sender, null, "Page number too big, must be at most " + pages + "!");
+			getLogger().message(sender, true, "Page number too big, must be at most " + pages + "!");
 			return true;
 		}
-		Utils.sendModuleHeader(sender);
-		Utils.sendMessage(sender, "", "&ePage " + (page + 1) + "/" + pages + ":", '&');
+		Message m = new Message(sender, null);
+		m.appendText(getLogger().getHeader().replace("\n", ""));
+		m.appendText("&ePage " + (page + 1) + "/" + pages + ":");
 		for (int i = start; i < end && i < lols.size(); i++)
-			Utils.sendMessage(sender, "", "&a" + i + "&8: &e" + lols.get(i), '&');
+			m.appendCallback("\n&a" + i + "&8: &e" + lols.get(i), getCallback(i));
+		m.send();
 		return true;
 	}
 	
@@ -197,78 +233,72 @@ public class Saylol implements Module
 	}
 	
 	@Command(hook = "searchlol")
-	public boolean search(CommandSender sender, boolean insensitive, String text)
+	public boolean search(CommandSender sender, boolean sensitive, String text)
 	{
-		Utils.sendModuleHeader(sender);
+		Message m = new Message(sender, null);
+		m.appendText(getLogger().getHeader().replace("\n", ""));
 		boolean found = false;
-		if (insensitive)
-		{
+		if (!sensitive)
 			text = text.toLowerCase();
-			for (int i = 0; i < lols.size(); i++)
-			{
-				if (((String) lols.get(i)).toLowerCase().contains(text))
-				{
-					Utils.sendMessage(sender, "", "&a" + i + "&8: &e" + lols.get(i), '&');
-					found = true;
-				}
-			}
-		}
-		else
+		for (int i = 0; i < lols.size(); i++)
 		{
-			for (int i = 0; i < lols.size(); i++)
+			String lol = (String) lols.get(i);
+			if ((sensitive ? lol : lol.toLowerCase()).contains(text))
 			{
-				if (((String) lols.get(i)).contains(text))
-				{
-					Utils.sendMessage(sender, "", "&a" + i + "&8: &e" + lols.get(i), '&');
-					found = true;
-				}
+				m.appendCallback("\n&a" + i + "&8: &e" + lol, getCallback(i));
+				found = true;
 			}
 		}
 		if (!found)
-		{
-			Utils.sendMessage(sender, "", "&cCouldn't find any matching lols.", '&');
-		}
+			getLogger().message(sender, "&cCouldn't find any matching lols.");
+		else
+			m.send();
 		return true;
 	}
 	
 	@Command(hook = "matchlol")
-	public boolean match(CommandSender sender, boolean insensitive, String regex)
+	public boolean match(CommandSender sender, boolean sensitive, String regex)
 	{
-		Utils.sendModuleHeader(sender);
+		Message m = new Message(sender, null);
+		m.appendText(getLogger().getHeader().replace("\n", ""));
 		boolean found = false;
-		if (insensitive)
-		{
+		if (!sensitive)
 			regex = regex.toLowerCase();
-			for (int i = 0; i < lols.size(); i++)
-			{
-				if (((String) lols.get(i)).toLowerCase().matches(regex))
-				{
-					Utils.sendMessage(sender, "", "&a" + i + ": " + lols.get(i), '&');
-					found = true;
-				}
-			}
-		}
-		else
+		for (int i = 0; i < lols.size(); i++)
 		{
-			for (int i = 0; i < lols.size(); i++)
+			String lol = (String) lols.get(i);
+			if ((sensitive ? lol : lol.toLowerCase()).matches(regex))
 			{
-				if (((String) lols.get(i)).matches(regex))
-				{
-					Utils.sendMessage(sender, "", "&a" + i + ": " + lols.get(i), '&');
-					found = true;
-				}
+				m.appendCallback("\n&a" + i + "&8: &e" + lol, getCallback(i));
+				found = true;
 			}
 		}
 		if (!found)
-		{
-			Utils.sendMessage(sender, "", "&cCouldn't find any matching lols.", '&');
-		}
+			getLogger().message(sender, "&cCouldn't find any matching lols.");
+		else
+			m.send();
 		return true;
 	}
 	
 	public void saveLols()
 	{
 		JsonManager.save(lols, lolLocation);
+	}
+	
+	public void saveLolsSync()
+	{
+		JsonManager.saveSync(lols, lolLocation);
+	}
+	
+	public ClickCallback getCallback(int index)
+	{
+		return (ClickCallback) handlers.get(index);
+	}
+	
+	public void clickAction(Player player, int index)
+	{
+		if (player.hasPermission("utils.lol.id"))
+			Bukkit.dispatchCommand(player, "lol id " + index);
 	}
 	
 	// @noformat

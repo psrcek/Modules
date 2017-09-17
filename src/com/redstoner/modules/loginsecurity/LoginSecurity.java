@@ -20,9 +20,10 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.misc.mysql.JSONManager;
 import com.redstoner.misc.mysql.MysqlHandler;
 import com.redstoner.misc.mysql.elements.ConstraintOperator;
@@ -33,8 +34,9 @@ import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.misc.mysql.types.text.VarChar;
 import com.redstoner.modules.Module;
 
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 1, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class LoginSecurity implements Module, Listener
 {
 	protected static Map<UUID, Location> loggingIn;
@@ -46,7 +48,7 @@ public class LoginSecurity implements Module, Listener
 		Map<Serializable, Serializable> config = JSONManager.getConfiguration("loginsecurity.json");
 		if (config == null || !config.containsKey("database") || !config.containsKey("table"))
 		{
-			Utils.sendErrorMessage(Bukkit.getConsoleSender(), null,
+			getLogger().message(Bukkit.getConsoleSender(), true,
 					"Could not load the LoginSecurity config file, disabling!");
 			return false;
 		}
@@ -60,8 +62,7 @@ public class LoginSecurity implements Module, Listener
 		}
 		catch (NullPointerException e)
 		{
-			Utils.sendErrorMessage(Bukkit.getConsoleSender(), null,
-					"Could not use the LoginSecurity config, disabling!");
+			getLogger().message(Bukkit.getConsoleSender(), true, "Could not use the LoginSecurity config, disabling!");
 			return false;
 		}
 		loggingIn = new HashMap<>();
@@ -212,7 +213,7 @@ public class LoginSecurity implements Module, Listener
 		{
 			return;
 		}
-		Utils.sendMessage(player, null, "You'll have to log in within 60s or you'll be kicked!");
+		getLogger().message(player, "You'll have to log in within 60s or you'll be kicked!");
 		loggingIn.put(player.getUniqueId(), player.getLocation());
 		BukkitScheduler scheduler = Bukkit.getScheduler();
 		RepeatingLoginRunnable repeatingRunnable = new RepeatingLoginRunnable(this, player);

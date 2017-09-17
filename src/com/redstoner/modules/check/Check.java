@@ -25,7 +25,6 @@ import com.nemez.cmdmgr.CommandManager;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
 import com.redstoner.misc.mysql.JSONManager;
 import com.redstoner.misc.mysql.MysqlHandler;
 import com.redstoner.misc.mysql.elements.ConstraintOperator;
@@ -34,7 +33,7 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 3, compatible = 3)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -45,7 +44,7 @@ public class Check implements Module, Listener
 		Map<Serializable, Serializable> config = JSONManager.getConfiguration("check.json");
 		if (config == null || !config.containsKey("database") || !config.containsKey("table"))
 		{
-			Utils.error("Could not load the Check config file, disabling!");
+			getLogger().error("Could not load the Check config file, disabling!");
 			return false;
 		}
 		try
@@ -56,7 +55,7 @@ public class Check implements Module, Listener
 		}
 		catch (NullPointerException e)
 		{
-			Utils.error("Could not use the Check config, disabling!");
+			getLogger().error("Could not use the Check config, disabling!");
 			return false;
 		}
 		return true;
@@ -72,14 +71,13 @@ public class Check implements Module, Listener
 	@Command(hook = "checkCommand", async = AsyncType.ALWAYS)
 	public void checkCommand(final CommandSender sender, final String player)
 	{
-		Utils.sendModuleHeader(sender);
-		Utils.sendMessage(sender, "", "&7Please note that the data may not be fully accurate!", '&');
+		getLogger().message(sender, "&7Please note that the data may not be fully accurate!");
 		OfflinePlayer oPlayer;
 		oPlayer = Bukkit.getPlayer(player);
 		if (oPlayer == null)
 			oPlayer = Bukkit.getServer().getOfflinePlayer(player);
 		sendData(sender, oPlayer);
-		if (ModuleLoader.getModule("Tag") != null)
+		if (ModuleLoader.exists("Tag"))
 			Bukkit.dispatchCommand(sender, "tag check " + player);
 	}
 	
@@ -215,7 +213,7 @@ public class Check implements Module, Listener
 			String firstJoin = getFirstJoin(player);
 			String lastSeen = getLastSeen(player);
 			firstJoin = (firstJoin.equals("1970-01-01 01:00")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm:ss) &e" + firstJoin;
-			lastSeen = (lastSeen.equals("1970-1-1 1:0")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm:ss) &e" + lastSeen;
+			lastSeen = (lastSeen.equals("1970-1-1 01:00")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm:ss) &e" + lastSeen;
 			Object[] websiteData = getWebsiteData(player);
 			String websiteUrl = (websiteData[0] == null) ? "None" : (String) websiteData[0];
 			String email = (websiteData[0] == null) ? "Unknown" : (String) websiteData[1];
@@ -225,23 +223,26 @@ public class Check implements Module, Listener
 			if (namesUsed == null)
 				namesUsed = "None";
 			// messages
-			Utils.sendMessage(sender, "", "&7Data provided by Redstoner:", '&');
-			Utils.sendMessage(sender, "", "&6>  UUID: &e" + player.getUniqueId(), '&');
-			Utils.sendMessage(sender, "", "&6>  First joined: " + firstJoin, '&');
-			Utils.sendMessage(sender, "", "&6>  Last seen: " + lastSeen, '&');
-			Utils.sendMessage(sender, "", "&6>  Website account: &e" + websiteUrl, '&');
-			Utils.sendMessage(sender, "", "&6>  email: &e" + email, '&');
-			if (emailNotConfirmed)
-				Utils.sendMessage(sender, "", "&6> &4Email NOT Confirmed!", '&');
-			Utils.sendMessage(sender, "", "&7Data provided by ipinfo:", '&');
-			Utils.sendMessage(sender, "", "&6>  Country: &e" + country, '&');
-			Utils.sendMessage(sender, "", "&7Data provided by Mojang:", '&');
-			Utils.sendMessage(sender, "", "&6>  All ingame names used so far: &e" + namesUsed, '&');
+			// @noformat
+			String[] message = new String[] {
+			"&7Data provided by Redstoner:",
+			"&6>  UUID: &e" + player.getUniqueId(),
+			"&6>  First joined: " + firstJoin,
+			"&6>  Last seen: " + lastSeen,
+			"&6>  Website account: &e" + websiteUrl,
+			"&6>  email: &e" + (emailNotConfirmed ? "&6> &4Email NOT Confirmed!" : email),
+			"&7Data provided by ipinfo:",
+			"&6>  Country: &e" + country,
+			"&7Data provided by Mojang:",
+			"&6>  All ingame names used so far: &e" + namesUsed
+			};
+			//@format
+			getLogger().message(sender, message);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Utils.sendErrorMessage(sender, null, "&cSorry, something went wrong while fetching data", '&');
+			getLogger().message(sender, true, "Sorry, something went wrong while fetching data");
 		}
 	}
 	
@@ -250,7 +251,7 @@ public class Check implements Module, Listener
 	public String getCommandString()
 	{
 		return "command check {\n" + 
-				"	perm utils.check;\n" + 
+				"	perm getLogger().check;\n" + 
 				"	\n" + 
 				"	[string:player] {\n" + 
 				"		run checkCommand player;\n" + 

@@ -58,8 +58,4 @@ command socialspy {
         run migrate;
         type console;
     }
-    test {
-        run test;
-        type console;
-    }
 }

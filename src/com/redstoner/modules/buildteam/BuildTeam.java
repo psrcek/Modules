@@ -5,21 +5,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.nemez.cmdmgr.Command;
-import com.nemez.cmdmgr.CommandManager;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Main;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 0, compatible = 3)
+@Commands(CommandHolderType.File)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class BuildTeam implements Module
 {
-	@Override
-	public void postEnable()
-	{
-		CommandManager.registerCommand(getClass().getResourceAsStream("BuildTeam.cmd"), this, Main.plugin);
-	}
-	
 	@Command(hook = "teleport")
 	public boolean teleport(CommandSender sender, String target_name)
 	{
@@ -32,7 +26,7 @@ public class BuildTeam implements Module
 			return true;
 		}
 		player.teleport(target);
-		Utils.sendMessage(sender, null, "Teleported you to &e" + target.getDisplayName() + "&7!", '&');
+		getLogger().message(sender, "Teleported you to &e" + target.getDisplayName() + "&7!");
 		return true;
 	}
 	
@@ -41,7 +35,7 @@ public class BuildTeam implements Module
 	{
 		if (!target_name.matches("^\\w{2,16}$"))
 		{
-			Utils.sendErrorMessage(sender, null, "This doesn't look like a valid playername!");
+			getLogger().message(sender, true, "This doesn't look like a valid playername!");
 			return true;
 		}
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + target_name + " group add +buildteam");
@@ -53,7 +47,7 @@ public class BuildTeam implements Module
 	{
 		if (!target_name.matches("^\\w{2,16}$"))
 		{
-			Utils.sendErrorMessage(sender, null, "This doesn't look like a valid playername!");
+			getLogger().message(sender, true, "This doesn't look like a valid playername!");
 			return true;
 		}
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + target_name + " group remove +buildteam");

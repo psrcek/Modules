@@ -8,13 +8,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.nemez.cmdmgr.Command;
-import com.nemez.cmdmgr.CommandManager;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Main;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
-@Version(major = 3, minor = 0, revision = 2, compatible = 3)
+import net.nemez.chatapi.click.Message;
+
+@Commands(CommandHolderType.File)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class List implements Module
 {
 	private HashMap<String, Integer> onConsole;
@@ -23,7 +26,6 @@ public class List implements Module
 	public void postEnable()
 	{
 		onConsole = new HashMap<String, Integer>();
-		CommandManager.registerCommand(getClass().getResourceAsStream("List.cmd"), this, Main.plugin);
 	}
 	
 	@Command(hook = "console_join")
@@ -40,7 +42,10 @@ public class List implements Module
 	public boolean console_leave(CommandSender sender, String name)
 	{
 		if (onConsole.containsKey(name))
-			onConsole.put(name, onConsole.get(name) - 1);
+			if (onConsole.get(name) == 1)
+				onConsole.remove(name);
+			else
+				onConsole.put(name, onConsole.get(name) - 1);
 		return true;
 	}
 	
@@ -59,11 +64,9 @@ public class List implements Module
 	@Command(hook = "list_rank")
 	public boolean listRank(CommandSender sender, String rank)
 	{
-		Utils.sendModuleHeader(sender);
-		
 		int onlinePlayers = Bukkit.getOnlinePlayers().size();
-		Utils.sendMessage(sender, "", "&7There are &e" + onlinePlayers + "&7 out of maximum &e" + Bukkit.getMaxPlayers()
-				+ "&7 players online.", '&');
+		getLogger().message(sender, "", "&7There are &e" + onlinePlayers + "&7 out of maximum &e"
+				+ Bukkit.getMaxPlayers() + "&7 players online.");
 				
 		rank = rank.toLowerCase();
 		boolean all = rank.equals("all");
@@ -112,20 +115,18 @@ public class List implements Module
 			{
 				if (!all)
 				{
-					Utils.sendErrorMessage(sender, null, "You do not have permissions to see who's on console!");
+					getLogger().message(sender, true, "You do not have permissions to see who's on console!");
 					shownAnything = true;
 				}
 			}
 		}
 		if (!shownAnything)
 		{
-			Utils.sendErrorMessage(sender, "",
-					"Looks like I couldn't figure out what you meant. Try again with different parameters maybe?", '&');
-			Utils.sendMessage(sender, "",
-					"Possible parameters are: &eAll&7, &eStaff&7, &eVisitor&7, &eMember&7, &eBuilder&7, &eTrusted&7, &eMit&7, &eMod&7, &eAdmin&7 and &eLead",
-					'&');
-			Utils.sendMessage(sender, "", "You can also combine any of the parameters, like this: &eMember, Staff",
-					'&');
+			getLogger().message(sender,
+					new String[] {
+							"Looks like I couldn't figure out what you meant. Try again with different parameters maybe?",
+							"Possible parameters are: &eAll&7, &eStaff&7, &eVisitor&7, &eMember&7, &eBuilder&7, &eTrusted&7, &eMit&7, &eMod&7, &eAdmin&7 and &eLead",
+							"You can also combine any of the parameters, like this: &eMember, Staff"});
 		}
 		return true;
 	}
@@ -148,7 +149,9 @@ public class List implements Module
 		}
 		if (players != null)
 		{
-			Utils.sendMessage(sender, "", "&8[" + rank + "&8]&7: " + players, '&');
+			Message m = new Message(sender, null);
+			m.appendText("&8[" + rank + "&8]&7: " + players);
+			m.send();
 			return true;
 		}
 		return false;

@@ -6,14 +6,15 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.json.simple.parser.ParseException;
 
 import com.nemez.cmdmgr.Command;
+import com.nemez.cmdmgr.Command.AsyncType;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.misc.Utils;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.mysql.Config;
 import com.redstoner.misc.mysql.MysqlHandler;
 import com.redstoner.misc.mysql.elements.ConstraintOperator;
@@ -22,7 +23,8 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 2, minor = 0, revision = 4, compatible = 2)
+@Commands(CommandHolderType.String)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class WebToken implements Module
 {
 	private static final int TOKEN_LENGTH = 6;
@@ -45,7 +47,7 @@ public class WebToken implements Module
 		}
 		if (config == null || !config.containsKey("database") || !config.containsKey("table"))
 		{
-			Utils.error("Could not load the WebToken config file, disabling!");
+			getLogger().error("Could not load the WebToken config file, disabling!");
 			config.put("database", "redstoner");
 			config.put("table", "webtoken");
 			return false;
@@ -57,7 +59,7 @@ public class WebToken implements Module
 		}
 		catch (NullPointerException e)
 		{
-			Utils.error("Could not use the WebToken config, disabling!");
+			getLogger().error("Could not use the WebToken config, aborting!");
 			return false;
 		}
 		return true;
@@ -116,11 +118,9 @@ public class WebToken implements Module
 	
 	private void printToken(Player player, String email, String token)
 	{
-		Utils.sendModuleHeader(player);
-		Utils.sendMessage(player, "", "§aEmail: " + email);
-		Utils.sendMessage(player, "", "§aToken: " + token);
-		Utils.sendMessage(player, "", "§cIMPORTANT: never share the token with anyone!");
-		Utils.sendMessage(player, "", "§cIt could be used to claim your website account!");
+		String[] message = new String[] {"&aEmail: " + email, "&aToken: " + token,
+				"&cIMPORTANT: never share the token with anyone!", "&cIt could be used to claim your website account!"};
+		getLogger().message(player, message);
 	}
 	
 	private String generateToken()
@@ -142,7 +142,7 @@ public class WebToken implements Module
 		return token;
 	}
 	
-	@Command(hook = "token")
+	@Command(hook = "token", async = AsyncType.ALWAYS)
 	public void token(CommandSender sender)
 	{
 		Player player = (Player) sender;
@@ -152,8 +152,7 @@ public class WebToken implements Module
 			String token = query("token", uuid);
 			if (token == null)
 			{
-				Utils.sendErrorMessage(player, null, "§cYou don't have a token yet! Use " + ChatColor.YELLOW
-						+ "/gettoken <email>" + ChatColor.RED + " to get one.");
+				getLogger().message(player, true, "You don't have a token yet! Use &e/gettoken <email>&7 to get one.");
 			}
 			else
 			{
@@ -163,12 +162,30 @@ public class WebToken implements Module
 		}
 		catch (Exception e)
 		{
-			Utils.sendErrorMessage(player, null, "Error getting your token, please contact an admin!");
-			e.printStackTrace();
+			try
+			{
+				Thread.sleep(100);
+				String token = query("token", uuid);
+				if (token == null)
+				{
+					getLogger().message(player, true,
+							"You don't have a token yet! Use &e/gettoken <email>&7 to get one.");
+				}
+				else
+				{
+					String email = query("email", uuid);
+					printToken(player, email, token);
+				}
+			}
+			catch (Exception e2)
+			{
+				getLogger().message(player, true, "Error getting your token, please contact an admin!");
+				e2.printStackTrace();
+			}
 		}
 	}
 	
-	@Command(hook = "gettoken")
+	@Command(hook = "gettoken", async = AsyncType.ALWAYS)
 	public void token(CommandSender sender, String email)
 	{
 		Player player = (Player) sender;
@@ -181,29 +198,28 @@ public class WebToken implements Module
 				String id = getNextId();
 				table.delete(new MysqlConstraint("uuid", ConstraintOperator.EQUAL, uuid));
 				table.insert(id, uuid, token, email);
-				player.sendMessage(ChatColor.GREEN + "Token generated!");
 				printToken(player, email, token);
 			}
 			catch (Exception e)
 			{
 				try
 				{
+					Thread.sleep(100);
 					String id = getNextId();
 					table.delete(new MysqlConstraint("uuid", ConstraintOperator.EQUAL, uuid));
 					table.insert(id, uuid, token, email);
-					player.sendMessage(ChatColor.GREEN + "Token generated!");
 					printToken(player, email, token);
 				}
 				catch (Exception e2)
 				{
-					Utils.sendErrorMessage(player, null, "Error getting your token, please contact an admin!");
+					getLogger().message(player, true, "Error getting your token, please contact an admin!");
 					e.printStackTrace();
 				}
 			}
 		}
 		else
 		{
-			Utils.sendErrorMessage(player, null, "Hmm... That doesn't look like a valid email!");
+			getLogger().message(player, true, "Hmm... That doesn't look like a valid email!");
 		}
 	}
 	

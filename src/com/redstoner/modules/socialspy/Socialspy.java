@@ -2,6 +2,7 @@ package com.redstoner.modules.socialspy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.bukkit.Bukkit;
@@ -11,25 +12,22 @@ import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 
 import com.nemez.cmdmgr.Command;
-import com.nemez.cmdmgr.CommandManager;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
-import com.redstoner.misc.Main;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.CoreModule;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Version(major = 3, minor = 1, revision = 8, compatible = 3)
+import net.nemez.chatapi.click.Message;
+
+@Commands(CommandHolderType.File)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Socialspy implements CoreModule
 {
-	@Override
-	public void postEnable()
-	{
-		CommandManager.registerCommand(this.getClass().getResourceAsStream("Socialspy.cmd"), this, Main.plugin);
-	}
-	
 	@Command(hook = "config_prefix_default")
 	public boolean prefixDefault(CommandSender sender)
 	{
@@ -39,7 +37,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "config_prefix")
 	public boolean prefix(CommandSender sender, String prefix)
 	{
-		Utils.sendMessage(sender, null, "Set your prefix to: " + prefix);
+		getLogger().message(sender, "Set your prefix to: " + prefix);
 		DataManager.setData(sender, "prefix", prefix);
 		return true;
 	}
@@ -53,7 +51,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "config_format")
 	public boolean configFormat(CommandSender sender, String format)
 	{
-		Utils.sendMessage(sender, null, "Set your format to: " + format);
+		getLogger().message(sender, "Set your format to: " + format);
 		DataManager.setData(sender, "format", format);
 		return true;
 	}
@@ -61,7 +59,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "stripcolor_on")
 	public boolean stripcolorOn(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Enabled stripping colors!");
+		getLogger().message(sender, "Enabled stripping colors!");
 		DataManager.setData(sender, "stripcolor", "on");
 		return true;
 	}
@@ -69,7 +67,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "stripcolor_off")
 	public boolean stripcolorOff(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Disabled stripping colors!");
+		getLogger().message(sender, "Disabled stripping colors!");
 		DataManager.setData(sender, "stripcolor", "off");
 		return true;
 	}
@@ -77,7 +75,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "stripcolor_partial")
 	public boolean stripcolor_partial(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Disabled stripping colors!");
+		getLogger().message(sender, "Disabled stripping colors!");
 		DataManager.setData(sender, "stripcolor", "partial");
 		return true;
 	}
@@ -86,7 +84,7 @@ public class Socialspy implements CoreModule
 	public boolean stripcolor(CommandSender sender)
 	{
 		boolean b = DataManager.getOrDefault(sender, "stripcolor", "on").equals("on");
-		Utils.sendMessage(sender, null, (b ? "Disabled" : "Enabled") + " stripping colors!");
+		getLogger().message(sender, (b ? "Disabled" : "Enabled") + " stripping colors!");
 		DataManager.setData(sender, "stripcolor", !b);
 		return true;
 	}
@@ -94,7 +92,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "on")
 	public boolean spyOn(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Enabled socialspy!");
+		getLogger().message(sender, "Enabled socialspy!");
 		DataManager.setData(sender, "enabled", true);
 		return true;
 	}
@@ -102,7 +100,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "off")
 	public boolean spyOff(CommandSender sender)
 	{
-		Utils.sendMessage(sender, null, "Disabled socialspy!");
+		getLogger().message(sender, "Disabled socialspy!");
 		DataManager.setData(sender, "enabled", false);
 		return true;
 	}
@@ -111,7 +109,7 @@ public class Socialspy implements CoreModule
 	public boolean spyToggle(CommandSender sender)
 	{
 		boolean b = (boolean) DataManager.getOrDefault(sender, "enabled", false);
-		Utils.sendMessage(sender, null, (b ? "Disabled" : "Enabled") + " socialspy!");
+		getLogger().message(sender, (b ? "Disabled" : "Enabled") + " socialspy!");
 		DataManager.setData(sender, "enabled", !b);
 		return true;
 	}
@@ -119,32 +117,30 @@ public class Socialspy implements CoreModule
 	@Command(hook = "format_help")
 	public boolean formatInfo(CommandSender sender)
 	{
-		Utils.sendModuleHeader(sender);
-		Utils.sendMessage(sender, "", " Format placeholders:");
-		Utils.sendMessage(sender, "", " &c%s&eender &7(display name) | &c%S&eender &7(real name)", '&');
-		Utils.sendMessage(sender, "", " &c%t&earget &7(display name) | &c%T&earget &7(real name)", '&');
-		Utils.sendMessage(sender, "", " &c%p&erefix &7(see prefix option)", '&');
-		Utils.sendMessage(sender, "", " &c%m&eessage", '&');
-		Utils.sendMessage(sender, "", " &c%c&eommand", '&');
-		Utils.sendMessage(sender, "", " Any other text will be put as literal text. Use %% to escape any %.", '&');
-		Utils.sendMessage(sender, "", " The default format is: §e" + getDefaultFormat());
-		Utils.sendMessage(sender, "", " The default prefix is: §e" + getDefaultPrefix());
+		getLogger().message(sender,
+				new String[] {" Format placeholders:", " &c%s&eender &7(display name) | &c%S&eender &7(real name)",
+						" &c%t&earget &7(display name) | &c%T&earget &7(real name)",
+						" &c%p&erefix &7(see prefix option)", " &c%m&eessage", " &c%c&eommand",
+						" Any other text will be put as literal text. Use %% to escape any %.",
+						" The default format is: §e" + getDefaultFormat(),
+						" The default prefix is: §e" + getDefaultPrefix()});
 		return true;
 	}
 	
 	@Command(hook = "commands_list")
 	public boolean commands_list(CommandSender sender)
 	{
-		Utils.sendModuleHeader(sender);
+		ArrayList<String> message = new ArrayList<String>();
 		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
 		if (commands == null || commands.size() == 0)
-			Utils.sendErrorMessage(sender, "", "You are not listening to any commands!");
+			message.add("You are not listening to any commands!");
 		else
 		{
-			Utils.sendMessage(sender, "", "You are listening to the following " + commands.size() + " commands:");
-			Utils.sendMessage(sender, "", Arrays.toString(commands.toArray()).replace(", /", "&7, &e/")
-					.replace("[", "[&e").replace("]", "&7]"), '&');
+			message.add("You are listening to the following " + commands.size() + " commands:");
+			message.add(Arrays.toString(commands.toArray()).replace(", /", "&7, &e/").replace("[", "[&e").replace("]",
+					"&7]"));
 		}
+		getLogger().message(sender, message.toArray(new String[] {}));
 		return true;
 	}
 	
@@ -164,7 +160,7 @@ public class Socialspy implements CoreModule
 		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
 		commands.add(command);
 		DataManager.setData(sender, "commands", commands);
-		Utils.sendMessage(sender, null, "You are now spying on &e" + command, '&');
+		getLogger().message(sender, "You are now spying on &e" + command);
 		return true;
 	}
 	
@@ -174,7 +170,7 @@ public class Socialspy implements CoreModule
 		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
 		commands.remove(command);
 		DataManager.setData(sender, "commands", commands);
-		Utils.sendMessage(sender, null, "You are no longer spying on &e" + command, '&');
+		getLogger().message(sender, "You are no longer spying on &e" + command);
 		return true;
 	}
 	
@@ -204,7 +200,11 @@ public class Socialspy implements CoreModule
 					if (((JSONArray) DataManager.getOrDefault(p, "commands", getDefaultCommandList()))
 							.contains(command))
 						if (filter == null || filter.sendTo(p))
-							Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
+						{
+							Message m = new Message(p, null);
+							m.appendText(formatMessage(p, sender, target, message, command));
+							m.send();
+						}
 				}
 				else
 					DataManager.setData(sender, "enabled", false);
@@ -237,7 +237,11 @@ public class Socialspy implements CoreModule
 					if (((JSONArray) DataManager.getOrDefault(p, "commands", getDefaultCommandList()))
 							.contains(command))
 						if (filter == null || filter.sendTo(p))
-							Utils.sendMessage(p, "", formatMessage(p, sender, target, message, command));
+						{
+							Message m = new Message(p, null);
+							m.appendText(formatMessage(p, sender, target, message, command));
+							m.send();
+						}
 				}
 				else
 					DataManager.setData(sender, "enabled", false);
@@ -338,26 +342,6 @@ public class Socialspy implements CoreModule
 	public boolean migrate(CommandSender sender)
 	{
 		DataManager.migrateAll("Message");
-		return true;
-	}
-	
-	@Command(hook = "test")
-	public boolean test(CommandSender sender) throws InterruptedException
-	{
-		DataManager.setData(sender, "test", "&aTest1");
-		Thread.sleep(1);
-		Utils.sendMessage(sender, null,
-				"Wrote \"Test1\", got " + DataManager.getOrDefault(sender, "test", "&4fallback"), '&');
-		DataManager.setData(sender, "test", "&aTest2");
-		Thread.sleep(1);
-		Utils.sendMessage(sender, null,
-				"Wrote \"Test2\", got " + DataManager.getOrDefault(sender, "test", "&4fallback"), '&');
-		DataManager.setData(sender, "test", "&4DATA");
-		Thread.sleep(1);
-		DataManager.removeData(sender, "test");
-		Thread.sleep(1);
-		Utils.sendMessage(sender, null, "Removed data, got " + DataManager.getOrDefault(sender, "test", "&anothing"),
-				'&');
 		return true;
 	}
 }

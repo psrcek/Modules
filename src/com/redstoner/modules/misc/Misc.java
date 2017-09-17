@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
@@ -19,16 +20,23 @@ import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
+import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+import net.nemez.chatapi.ChatAPI;
+import net.nemez.chatapi.click.Message;
+
+@Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 2, minor = 0, revision = 22, compatible = 2)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Misc implements Module, Listener
 {
-	private final String[] sudoBlacklist = new String[] {".?+:?esudo", ".?+:?sudo", ".?+:?script.*", ".?+:?stop",
-			".?+:?modules"};
+	private final String[] sudoBlacklist = new String[] {"(.*:)?e?sudo", "(.*:)?script.*", "(.*:)?stop",
+			"(.*:)?modules", "(.*:)?sayn", "(.*:)?pex", "(.*:)?console_.*", "(.*:)?op", "(.*:)?login", "(.*:)?register",
+			"(.*:)?.*pass"};
 	JSONObject config;
 	JSONArray unprotectedRegions;
 	
@@ -38,34 +46,31 @@ public class Misc implements Module, Listener
 		Player player = event.getPlayer();
 		if (!player.hasPlayedBefore())
 		{
-			Utils.broadcast("", "\n&a&lPlease welcome &f" + player.getDisplayName() + " &a&lto Redstoner!\n", null,
-					'&');
-			Utils.sendMessage(player, "", " \n \n \n \n \n \n \n \n \n \n \n \n ", '&');
-			Utils.sendMessage(player, "", "  &4Welcome to the Redstoner Server!", '&');
-			Utils.sendMessage(player, "", "  &6Before you ask us things, take a quick", '&');
-			Utils.sendMessage(player, "", "  &6look at &a&nredstoner.com/info", '&');
-			Utils.sendMessage(player, "", "  \n&6thank you and happy playing ;)", '&');
-			Utils.sendMessage(player, "", " \n \n", '&');
+			Utils.broadcast("", "\n§a§lPlease welcome §f" + player.getDisplayName() + " §a§lto Redstoner!\n", null);
+			String[] message = new String[] {" \n \n \n \n \n \n \n \n \n \n \n \n ",
+					"  &4Welcome to the Redstoner Server!", "  &6Before you ask us things, take a quick",
+					"  &6look at &a&nredstoner.com/info", "  \n&6thank you and happy playing ;)", " \n \n"};
+			getLogger().message(player, message);
 		}
 		Material spawnBlock = player.getLocation().getBlock().getType();
 		if (spawnBlock == Material.PORTAL || spawnBlock == Material.ENDER_PORTAL)
 		{
-			Utils.sendMessage(player, "", "&4Looks like you spawned in a portal... Let me help you out", '&');
-			Utils.sendMessage(player, "", "&6You can use /back if you &nreally&6 want to go back", '&');
+			getLogger().message(player, "&4Looks like you spawned in a portal... Let me help you out");
+			getLogger().message(player, "&6You can use /back if you &nreally&6 want to go back");
 			player.teleport(player.getWorld().getSpawnLocation());
 		}
 	}
 	
 	// Disables spectator teleportation
-	@EventHandler
-	public void onSpectatorTeleort(PlayerTeleportEvent event)
+	// Fixes MV end portal crashing
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onTeleport(PlayerTeleportEvent event)
 	{
 		Player player = event.getPlayer();
-		if (!event.isCancelled() && event.getCause() == TeleportCause.SPECTATE
-				&& !player.hasPermission("utils.tp.spectate"))
+		if (!event.isCancelled() && event.getCause() == TeleportCause.SPECTATE && !player.hasPermission("utils.tp"))
 		{
 			event.setCancelled(true);
-			Utils.sendErrorMessage(event.getPlayer(), null, "Spectator teleportation is disabled!");
+			getLogger().message(event.getPlayer(), true, "Spectator teleportation is disabled!");
 		}
 	}
 	
@@ -107,18 +112,18 @@ public class Misc implements Module, Listener
 		}
 		catch (NumberFormatException e)
 		{
-			Utils.sendErrorMessage(sender, null, "That is not a valid number!");
+			getLogger().message(sender, true, "That is not a valid number!");
 			return true;
 		}
 		Bukkit.dispatchCommand(sender, "pex user " + user + " group add " + group + " * " + duration);
-		Utils.sendMessage(sender, null, "Added to group " + group + "for " + duration + " seconds.");
+		getLogger().message(sender, "Added to group " + group + "for " + duration + " seconds.");
 		return true;
 	}
 	
 	@Command(hook = "echo")
 	public boolean echo(CommandSender sender, String text)
 	{
-		Utils.sendMessage(sender, "", "&f" + text, '&');
+		sender.sendMessage(text);
 		return true;
 	}
 	
@@ -130,29 +135,24 @@ public class Misc implements Module, Listener
 			name = ((Player) sender).getDisplayName();
 		else
 			name = "§9" + sender.getName();
-		if (sender.hasPermission("essentials.chat.color"))
-			Utils.broadcast(" §7- " + name + " §7⇦ ", text, null, '&');
-		else
-			Utils.broadcast(" §7- " + name + " §7⇦ ", text, null);
+		text = ChatAPI.colorify(sender, text);
+		Utils.broadcast(" §7- " + name + " §7⇦ ", text, null);
 		return true;
 	}
 	
 	@Command(hook = "say")
 	public boolean say(CommandSender sender, String message)
 	{
-		String name;
-		if (sender instanceof Player)
-			name = ((Player) sender).getDisplayName();
-		else
-			name = sender.getName();
-		Utils.broadcast(" &7[&9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "&7]: ", "&r" + message, null, '&');
+		String name = Utils.getName(sender);
+		Utils.broadcast(" §7[§9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "§7]: ",
+				"§r" + ChatAPI.colorify(null, message), null);
 		return true;
 	}
 	
 	@Command(hook = "sayn")
 	public boolean say(CommandSender sender, String name, String message)
 	{
-		Utils.broadcast(" &7[&9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "&7]: ", "&r" + message, null, '&');
+		Utils.broadcast(" §7[§9" + name + "§7]: ", "§r" + ChatAPI.colorify(null, message), null);
 		return true;
 	}
 	
@@ -168,7 +168,7 @@ public class Misc implements Module, Listener
 			target = Bukkit.getPlayer(name);
 		if (target == null)
 		{
-			Utils.sendErrorMessage(sender, null, "That player couldn't be found!");
+			getLogger().message(sender, false, "That player couldn't be found!");
 			return true;
 		}
 		if (command.startsWith("/") || target.equals(Bukkit.getConsoleSender()))
@@ -176,19 +176,19 @@ public class Misc implements Module, Listener
 			String[] args = command.split(" ");
 			for (String regex : sudoBlacklist)
 			{
-				if (args[0].matches(regex))
+				if (args[0].matches("\\/" + regex))
 				{
-					Utils.sendErrorMessage(sender, null, "You can't sudo anyone into using that command!");
+					getLogger().message(sender, true, "You can't sudo anyone into using that command!");
 					return true;
 				}
 			}
 			Bukkit.dispatchCommand(target, command.replaceFirst("/", ""));
-			Utils.sendMessage(sender, null, "Sudoed " + name + " into running " + command);
+			getLogger().message(sender, "Sudoed " + Utils.getName(target) + "&7 into running " + command);
 		}
 		else
 		{
 			((Player) target).chat(command);
-			Utils.sendMessage(sender, null, "Sudoed " + name + " into saying " + command);
+			getLogger().message(sender, "Sudoed " + Utils.getName(target) + "&7 into saying " + command);
 		}
 		return true;
 	}
@@ -204,19 +204,40 @@ public class Misc implements Module, Listener
 			}
 			catch (Exception e)
 			{
-				Utils.sendErrorMessage(sender, noformat ? "" : null,
-						noformat ? "&rERR: Invalid UUID" : "&rThat UUID is not valid!!", '&');
+				if (noformat)
+					sender.sendMessage("ERR: Invalid UUID");
+				else
+					getLogger().message(sender, "That UUID is not valid!");
 				return true;
 			}
 		else
 			p = Bukkit.getPlayer(name);
 		if (p == null)
 		{
-			Utils.sendErrorMessage(sender, noformat ? "" : null,
-					noformat ? "&rERR: Invalid player" : "&rThat player couldn't be found!", '&');
+			if (noformat)
+			{
+				Message m = new Message(sender, null);
+				m.appendText("ERR: Invalid player");
+				m.send();
+			}
+			else
+			{
+				getLogger().message(sender, "That player couldn't be found!");
+			}
 			return true;
 		}
-		Utils.sendMessage(sender, noformat ? "" : null, "&r" + p.hasPermission(node), '&');
+		
+		if (noformat)
+		{
+			Message m = new Message(sender, null);
+			m.appendText("" + p.hasPermission(node));
+			m.send();
+		}
+		else
+		{
+			getLogger().message(sender, "" + p.hasPermission(node));
+		}
+		
 		return true;
 	}
 	
