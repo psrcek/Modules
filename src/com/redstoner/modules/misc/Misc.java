@@ -31,7 +31,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Misc implements Module, Listener
 {
 	private final String[] sudoBlacklist = new String[] {"(.*:)?e?sudo", "(.*:)?script.*", "(.*:)?stop",
@@ -123,7 +123,7 @@ public class Misc implements Module, Listener
 	@Command(hook = "echo")
 	public boolean echo(CommandSender sender, String text)
 	{
-		sender.sendMessage(text);
+		sender.sendMessage(ChatAPI.colorify(null, text));
 		return true;
 	}
 	
@@ -152,7 +152,8 @@ public class Misc implements Module, Listener
 	@Command(hook = "sayn")
 	public boolean say(CommandSender sender, String name, String message)
 	{
-		Utils.broadcast(" §7[§9" + name + "§7]: ", "§r" + ChatAPI.colorify(null, message), null);
+		Utils.broadcast(" §7[§9" + ChatAPI.colorify(sender, name) + "§7]: ", "§r" + ChatAPI.colorify(null, message),
+				null);
 		return true;
 	}
 	
