@@ -31,12 +31,12 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
 	protected JSONObject data = new JSONObject();
-	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<String, HashMap<String, Boolean>>();
+	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<>();
 	
 	@Override
 	public void postEnable()
@@ -544,7 +544,7 @@ public final class DataManager implements CoreModule, Listener
 			Module mod = ModuleLoader.getModule("DataManager");
 			Method m = mod.getClass().getDeclaredMethod("setState_", CommandSender.class, String.class, boolean.class);
 			m.setAccessible(true);
-			m.invoke(mod, sender, key);
+			m.invoke(mod, sender, key, value);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
