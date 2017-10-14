@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -14,6 +17,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.TabCompleteEvent;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.nemez.cmdmgr.Command;
@@ -31,12 +36,16 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 1, revision = 0, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
 	protected JSONObject data = new JSONObject();
+	protected JSONObject config_data;
+	protected ArrayList<String> module_index;
+	int old_hash = 0;
 	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<>();
+	protected ArrayList<String> subcommands;
 	
 	@Override
 	public void postEnable()
@@ -47,7 +56,17 @@ public final class DataManager implements CoreModule, Listener
 		{
 			loadData_(p.getUniqueId().toString());
 		}
+		subcommands = new ArrayList<>();
+		subcommands.add("list");
+		subcommands.add("get");
+		subcommands.add("set");
+		subcommands.add("remove");
 		states.put(getID(Bukkit.getConsoleSender()), new HashMap<String, Boolean>());
+		config_data = JsonManager.getObject(new File(dataFolder, "configs.json"));
+		if (config_data == null)
+			config_data = new JSONObject();
+		fixJson();
+		updateIndex();
 		CommandManager.registerCommand(getClass().getResourceAsStream("DataManager.cmd"), this, Main.plugin);
 	}
 	
@@ -58,6 +77,7 @@ public final class DataManager implements CoreModule, Listener
 		{
 			saveAndUnload(p);
 		}
+		JsonManager.save(config_data, new File(dataFolder, "configs.json"));
 	}
 	
 	@Command(hook = "import_file")
@@ -581,5 +601,409 @@ public final class DataManager implements CoreModule, Listener
 		if (lstates == null)
 			return false;
 		return lstates.containsKey(key) ? lstates.get(key) : false;
+	}
+	
+	protected boolean hasConfigChanged()
+	{
+		return old_hash != config_data.hashCode();
+	}
+	
+	protected void updateIndex()
+	{
+		if (!hasConfigChanged())
+			return;
+		old_hash = config_data.hashCode();
+		module_index = new ArrayList<>();
+		if (config_data.size() > 0)
+		{
+			for (Object key : config_data.keySet())
+				module_index.add(key.toString());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void fixJson()
+	{
+		for (Object key : config_data.keySet())
+		{
+			JSONObject json = (JSONObject) config_data.get(key);
+			for (Object key2 : json.keySet())
+			{
+				Object o = json.get(key2);
+				if (!(o instanceof ConfigEntry))
+					json.put(key2, new ConfigEntry((JSONObject) o));
+			}
+			config_data.put(key, json);
+		}
+	}
+	
+	private List<String> subsetWhereStartsWith(List<String> list, String prefix)
+	{
+		ArrayList<String> subset = new ArrayList<>();
+		if (prefix == null || prefix.equals(""))
+			return list;
+		for (String s : list)
+			if (s.startsWith(prefix))
+				subset.add(s);
+		return subset;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@EventHandler
+	public void onTabComplete(TabCompleteEvent event)
+	{
+		if (event.getBuffer().toLowerCase().matches("^settings? .*")
+				|| event.getBuffer().toLowerCase().matches("^configs? .*"))
+		{
+			boolean argument_complete = event.getBuffer().endsWith(" ");
+			String[] arguments = event.getBuffer().split(" ");
+			event.setCompletions(new ArrayList<String>());
+			if (arguments.length == 1 || (arguments.length == 2 && !argument_complete))
+				event.setCompletions(subsetWhereStartsWith(subcommands, arguments.length >= 2 ? arguments[1] : ""));
+			else if (arguments.length == 2 || (arguments.length == 3 && !argument_complete))
+			{
+				switch (arguments[1].toLowerCase())
+				{
+					case "list":
+					case "get":
+					case "set":
+					case "remove":
+					{
+						event.setCompletions(
+								subsetWhereStartsWith(module_index, arguments.length == 3 ? arguments[2] : ""));
+						break;
+					}
+				}
+			}
+			else if ((arguments.length == 3 && argument_complete) || (arguments.length == 4 && !argument_complete))
+			{
+				switch (arguments[1].toLowerCase())
+				{
+					case "get":
+					case "set":
+					case "remove":
+					{
+						Object o = config_data.get(arguments[2]);
+						if (o == null)
+							break;
+						event.setCompletions(subsetWhereStartsWith(new ArrayList<String>(((JSONObject) o).keySet()),
+								arguments.length == 4 ? arguments[3] : ""));
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (arguments[1].toLowerCase().equals("set"))
+				{
+					Object o = config_data.get(arguments[2]);
+					if (o == null)
+						return;
+					Object o2 = ((JSONObject) o).get(arguments[3]);
+					if (o2 == null)
+						return;
+					event.setCompletions(subsetWhereStartsWith(Arrays.asList(((ConfigEntry) o2).getCompleteOptions()),
+							arguments.length > 4 ? String.join(" ", Arrays.copyOfRange(arguments, 4, arguments.length))
+									: ""));
+				}
+			}
+		}
+	}
+	
+	@Command(hook = "list")
+	public boolean list(CommandSender sender)
+	{
+		getLogger().message(sender, Arrays.toString(module_index.toArray(new String[] {})));
+		return true;
+	}
+	
+	@Command(hook = "list2")
+	public boolean list(CommandSender sender, String module)
+	{
+		Object o = config_data.get(module);
+		if (o == null)
+		{
+			getLogger().message(sender, "This module has not registered any settings.");
+		}
+		else
+		{
+			ArrayList<String> entries = new ArrayList<>();
+			JSONObject json = (JSONObject) o;
+			for (Object key : json.keySet())
+			{
+				String entry = key.toString();
+				entries.add("§e" + entry + "§7");
+			}
+			getLogger().message(sender, "The module §e" + module + "§7 has the following config settings: ",
+					Arrays.toString(entries.toArray(new String[] {})));
+		}
+		return true;
+	}
+	
+	@Command(hook = "get")
+	public boolean get(CommandSender sender, String module, String key)
+	{
+		getLogger().message(sender, new String[] {"§e" + module + "." + key + "§7 currently holds the value:",
+				getConfigOrDefault_(module, key, "<empty>").toString()});
+		return true;
+	}
+	
+	@Command(hook = "set")
+	public boolean set(CommandSender sender, String module, String key, String value)
+	{
+		if (setConfig_(module, key, value))
+		{
+			getLogger().message(sender, "Successfully changed the value for §e" + module + "." + key);
+		}
+		else
+		{
+			getLogger().message(sender, true,
+					"§7\"§e" + value + "§7\" is not a valid value for setting §e" + module + "." + key);
+		}
+		return true;
+	}
+	
+	@Command(hook = "remove")
+	public boolean remove(CommandSender sender, String module, String key)
+	{
+		if (removeConfig_(module, key))
+			getLogger().message(sender, "Successfully deleted the config entry §e" + module + "." + key + "§7!");
+		else
+			getLogger().message(sender, true, "Could not delete the config entry §e" + module + "." + key + "§7!");
+		return true;
+	}
+	
+	@Command(hook = "remove_all")
+	public boolean remove_all(CommandSender sender, String module)
+	{
+		if (removeAllConfig_(module))
+			getLogger().message(sender, "Successfully deleted all config entries for module §e" + module + "§7!");
+		else
+			getLogger().message(sender, true, "Could not delete all config entries for module §e" + module + "§7!");
+		return true;
+	}
+	
+	public static Object getConfigOrDefault(String key, Object fallback)
+	{
+		return getOrDefault(Utils.getCaller("DataManager"), key, fallback);
+	}
+	
+	public static Object getConfigOrDefault(String module, String key, Object fallback)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("getConfigOrDefault_", String.class, String.class,
+					Object.class);
+			m.setAccessible(true);
+			return m.invoke(mod, module, key, fallback);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+		return fallback;
+	}
+	
+	protected Object getConfigOrDefault_(String module, String key, Object fallback)
+	{
+		Object o = getConfigData_(module, key);
+		return o == null ? fallback : o;
+	}
+	
+	protected Object getConfigData_(String module, String key)
+	{
+		Object o = config_data.get(module);
+		if (o == null)
+			return null;
+		else
+		{
+			JSONObject json = (JSONObject) o;
+			Object o2 = json.get(key);
+			if (o2 == null)
+				return null;
+			return ((ConfigEntry) o2).getValue();
+		}
+	}
+	
+	protected ConfigEntry getConfigEntry_(String module, String key)
+	{
+		Object o = config_data.get(module);
+		if (o == null)
+			return null;
+		else
+		{
+			JSONObject json = (JSONObject) o;
+			return (ConfigEntry) json.get(key);
+		}
+	}
+	
+	public static void setConfig(String key, String value)
+	{
+		setConfig(Utils.getCaller("DataManager"), key, value, null);
+	}
+	
+	public static void setConfig(String key, String value, String[] complete_options)
+	{
+		setConfig(Utils.getCaller("DataManager"), key, value, complete_options);
+	}
+	
+	public static void setConfig(String module, String key, String value, String[] complete_options)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("setConfig_", String.class, String.class, String.class,
+					String[].class);
+			m.setAccessible(true);
+			m.invoke(mod, module, key, value, complete_options);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected boolean setConfig_(String module, String key, String value)
+	{
+		ConfigEntry entry = getConfigEntry_(module, key);
+		if (entry == null)
+			entry = new ConfigEntry(value, null);
+		if (entry.attemptSet(value))
+		{
+			Object o = config_data.get(module);
+			JSONObject json;
+			if (o == null)
+				json = new JSONObject();
+			else
+				json = (JSONObject) o;
+			json.put(key, entry);
+			config_data.put(module, json);
+			updateIndex();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void setConfig_(String module, String key, String value, String[] complete_options)
+	{
+		ConfigEntry entry = new ConfigEntry(value, complete_options);
+		Object o = config_data.get(module);
+		JSONObject json;
+		if (o == null)
+			json = new JSONObject();
+		else
+			json = (JSONObject) o;
+		json.put(key, entry);
+		config_data.put(module, json);
+		updateIndex();
+	}
+	
+	public static boolean removeConfig(String key)
+	{
+		return removeConfig(Utils.getCaller("DataManager"), key);
+	}
+	
+	public static boolean removeConfig(String module, String key)
+	{
+		try
+		{
+			Module mod = ModuleLoader.getModule("DataManager");
+			Method m = mod.getClass().getDeclaredMethod("removeConfig_", String.class, String.class);
+			m.setAccessible(true);
+			return (boolean) m.invoke(mod, module, key);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e)
+		{}
+		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected boolean removeConfig_(String module, String key)
+	{
+		if (key == null)
+			return removeAllConfig_(module);
+		Object o = config_data.get(module);
+		JSONObject json;
+		if (o == null)
+			return false;
+		else
+			json = (JSONObject) o;
+		json.remove(key);
+		if (json.size() == 0)
+			config_data.remove(module);
+		else
+			config_data.put(module, json);
+		updateIndex();
+		return true;
+	}
+	
+	protected boolean removeAllConfig_(String module)
+	{
+		if (config_data.remove(module) == null)
+			return false;
+		updateIndex();
+		return true;
+	}
+}
+
+class ConfigEntry
+{
+	private String value;
+	private String[] complete_options;
+	
+	public ConfigEntry(String value, String[] complete_options)
+	{
+		this.value = value;
+		this.complete_options = complete_options;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ConfigEntry(JSONObject json)
+	{
+		this(json.get("value").toString(),
+				(String[]) ((JSONArray) json.get("complete_options")).toArray(new String[] {}));
+	}
+	
+	protected boolean attemptSet(String value)
+	{
+		if (complete_options == null || complete_options.length == 0)
+		{
+			this.value = value;
+			return true;
+		}
+		else
+		{
+			for (String s : complete_options)
+			{
+				if (s.equals(value))
+				{
+					this.value = value;
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
+	protected String[] getCompleteOptions()
+	{
+		return complete_options;
+	}
+	
+	protected String getValue()
+	{
+		return value;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "{\"value\":\"" + value + "\",\"complete_options\":"
+				+ (complete_options == null || complete_options.length == 0 ? "[]"
+						: "[\"" + String.join("\",\"", complete_options + "\"]"))
+				+ "}";
 	}
 }
