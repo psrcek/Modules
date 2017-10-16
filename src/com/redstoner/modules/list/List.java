@@ -13,11 +13,12 @@ import com.redstoner.annotations.Version;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.datamanager.DataManager;
 
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class List implements Module
 {
 	private HashMap<String, Integer> onConsole;
@@ -25,7 +26,7 @@ public class List implements Module
 	@Override
 	public void postEnable()
 	{
-		onConsole = new HashMap<String, Integer>();
+		onConsole = new HashMap<>();
 	}
 	
 	@Command(hook = "console_join")
@@ -67,13 +68,13 @@ public class List implements Module
 		int onlinePlayers = Bukkit.getOnlinePlayers().size();
 		getLogger().message(sender, "", "&7There are &e" + onlinePlayers + "&7 out of maximum &e"
 				+ Bukkit.getMaxPlayers() + "&7 players online.");
-				
+		
 		rank = rank.toLowerCase();
 		boolean all = rank.equals("all");
 		
 		if (onlinePlayers == 0 && !rank.contains("console") && !all)
 			return true;
-			
+		
 		rank = rank.replace("staff", "mit mod admin lead");
 		
 		boolean shownAnything = false;
@@ -122,11 +123,10 @@ public class List implements Module
 		}
 		if (!shownAnything)
 		{
-			getLogger().message(sender,
-					new String[] {
-							"Looks like I couldn't figure out what you meant. Try again with different parameters maybe?",
-							"Possible parameters are: &eAll&7, &eStaff&7, &eVisitor&7, &eMember&7, &eBuilder&7, &eTrusted&7, &eMit&7, &eMod&7, &eAdmin&7 and &eLead",
-							"You can also combine any of the parameters, like this: &eMember, Staff"});
+			getLogger().message(sender, new String[] {
+					"Looks like I couldn't figure out what you meant. Try again with different parameters maybe?",
+					"Possible parameters are: &eAll&7, &eStaff&7, &eVisitor&7, &eMember&7, &eBuilder&7, &eTrusted&7, &eMit&7, &eMod&7, &eAdmin&7 and &eLead",
+					"You can also combine any of the parameters, like this: &eMember, Staff"});
 		}
 		return true;
 	}
@@ -170,11 +170,25 @@ public class List implements Module
 			{
 				if (player == null || player.canSee(p))
 				{
-					sb.append(Utils.getName(p));
+					sb.append(Utils.getName(p) + afk(p));
 					sb.append(", ");
 				}
 			}
 		}
 		return sb.toString().replaceAll(", $", "");
+	}
+	
+	public String afk(Player player)
+	{
+		return DataManager.getState(player, "afk")
+				? (String) DataManager.getConfigOrDefault("afk", "indicator", "&7[AFK]")
+				: "";
+	}
+	
+	public String vanished(Player player)
+	{
+		return DataManager.getState(player, "vanished")
+				? (String) DataManager.getConfigOrDefault("vanish", "indivator", "&7[V]")
+				: "";
 	}
 }
