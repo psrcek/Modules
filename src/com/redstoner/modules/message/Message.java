@@ -17,13 +17,11 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.socialspy.Socialspy;
 
-import net.nemez.chatapi.ChatAPI;
-
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Message implements Module
 {
-	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<CommandSender, CommandSender>();
+	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<>();
 	
 	@Command(hook = "message", async = AsyncType.ALWAYS)
 	public boolean message(CommandSender sender, String target, String message)
@@ -40,7 +38,6 @@ public class Message implements Module
 		}
 		else
 		{
-			message = ChatAPI.colorify(sender, message);
 			if (ModuleLoader.getModule("Socialspy") != null)
 				Socialspy.spyBroadcast(sender, p, message, "/m", new BroadcastFilter()
 				{
@@ -50,7 +47,7 @@ public class Message implements Module
 						return !(recipient.equals(sender) || recipient.equals(p));
 					}
 				});
-				
+			
 			net.nemez.chatapi.click.Message m = new net.nemez.chatapi.click.Message(sender, null);
 			m.appendText("&6[&cme &6-> " + Utils.getName(p) + "&6] " + "§f" + message);
 			m.send();
@@ -76,7 +73,6 @@ public class Message implements Module
 		}
 		else
 		{
-			message = ChatAPI.colorify(sender, message);
 			if (ModuleLoader.getModule("Socialspy") != null)
 				Socialspy.spyBroadcast(sender, target, message, "/r", new BroadcastFilter()
 				{
@@ -86,7 +82,7 @@ public class Message implements Module
 						return !(recipient.equals(sender) || recipient.equals(target));
 					}
 				});
-				
+			
 			net.nemez.chatapi.click.Message m = new net.nemez.chatapi.click.Message(sender, null);
 			m.appendText("&6[&cme &6-> " + Utils.getName(target) + "&6] " + "§f" + message);
 			m.send();
