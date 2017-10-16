@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -12,9 +13,11 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.EventExecutor;
 
 import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.BroadcastFilter;
@@ -25,7 +28,8 @@ import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@AutoRegisterListener
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class AFK implements Module, Listener
 {
 	private CustomListener listener = new CustomListener();
@@ -125,6 +129,12 @@ public class AFK implements Module, Listener
 		else
 			PlayerCommandPreprocessEvent.getHandlerList().unregister(listener);
 		return true;
+	}
+	
+	@EventHandler
+	public void onLeave(PlayerQuitEvent event)
+	{
+		DataManager.setState(event.getPlayer(), "afk", false);
 	}
 }
 
