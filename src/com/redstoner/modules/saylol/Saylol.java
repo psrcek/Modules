@@ -18,11 +18,12 @@ import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+import net.nemez.chatapi.ChatAPI;
 import net.nemez.chatapi.click.ClickCallback;
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Saylol implements Module
 {
 	private long lastLol = 0;
@@ -149,7 +150,7 @@ public class Saylol implements Module
 			name = ((Player) sender).getDisplayName();
 		else
 			name = "&9" + sender.getName();
-		Utils.broadcast(LOL_PREFIX, name + "&8: &e" + lols.get(id), new BroadcastFilter()
+		Utils.broadcast(LOL_PREFIX, ChatAPI.colorify(null, name + "&8: &e" + lols.get(id)), new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
@@ -183,7 +184,7 @@ public class Saylol implements Module
 			name = "&9" + sender.getName();
 		Random random = new Random();
 		int id = random.nextInt(lols.size());
-		Utils.broadcast(LOL_PREFIX, name + "&8: &e" + lols.get(id), new BroadcastFilter()
+		Utils.broadcast(LOL_PREFIX, ChatAPI.colorify(null, name + "&8: &e" + lols.get(id)), new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
