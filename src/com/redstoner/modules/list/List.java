@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class List implements Module
 {
 	private HashMap<String, Integer> onConsole;
@@ -170,7 +170,7 @@ public class List implements Module
 			{
 				if (player == null || player.canSee(p))
 				{
-					sb.append(Utils.getName(p) + afk(p));
+					sb.append(Utils.getName(p) + afk(p) + vanish(p));
 					sb.append(", ");
 				}
 			}
@@ -185,10 +185,10 @@ public class List implements Module
 				: "";
 	}
 	
-	public String vanished(Player player)
+	public String vanish(Player player)
 	{
 		return DataManager.getState(player, "vanished")
-				? (String) DataManager.getConfigOrDefault("vanish", "indivator", "&7[V]")
+				? (String) DataManager.getConfigOrDefault("vanish", "indicator", "&7[V]")
 				: "";
 	}
 }
