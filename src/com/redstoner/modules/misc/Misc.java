@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,7 +32,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Misc implements Module, Listener
 {
 	private final String[] sudoBlacklist = new String[] {"(.*:)?e?sudo", "(.*:)?script.*", "(.*:)?stop",
@@ -62,7 +63,6 @@ public class Misc implements Module, Listener
 	}
 	
 	// Disables spectator teleportation
-	// Fixes MV end portal crashing
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onTeleport(PlayerTeleportEvent event)
 	{
@@ -125,6 +125,47 @@ public class Misc implements Module, Listener
 	{
 		sender.sendMessage(ChatAPI.colorify(null, text));
 		return true;
+	}
+	
+	@Command(hook = "ping")
+	public boolean ping(CommandSender sender)
+	{
+		if (sender instanceof Player)
+		{
+			int ping = getPing((Player) sender);
+			getLogger().message(sender, "Your ping is " + ping + "ms.");
+		}
+		else
+		{
+			sender.sendMessage("Pong!");
+		}
+		return true;
+	}
+	
+	@Command(hook = "ping2")
+	public boolean ping(CommandSender sender, String password)
+	{
+		if (password.equals("pong"))
+			if (sender instanceof Player)
+			{
+				int ping = getPing((Player) sender);
+				getLogger().message(sender, new String[] {"Your ping is " + ping + "ms.", ping < 20
+						? "&aThat's gr8 m8 r8 8/8"
+						: (ping < 50 ? "F&eair enough you cunt!"
+								: (ping < 100 ? "&eShite, but not shite enough."
+										: "&cLooks like the server is about two months ahead of you. GET A NEW FRIGGIN' ISP ALREADY"))});
+			}
+			else
+				getLogger().message(sender, true,
+						"M8 you shitty cunt are not supposed to run this shit it's for players only!!!");
+		else
+			getLogger().message(sender, true, "&4WRONG PASSWORD, 4/3 ATTEMPTS FAILED! BAN COMMENCING!");
+		return true;
+	}
+	
+	public int getPing(Player player)
+	{
+		return ((CraftPlayer) player).getHandle().ping;
 	}
 	
 	@Command(hook = "me")
@@ -268,6 +309,16 @@ public class Misc implements Module, Listener
 				"    [string:text...] {\n" + 
 				"        help Echoes back to you.;\n" + 
 				"        run echo text;\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"command ping {\n" + 
+				"    [empty] {\n" + 
+				"        help Pongs :D;\n" + 
+				"        run ping;\n" + 
+				"    }\n" + 
+				"    [string:password] {\n" + 
+				"        help Pongs :D;\n" + 
+				"        run ping2 password;\n" + 
 				"    }\n" + 
 				"}\n" + 
 				"command me {\n" + 
