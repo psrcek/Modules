@@ -23,12 +23,14 @@ import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 
+import net.nemez.chatapi.ChatAPI;
+
 /** AdminChat module. Allows staff to chat to other staff using /ac \<message\> as well as a one char prefix or a toggle.
  * 
  * @author Pepich */
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Adminchat implements Module, Listener
 {
 	private static final char defaultKey = ',';
@@ -45,7 +47,7 @@ public class Adminchat implements Module, Listener
 			keys = new JSONObject();
 			saveKeys();
 		}
-		actoggled = new ArrayList<UUID>();
+		actoggled = new ArrayList<>();
 		return true;
 	}
 	
@@ -106,7 +108,7 @@ public class Adminchat implements Module, Listener
 			name = ((Player) sender).getDisplayName();
 		else
 			name = sender.getName();
-		Utils.broadcast("§8[§cAC§8] §9" + name + "§8: §b", message, new BroadcastFilter()
+		Utils.broadcast("§8[§cAC§8] §9" + name + "§8: §b", ChatAPI.colorify(sender, message), new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
@@ -120,7 +122,7 @@ public class Adminchat implements Module, Listener
 	@Command(hook = "acn_msg")
 	public boolean acnSay(CommandSender sender, String name, String message)
 	{
-		Utils.broadcast("§8[§cAC§8] §9" + name + "§8: §b", message, new BroadcastFilter()
+		Utils.broadcast("§8[§cAC§8] §9" + name + "§8: §b", ChatAPI.colorify(sender, message), new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
@@ -131,7 +133,7 @@ public class Adminchat implements Module, Listener
 		return true;
 	}
 	
-	/** Let's a Player toggle their auto-cg status to allow for automatically sending chat messages to their chatgroup.
+	/** Let's a Player toggle their ac-toglge status to allow for automatically sending chat messages to adminchat.
 	 * 
 	 * @param sender the issuer of the command.
 	 * @param _void ignored.
@@ -152,7 +154,7 @@ public class Adminchat implements Module, Listener
 		return true;
 	}
 	
-	/** Let's a Player toggle their auto-cg status to allow for automatically sending chat messages to their chatgroup.
+	/** Let's a Player toggle their ac-toglge status to allow for automatically sending chat messages to adminchat.
 	 * 
 	 * @param sender the issuer of the command.
 	 * @return true. */
@@ -169,7 +171,7 @@ public class Adminchat implements Module, Listener
 		return true;
 	}
 	
-	/** Let's a Player toggle their auto-cg status to allow for automatically sending chat messages to their chatgroup.
+	/** Let's a Player toggle their ac-toglge status to allow for automatically sending chat messages to adminchat.
 	 * 
 	 * @param sender the issuer of the command.
 	 * @return true. */
@@ -188,7 +190,7 @@ public class Adminchat implements Module, Listener
 		return true;
 	}
 	
-	/** Deals with chat events to allow for cgkeys and cgtoggle.
+	/** Deals with chat events to allow for ackeys and actoggle.
 	 * 
 	 * @param event the chat event containing the player and the message. */
 	@EventHandler
@@ -235,7 +237,7 @@ public class Adminchat implements Module, Listener
 		return true;
 	}
 	
-	/** This method will find the ChatgGroup key of any player.
+	/** This method will find the AdminChat key of any player.
 	 * 
 	 * @param player the player to get the key from.
 	 * @return the key. */
