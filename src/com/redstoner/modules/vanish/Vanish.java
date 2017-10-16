@@ -24,11 +24,21 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Vanish implements Module, Listener
 {
 	private ArrayList<UUID> vanished = new ArrayList<>();
 	private HashMap<UUID, ArrayList<UUID>> vanishOthers = new HashMap<>();
+	
+	@Override
+	public void migrate(Version old)
+	{
+		Module.super.migrate(old);
+		if ((old.major() == 4) && (old.minor() == 0) && (old.revision() <= 1))
+		{
+			DataManager.setConfig("indicator", "&7[V]");
+		}
+	}
 	
 	@Command(hook = "vanish")
 	public boolean vanish(CommandSender sender)
