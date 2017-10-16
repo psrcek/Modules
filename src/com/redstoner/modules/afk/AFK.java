@@ -76,7 +76,7 @@ public class AFK implements Module, Listener
 			DataManager.setData(sender, "afk_reason", reason);
 			DataManager.setState(sender, "afk", true);
 			if (!silent)
-				Utils.broadcast("*§7", Utils.getName(sender) + "§7 is now AFK", null);
+				Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is now AFK", null);
 		}
 		return true;
 	}
@@ -84,7 +84,7 @@ public class AFK implements Module, Listener
 	public void unafk(CommandSender sender)
 	{
 		DataManager.setState(sender, "afk", false);
-		Utils.broadcast("*§7", Utils.getName(sender) + "§7 is no longer AFK", null);
+		Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is no longer AFK", null);
 	}
 	
 	public boolean isafk(CommandSender sender)
