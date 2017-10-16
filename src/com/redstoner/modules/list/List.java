@@ -18,7 +18,7 @@ import com.redstoner.modules.datamanager.DataManager;
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class List implements Module
 {
 	private HashMap<String, Integer> onConsole;
@@ -110,7 +110,7 @@ public class List implements Module
 					}
 				}
 				String players = sb.toString().replaceAll(", $", "");
-				shownAnything |= show(sender, "&9Console", players);
+				shownAnything |= show(sender, "&9Console" + afk(Bukkit.getConsoleSender()), players);
 			}
 			else
 			{
@@ -178,9 +178,9 @@ public class List implements Module
 		return sb.toString().replaceAll(", $", "");
 	}
 	
-	public String afk(Player player)
+	public String afk(CommandSender sender)
 	{
-		return DataManager.getState(player, "afk")
+		return DataManager.getState(sender, "afk")
 				? (String) DataManager.getConfigOrDefault("afk", "indicator", "&7[AFK]")
 				: "";
 	}
