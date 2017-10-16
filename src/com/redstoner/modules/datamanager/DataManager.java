@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 0, compatible = 4)
+@Version(major = 4, minor = 1, revision = 2, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -45,6 +45,7 @@ public final class DataManager implements CoreModule, Listener
 	protected ArrayList<String> module_index;
 	int old_hash = 0;
 	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<>();
+	private DataManager previous_instance = null;
 	protected ArrayList<String> subcommands;
 	
 	@Override
@@ -61,7 +62,13 @@ public final class DataManager implements CoreModule, Listener
 		subcommands.add("get");
 		subcommands.add("set");
 		subcommands.add("remove");
-		states.put(getID(Bukkit.getConsoleSender()), new HashMap<String, Boolean>());
+		if (previous_instance == null)
+			states.put(getID(Bukkit.getConsoleSender()), new HashMap<String, Boolean>());
+		else
+		{
+			this.states = previous_instance.states;
+			previous_instance = null;
+		}
 		config_data = JsonManager.getObject(new File(dataFolder, "configs.json"));
 		if (config_data == null)
 			config_data = new JSONObject();
@@ -73,6 +80,7 @@ public final class DataManager implements CoreModule, Listener
 	@Override
 	public void onDisable()
 	{
+		previous_instance = this;
 		for (Player p : Bukkit.getOnlinePlayers())
 		{
 			saveAndUnload(p);
@@ -652,8 +660,8 @@ public final class DataManager implements CoreModule, Listener
 	@EventHandler
 	public void onTabComplete(TabCompleteEvent event)
 	{
-		if (event.getBuffer().toLowerCase().matches("^settings? .*")
-				|| event.getBuffer().toLowerCase().matches("^configs? .*"))
+		if (event.getBuffer().toLowerCase().matches("^/?settings? .*")
+				|| event.getBuffer().toLowerCase().matches("^/?configs? .*"))
 		{
 			boolean argument_complete = event.getBuffer().endsWith(" ");
 			String[] arguments = event.getBuffer().split(" ");
@@ -812,6 +820,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	protected Object getConfigData_(String module, String key)
 	{
+		module = module.toLowerCase();
 		Object o = config_data.get(module);
 		if (o == null)
 			return null;
@@ -827,6 +836,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	protected ConfigEntry getConfigEntry_(String module, String key)
 	{
+		module = module.toLowerCase();
 		Object o = config_data.get(module);
 		if (o == null)
 			return null;
@@ -865,6 +875,7 @@ public final class DataManager implements CoreModule, Listener
 	@SuppressWarnings("unchecked")
 	protected boolean setConfig_(String module, String key, String value)
 	{
+		module = module.toLowerCase();
 		ConfigEntry entry = getConfigEntry_(module, key);
 		if (entry == null)
 			entry = new ConfigEntry(value, null);
@@ -888,6 +899,7 @@ public final class DataManager implements CoreModule, Listener
 	@SuppressWarnings("unchecked")
 	protected void setConfig_(String module, String key, String value, String[] complete_options)
 	{
+		module = module.toLowerCase();
 		ConfigEntry entry = new ConfigEntry(value, complete_options);
 		Object o = config_data.get(module);
 		JSONObject json;
@@ -923,6 +935,7 @@ public final class DataManager implements CoreModule, Listener
 	@SuppressWarnings("unchecked")
 	protected boolean removeConfig_(String module, String key)
 	{
+		module = module.toLowerCase();
 		if (key == null)
 			return removeAllConfig_(module);
 		Object o = config_data.get(module);
@@ -942,6 +955,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	protected boolean removeAllConfig_(String module)
 	{
+		module = module.toLowerCase();
 		if (config_data.remove(module) == null)
 			return false;
 		updateIndex();
@@ -1003,7 +1017,7 @@ class ConfigEntry
 	{
 		return "{\"value\":\"" + value + "\",\"complete_options\":"
 				+ (complete_options == null || complete_options.length == 0 ? "[]"
-						: "[\"" + String.join("\",\"", complete_options + "\"]"))
+						: "[\"" + String.join("\",\"", complete_options) + "\"]")
 				+ "}";
 	}
 }
