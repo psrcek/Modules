@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,12 +26,14 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.socialspy.Socialspy;
 
+import net.nemez.chatapi.ChatAPI;
+
 /** The ChatGroups module. Allows people to have private sub-chats that can be accessed via a single char prefix or a toggle.
  * 
  * @author Pepich */
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
@@ -56,7 +57,7 @@ public class Chatgroups implements Module, Listener
 			keys = new JSONObject();
 			saveKeys();
 		}
-		cgtoggled = new ArrayList<UUID>();
+		cgtoggled = new ArrayList<>();
 		return true;
 	}
 	
@@ -122,9 +123,9 @@ public class Chatgroups implements Module, Listener
 			getLogger().message(sender, true, "You are not in a chatgroup!");
 		else
 		{
-			ArrayList<String> message = new ArrayList<String>();
+			ArrayList<String> message = new ArrayList<>();
 			message.add("§7Your current chatgroup is: §6" + group);
-			ArrayList<String> players = new ArrayList<String>();
+			ArrayList<String> players = new ArrayList<>();
 			Iterator<String> iter = groups.keySet().iterator();
 			while (iter.hasNext())
 			{
@@ -356,6 +357,7 @@ public class Chatgroups implements Module, Listener
 	{
 		String name = Utils.getName(sender);
 		String group = getGroup(sender);
+		message = ChatAPI.colorify(null, message);
 		Utils.broadcast("§8[§bCG§8] §9", name + "§8: §6" + message, new BroadcastFilter()
 		{
 			@Override
@@ -391,7 +393,7 @@ public class Chatgroups implements Module, Listener
 	 * @param message the message to be sent. */
 	private void sendToGroup(String group, String message)
 	{
-		message = ChatColor.translateAlternateColorCodes('&', message);
+		message = ChatAPI.colorify(null, message);
 		Utils.broadcast(null, message, new BroadcastFilter()
 		{
 			@Override
