@@ -15,6 +15,6 @@ command afk {
 command update_afk_listeners {
     [empty] {
         run update_afk_listeners;
-        permission utils.afk.admin;
+        perm utils.afk.admin;
     }
 }
