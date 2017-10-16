@@ -7,6 +7,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -29,7 +30,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class AFK implements Module, Listener
 {
 	private CustomListener listener = new CustomListener();
@@ -51,6 +52,13 @@ public class AFK implements Module, Listener
 	{
 		Module.super.postEnable();
 		update_afk_listeners(Bukkit.getConsoleSender());
+	}
+	
+	@Override
+	public void onDisable()
+	{
+		Module.super.onDisable();
+		HandlerList.unregisterAll(listener);
 	}
 	
 	@Command(hook = "afk")

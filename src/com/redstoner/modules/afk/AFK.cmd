@@ -6,7 +6,7 @@ command afk {
         run afk;
         perm utils.afk;
     }
-    [string:reason] {
+    [string:reason...] {
         run afk2 reason;
         perm utils.afk;
     }
