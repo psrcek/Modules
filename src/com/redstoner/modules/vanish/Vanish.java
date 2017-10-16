@@ -20,14 +20,15 @@ import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Vanish implements Module, Listener
 {
-	private ArrayList<UUID> vanished = new ArrayList<UUID>();
-	private HashMap<UUID, ArrayList<UUID>> vanishOthers = new HashMap<UUID, ArrayList<UUID>>();
+	private ArrayList<UUID> vanished = new ArrayList<>();
+	private HashMap<UUID, ArrayList<UUID>> vanishOthers = new HashMap<>();
 	
 	@Command(hook = "vanish")
 	public boolean vanish(CommandSender sender)
@@ -121,7 +122,7 @@ public class Vanish implements Module, Listener
 		UUID uuid = ((Player) sender).getUniqueId();
 		ArrayList<UUID> toAddTo = vanishOthers.get(uuid);
 		if (toAddTo == null)
-			toAddTo = new ArrayList<UUID>();
+			toAddTo = new ArrayList<>();
 		toAddTo.add(uid);
 		vanishOthers.put(uuid, toAddTo);
 		getLogger().message(sender, "Successfully vanished &e" + player.getDisplayName());
@@ -133,6 +134,7 @@ public class Vanish implements Module, Listener
 	public void onPlayerJoin(PlayerJoinEvent event)
 	{
 		Player player = event.getPlayer();
+		DataManager.setState(player, "vanished", vanished.contains(player.getUniqueId()));
 		if (vanished.contains(player.getUniqueId()))
 		{
 			for (Player p : Bukkit.getOnlinePlayers())
@@ -203,12 +205,14 @@ public class Vanish implements Module, Listener
 			if (!p.hasPermission("utils.vanish"))
 				p.hidePlayer(player);
 		}
+		DataManager.setState(player, "vanished", true);
 	}
 	
 	private void unvanishPlayer(Player player)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
 			p.showPlayer(player);
+		DataManager.setState(player, "vanished", false);
 	}
 	
 	// @noformat
