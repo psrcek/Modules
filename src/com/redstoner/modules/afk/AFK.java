@@ -29,7 +29,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class AFK implements Module, Listener
 {
 	private CustomListener listener = new CustomListener();
@@ -156,7 +156,7 @@ class CustomListener implements Listener, EventExecutor
 	public void unafk(CommandSender sender)
 	{
 		DataManager.setState(sender, "afk", false);
-		Utils.broadcast("*§7", Utils.getName(sender) + "§7 is no longer AFK", null);
+		Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is no longer AFK", null);
 	}
 	
 	public boolean isafk(CommandSender sender)
