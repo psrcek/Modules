@@ -37,7 +37,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Eastereggs implements Module, Listener
 {
 	final File prefixFile = new File(Main.plugin.getDataFolder(), "eastereggs/prefix.json"),
@@ -165,11 +165,11 @@ public class Eastereggs implements Module, Listener
 				if ((rawMaterialName = itm.get("item")) == null)
 					if ((rawMaterialName = prefx.get("item")) == null)
 						rawMaterialName = "minecraft:stick";
-						
+					
 		Material material = Material.valueOf(((String) rawMaterialName).toUpperCase().replaceFirst(".+?:", ""));
 		if (material == null)
 			material = Material.STICK;
-			
+		
 		ItemStack resultingItem = new ItemStack(material);
 		ItemMeta meta = resultingItem.getItemMeta();
 		if (meta == null)
@@ -248,7 +248,7 @@ public class Eastereggs implements Module, Listener
 					meta.addEnchant(entry.getKey() == null ? getRandomValue(Enchantment.values()) : entry.getKey(),
 							override ? overrideLvl : (lvl + totalMod), true);
 				}
-				
+			
 			resultingItem.setItemMeta(meta);
 		}
 		
@@ -268,7 +268,7 @@ public class Eastereggs implements Module, Listener
 	public HashMap<Enchantment, Integer> parseEnchants(JSONObject prefx, JSONObject itm, JSONObject mod,
 			JSONObject sufx)
 	{
-		HashMap<Enchantment, Integer> result = new HashMap<Enchantment, Integer>();
+		HashMap<Enchantment, Integer> result = new HashMap<>();
 		Object raw;
 		if ((raw = sufx.get("ench")) != null)
 		{
@@ -330,6 +330,13 @@ public class Eastereggs implements Module, Listener
 		Message m = new Message(sender, null);
 		m.appendText("§8There is no /deadbush");
 		m.send();
+		return true;
+	}
+	
+	@Command(hook = "grief")
+	public boolean grief(CommandSender sender)
+	{
+		((Player) sender).kickPlayer("You have been banned: Attempted grief!");
 		return true;
 	}
 	

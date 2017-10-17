@@ -43,3 +43,10 @@ command deadbush {
         help Does stuff.;
     }
 }
+
+command /grief {
+    [empty] {
+        run grief;
+        help Does stuff.;
+    }
+}
