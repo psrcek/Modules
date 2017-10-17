@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 2, compatible = 4)
+@Version(major = 4, minor = 1, revision = 3, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -793,7 +793,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	public static Object getConfigOrDefault(String key, Object fallback)
 	{
-		return getOrDefault(Utils.getCaller("DataManager"), key, fallback);
+		return getConfigOrDefault(Utils.getCaller("DataManager"), key, fallback);
 	}
 	
 	public static Object getConfigOrDefault(String module, String key, Object fallback)
