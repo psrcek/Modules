@@ -19,12 +19,13 @@ import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.misc.CommandHolderType;
+import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Vanish implements Module, Listener
 {
 	private ArrayList<UUID> vanished = new ArrayList<>();
@@ -216,6 +217,7 @@ public class Vanish implements Module, Listener
 				p.hidePlayer(player);
 		}
 		DataManager.setState(player, "vanished", true);
+		DataManager.setData(Utils.getID(player), "Seen", "lastquit", System.currentTimeMillis());
 	}
 	
 	private void unvanishPlayer(Player player)
@@ -223,6 +225,7 @@ public class Vanish implements Module, Listener
 		for (Player p : Bukkit.getOnlinePlayers())
 			p.showPlayer(player);
 		DataManager.setState(player, "vanished", false);
+		DataManager.setData(Utils.getID(player), "Seen", "lastjoined", System.currentTimeMillis());
 	}
 	
 	// @noformat
