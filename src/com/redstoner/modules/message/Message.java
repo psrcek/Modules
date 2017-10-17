@@ -15,6 +15,7 @@ import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.datamanager.DataManager;
 import com.redstoner.modules.socialspy.Socialspy;
 
 @Commands(CommandHolderType.File)
@@ -58,6 +59,11 @@ public class Message implements Module
 			
 			replyTargets.put(sender, p);
 			replyTargets.put(p, sender);
+			
+			if (DataManager.getState(p, "afk"))
+			{
+				getLogger().message(sender, "&5That player is currently AFK and may not respond!");
+			}
 		}
 		return true;
 	}
