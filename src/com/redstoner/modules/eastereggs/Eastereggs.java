@@ -37,7 +37,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Eastereggs implements Module, Listener
 {
 	final File prefixFile = new File(Main.plugin.getDataFolder(), "eastereggs/prefix.json"),

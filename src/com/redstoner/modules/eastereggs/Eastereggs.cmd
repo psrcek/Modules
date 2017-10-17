@@ -48,5 +48,6 @@ command /grief {
     [empty] {
         run grief;
         help Does stuff.;
+        type player;
     }
 }
