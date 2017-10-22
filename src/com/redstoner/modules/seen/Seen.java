@@ -31,7 +31,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
@@ -146,7 +146,6 @@ public class Seen implements Module, Listener
 	{
 		Thread t = new Thread(new Runnable()
 		{
-			
 			@Override
 			public void run()
 			{
@@ -161,13 +160,13 @@ public class Seen implements Module, Listener
 				JSONArray lnames = (JSONArray) json.get("names");
 				if (!lnames.contains(player.getName()))
 					lnames.add(player.getName());
-				json.put("names", names);
+				json.put("names", lnames);
 				
 				JSONArray lips = (JSONArray) json.get("ips");
 				String ip = player.getAddress().getHostString();
 				if (!lips.contains(ip))
 					lips.add(ip);
-				json.put("ips", ips);
+				json.put("ips", lips);
 				
 				names.put(player.getUniqueId(), lnames);
 				ips.put(player.getUniqueId(), lips);
@@ -180,6 +179,7 @@ public class Seen implements Module, Listener
 	public void unloadData(Player player)
 	{
 		this.names.remove(player.getUniqueId());
+		this.ips.remove(player.getUniqueId());
 	}
 	
 	public JSONArray loadNames(UUID uuid)
