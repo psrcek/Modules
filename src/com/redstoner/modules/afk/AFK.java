@@ -30,10 +30,11 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class AFK implements Module, Listener
 {
 	private CustomListener listener = new CustomListener();
+	boolean move = true, look = false;
 	
 	@Override
 	public void firstLoad()
@@ -42,9 +43,21 @@ public class AFK implements Module, Listener
 		DataManager.setConfig("indicator", "&7[AFK]");
 		String[] choices = new String[] {"listen", "ignore"};
 		DataManager.setConfig("move", "listen", choices);
+		DataManager.setConfig("look", "listen", choices);
 		DataManager.setConfig("chat", "listen", choices);
 		DataManager.setConfig("interact", "listen", choices);
 		DataManager.setConfig("command", "ignore", choices);
+	}
+	
+	@Override
+	public void migrate(Version old)
+	{
+		Module.super.migrate(old);
+		if ((old.major() == 4) && (old.minor() == 0) && (old.revision()) == 3)
+		{
+			String[] choices = new String[] {"listen", "ignore"};
+			DataManager.setConfig("look", "listen", choices);
+		}
 	}
 	
 	@Override
@@ -116,7 +129,9 @@ public class AFK implements Module, Listener
 				return recipient.hasPermission("utils.afk.admin");
 			}
 		});
-		if (DataManager.getConfigOrDefault("move", "listen").equals("listen"))
+		move = DataManager.getConfigOrDefault("move", "listen").equals("listen");
+		look = DataManager.getConfigOrDefault("look", "ignore").equals("listen");
+		if (move || look)
 			Bukkit.getPluginManager().registerEvent(PlayerMoveEvent.class, listener, EventPriority.MONITOR, listener,
 					Main.plugin);
 		else
@@ -148,16 +163,36 @@ public class AFK implements Module, Listener
 
 class CustomListener implements Listener, EventExecutor
 {
+	private boolean move = true, look = false;
+	
 	@Override
 	public void execute(Listener listener, Event event) throws EventException
 	{
 		if (event instanceof PlayerEvent)
 		{
-			PlayerEvent pevent = (PlayerEvent) event;
-			Player player = pevent.getPlayer();
-			if (isafk(player))
-				if (!isVanished(player))
-					unafk(player);
+			if (event instanceof PlayerMoveEvent)
+			{
+				PlayerMoveEvent pevent = (PlayerMoveEvent) event;
+				double distance = pevent.getFrom().distance(pevent.getTo());
+				boolean moved = distance > 0;
+				boolean looked = (pevent.getFrom().getPitch() != pevent.getTo().getPitch())
+						|| (pevent.getFrom().getYaw() != pevent.getTo().getYaw());
+				if ((move && moved) || (look && looked))
+				{
+					Player player = pevent.getPlayer();
+					if (isafk(player))
+						if (!isVanished(player))
+							unafk(player);
+				}
+			}
+			else
+			{
+				PlayerEvent pevent = (PlayerEvent) event;
+				Player player = pevent.getPlayer();
+				if (isafk(player))
+					if (!isVanished(player))
+						unafk(player);
+			}
 		}
 	}
 	
@@ -175,5 +210,15 @@ class CustomListener implements Listener, EventExecutor
 	public boolean isVanished(Player player)
 	{
 		return DataManager.getState(player, "vanished");
+	}
+	
+	public void listenMove(boolean move)
+	{
+		this.move = move;
+	}
+	
+	public void listenLook(boolean look)
+	{
+		this.look = look;
 	}
 }
