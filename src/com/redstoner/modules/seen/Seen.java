@@ -31,7 +31,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
@@ -43,6 +43,12 @@ public class Seen implements Module, Listener
 		Module.super.postEnable();
 		for (Player player : Bukkit.getOnlinePlayers())
 			loadData(player);
+	}
+	
+	@Command(hook = "seen", async = AsyncType.ALWAYS)
+	public boolean seen(CommandSender sender, String player)
+	{
+		return seen(sender, player, false);
 	}
 	
 	@SuppressWarnings("deprecation")
