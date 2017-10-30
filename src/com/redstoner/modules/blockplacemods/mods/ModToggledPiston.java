@@ -1,15 +1,10 @@
 package com.redstoner.modules.blockplacemods.mods;
 
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockPlaceEvent;
 
-public class ModToggledPiston extends ModToggledAbstract
+public class ModToggledPiston extends ModToggledLogPlaceAbstract
 {
 	public ModToggledPiston()
 	{
@@ -22,28 +17,17 @@ public class ModToggledPiston extends ModToggledAbstract
 		return "If active, pistons face the block you place them against";
 	}
 	
-	@SuppressWarnings("deprecation")
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onBlockPlace(BlockPlaceEvent event)
-	{
-		Player player = event.getPlayer();
-		if (hasEnabled(player) && !player.isSneaking() && player.getGameMode() == GameMode.CREATIVE
-				&& isPiston(event.getBlock().getType()))
-		{
-			Block block = event.getBlock();
-			block.setData((byte) pistonDataForFace(block.getFace(event.getBlockAgainst())));
-		}
+	@Override
+	protected boolean isApplicableToPlacedBlock(Block block) {
+		Material type = block.getType();
+		return type == Material.PISTON_BASE || type == Material.PISTON_STICKY_BASE;
 	}
 	
-	private boolean isPiston(Material block)
-	{
-		return block == Material.PISTON_BASE || block == Material.PISTON_STICKY_BASE;
-	}
-	
-	private int pistonDataForFace(BlockFace face)
-	{
-		switch (face)
+	@Override
+	protected int getBlockDataForFacing(BlockFace direction) {
+		switch (direction)
 		{
+			default:
 			case DOWN:
 				return 0;
 			case UP:
@@ -56,8 +40,7 @@ public class ModToggledPiston extends ModToggledAbstract
 				return 4;
 			case EAST:
 				return 5;
-			default:
-				return 0;
 		}
 	}
+	
 }
