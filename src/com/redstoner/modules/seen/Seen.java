@@ -31,7 +31,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
