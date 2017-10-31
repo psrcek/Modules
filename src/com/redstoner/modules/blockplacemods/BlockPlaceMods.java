@@ -27,7 +27,7 @@ import com.redstoner.utils.CommandMap;
 
 @Commands(CommandHolderType.None)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 1, revision = 1, compatible = 4)
 public final class BlockPlaceMods implements Module, Listener
 {
 	@Override
@@ -89,7 +89,7 @@ public final class BlockPlaceMods implements Module, Listener
 		String pluginName = Main.plugin.getName().toLowerCase();
 		// @noformat
 		return new String[]{"mod", 		pluginName + ":mod",
-				"set", 		pluginName + ":mod",
+				"set", 		pluginName + ":set",
 				"toggle",	pluginName + ":toggle"
 		};
 		// @format
