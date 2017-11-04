@@ -32,7 +32,7 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Chatalias implements Module, Listener
 {
 	private final String[] commands = new String[] {"e?r", "e?m .+?", "e?t", "e?w", "e?msg .+?", "e?message .+?",
@@ -121,7 +121,7 @@ public class Chatalias implements Module, Listener
 				return;
 			}
 		}
-		event.setMessage(ChatAPI.colorify(null, event.getMessage()));
+		event.setMessage(ChatAPI.colorify(event.getPlayer(), event.getMessage()));
 		if (changed)
 			saveAliases(uuid);
 	}
@@ -248,7 +248,7 @@ public class Chatalias implements Module, Listener
 	@Command(hook = "listaliases")
 	public boolean listAliases(CommandSender sender)
 	{
-		ArrayList<String> message = new ArrayList<String>();
+		ArrayList<String> message = new ArrayList<>();
 		Player player = (Player) sender;
 		UUID uuid = player.getUniqueId();
 		JSONObject data = (JSONObject) aliases.get(uuid.toString());
