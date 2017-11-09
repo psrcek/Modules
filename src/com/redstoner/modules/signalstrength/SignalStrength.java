@@ -6,7 +6,9 @@ import com.redstoner.annotations.Version;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -27,6 +29,18 @@ import java.util.Set;
 @Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class SignalStrength implements Module
 {
+
+	private static final String namePrefix = ChatColor.GREEN.toString() + ChatColor.RESET + ChatColor.DARK_PURPLE + "Signal Strength: " + ChatColor.RED + ChatColor.BOLD;
+
+	private static String nameForSignalStrength(int strength)
+	{
+		return namePrefix + strength;
+	}
+
+	private static boolean isSignalStrengthNameOrEmpty(String name)
+	{
+		return name == null || name.isEmpty() || name.startsWith(namePrefix);
+	}
 
 	@Command(hook = "ss")
 	public boolean ss(CommandSender sender, int strength)
@@ -97,7 +111,16 @@ public class SignalStrength implements Module
 		for (Block containerBlock : containerBlocks)
 		{
 			// Below checks should evaluate to false, but let's be safe.
-			Inventory inv = getInventory(containerBlock);
+			BlockState blockState = containerBlock.getState();
+			if (!(blockState instanceof InventoryHolder)) continue;
+
+			if (blockState instanceof Nameable && isSignalStrengthNameOrEmpty(((Nameable) blockState).getCustomName()))
+			{
+				((Nameable) blockState).setCustomName(nameForSignalStrength(strength));
+				blockState.update();
+			}
+
+			Inventory inv = ((InventoryHolder) blockState).getInventory();
 			if (inv == null) continue;
 
 			inv.clear();
@@ -105,6 +128,7 @@ public class SignalStrength implements Module
 				inv.setItem(i, new ItemStack(itemType, stackSize));
 			if (remaining > 0)
 				inv.setItem(fullStackCount, new ItemStack(itemType, remaining));
+
 		}
 		getLogger().message(sender, "Comparators attached to this " + enumNameToHumanName(blockType.name())
 				+ " will now put out a signal strength of " + strength);
@@ -151,5 +175,6 @@ public class SignalStrength implements Module
 	{
 		return enumName.toLowerCase().replace('_', ' ');
 	}
+
 
 }
