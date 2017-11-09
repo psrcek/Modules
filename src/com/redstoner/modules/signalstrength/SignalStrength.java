@@ -1,8 +1,11 @@
 package com.redstoner.modules.signalstrength;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
+import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
+import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
+import com.redstoner.modules.Module;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -10,121 +13,143 @@ import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import com.nemez.cmdmgr.Command;
-import com.redstoner.annotations.Commands;
-import com.redstoner.annotations.Version;
-import com.redstoner.misc.CommandHolderType;
-import com.redstoner.modules.Module;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 
 @Commands(CommandHolderType.File)
 @Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class SignalStrength implements Module
 {
-	
+
 	@Command(hook = "ss")
 	public boolean ss(CommandSender sender, int strength)
 	{
-		return ssm(sender, strength, Material.REDSTONE_WIRE.toString());
+		return ssm(sender, strength, Material.REDSTONE.toString());
 	}
-	
+
 	@Command(hook = "ssm")
 	public boolean ssm(CommandSender sender, int strength, String material)
 	{
-		Material item_type = Material.getMaterial(material);
+		Material itemType = Material.matchMaterial(material);
+		if (itemType == null)
+		{
+			getLogger().message(sender, true, "The material " + material + " could not be recognized");
+			return true;
+		}
 		Player player = (Player) sender;
-		Block target_block = player.getTargetBlock(new HashSet<Material>(), 5);
-		if (target_block == null)
+
+		// Empty set in the first argument would make it always return the first block, because no block types are
+		// considered to be transparent. Only a value of null is treated as "air only".
+		Block targetBlock = player.getTargetBlock((Set<Material>) null, 5);
+		if (targetBlock == null)
 		{
 			getLogger().message(sender, true, "That command can only be used if a container is targeted!");
 			return true;
 		}
-		Inventory inventory = getInventory(target_block);
+		Inventory inventory = getInventory(targetBlock);
 		if (inventory == null)
 		{
 			getLogger().message(sender, true, "That command can only be used if a container is targeted!");
 			return true;
 		}
+
 		// --------Get the stack size and required amount of items to achieve the desired signal strength---------
-		int stack_size = item_type.getMaxStackSize();
-		int slot_count = inventory.getSize();
-		int item_count = required_item_count(strength, stack_size, slot_count);
-		if (item_count == -1)
+		int stackSize = itemType.getMaxStackSize();
+		int slotCount = inventory.getSize();
+		int itemCount = computeRequiredItemCount(strength, stackSize, slotCount);
+		if (itemCount == -1)
 		{
 			getLogger().message(sender, true,
 					"The desired signal strength could not be achieved with the requested item type");
 			return true;
 		}
 		// #--------Add the other side of the chest if target is a double chest and check if player can build---------
-		ArrayList<Block> container_blocks = getAllContainers(target_block);
-		for (Block b : container_blocks)
+		ArrayList<Block> containerBlocks = new ArrayList<>();
+		containerBlocks.add(targetBlock);
+
+		Material blockType = targetBlock.getType();
+		if (inventory.getType() == InventoryType.CHEST)
 		{
-			if (!canBuild(player, b))
+			Arrays.stream(new BlockFace[]{BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH})
+					.map(targetBlock::getRelative)
+					.filter(b -> b.getType() == blockType)
+					.forEach(containerBlocks::add);
+		}
+
+		for (Block containerBlock : containerBlocks)
+		{
+			if (!canBuild(player, containerBlock))
 			{
 				getLogger().message(sender, true, "You can not build here!");
 				return true;
 			}
 		}
 		// #----------------Insert items-------------
-		int full_stack_count = item_count / stack_size;
-		int remaining = item_count % stack_size;
-		for (Block b : container_blocks)
+		int fullStackCount = itemCount / stackSize;
+		int remaining = itemCount % stackSize;
+		for (Block containerBlock : containerBlocks)
 		{
-			Inventory inv = getInventory(b);
+			// Below checks should evaluate to false, but let's be safe.
+			Inventory inv = getInventory(containerBlock);
+			if (inv == null) continue;
+
 			inv.clear();
-			for (int i = 0; i < full_stack_count; i++)
-				inv.setItem(i, new ItemStack(item_type, stack_size));
+			for (int i = 0; i < fullStackCount; i++)
+				inv.setItem(i, new ItemStack(itemType, stackSize));
 			if (remaining > 0)
-				inv.setItem(full_stack_count, new ItemStack(item_type, remaining));
+				inv.setItem(fullStackCount, new ItemStack(itemType, remaining));
 		}
-		getLogger().message(sender,
-				"Comparators attached to this Inventory will now put out a signal strength of" + strength);
+		getLogger().message(sender, "Comparators attached to this " + enumNameToHumanName(blockType.name())
+				+ " will now put out a signal strength of " + strength);
 		return true;
 	}
-	
-	private int required_item_count(int strength, int stack_size, int slot_count)
-	{
-		int item_count = -1;
-		if (strength == 0)
-			item_count = 0;
-		else if (strength == 1)
-			item_count = 1;
-		else
-			item_count = (int) Math.ceil(slot_count * stack_size / 14.0 * (strength - 1));
-		int resulting_strength = item_count == 0 ? 0 : (int) Math.ceil(1 + 14.0 * item_count / stack_size / slot_count);
-		// Clarification on these formulas at https://minecraft.gamepedia.com/Redstone_Comparator#Containers
-		return resulting_strength == strength ? item_count : -1;
-	}
-	
-	private Inventory getInventory(Block b)
+
+	private static Inventory getInventory(Block b)
 	{
 		BlockState state = b.getState();
 		if (state instanceof InventoryHolder)
 			return ((InventoryHolder) state).getInventory();
 		return null;
 	}
-	
-	private boolean canBuild(Player p, Block b)
+
+	private static int computeRequiredItemCount(int strength, int stackSize, int slotCount)
 	{
-		BlockPlaceEvent e = new BlockPlaceEvent(b, b.getState(), b.getRelative(BlockFace.DOWN),
-				p.getInventory().getItemInMainHand(), p, true, EquipmentSlot.HAND);
-		return e.isCancelled();
-	}
-	
-	private ArrayList<Block> getAllContainers(Block b)
-	{
-		ArrayList<Block> result = new ArrayList<Block>();
-		result.add(b);
-		for (BlockFace face : BlockFace.values())
+		int itemCount = -1;
+		if (strength == 0)
+			itemCount = 0;
+		else if (strength == 1)
+			itemCount = 1;
+		else
+			itemCount = (int) Math.ceil(slotCount * stackSize / 14.0 * (strength - 1));
+
+		// Reverse engineer the calculation to verify
+		int resultingStrength = itemCount == 0 ? 0 : (int) Math.floor(1 + 14.0 * itemCount / stackSize / slotCount);
+		if (resultingStrength != strength)
 		{
-			Block b2 = b.getRelative(face);
-			if (getInventory(b2) != null)
-				result.add(b2);
+			return -1;
 		}
-		return result;
+		// Clarification on these formulas at https://minecraft.gamepedia.com/Redstone_Comparator#Containers
+		return itemCount;
 	}
+
+	private static boolean canBuild(Player p, Block b)
+	{
+		BlockPlaceEvent event = new BlockPlaceEvent(b, b.getState(), b.getRelative(BlockFace.DOWN),
+				p.getInventory().getItemInMainHand(), p, true, EquipmentSlot.HAND);
+		Bukkit.getPluginManager().callEvent(event);
+		return !event.isCancelled();
+	}
+
+	private static String enumNameToHumanName(String enumName)
+	{
+		return enumName.toLowerCase().replace('_', ' ');
+	}
+
 }
