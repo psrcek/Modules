@@ -48,6 +48,7 @@ public abstract class ModAbstract implements Mod, Listener
 		ModAbstract.logger = logger;
 		registerMod(new ModToggledCauldron());
 		registerMod(new ModToggledPiston());
+		registerMod(new ModToggledObserver());
 		registerMod(new ModToggledStep());
 		registerMod(new ModToggledTorch());
 		registerMod(new ModInventory("dropper", InventoryType.DROPPER));
