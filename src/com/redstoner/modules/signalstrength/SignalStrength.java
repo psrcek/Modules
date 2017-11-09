@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class SignalStrength implements Module
 {
 
