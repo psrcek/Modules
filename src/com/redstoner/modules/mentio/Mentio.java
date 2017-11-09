@@ -28,7 +28,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Mentio implements Module, Listener
 {
 	private File mentioLocation = new File(Main.plugin.getDataFolder(), "mentio.json");
@@ -100,7 +100,7 @@ public class Mentio implements Module, Listener
 	@Command(hook = "listmentios")
 	public boolean listMentios(CommandSender sender)
 	{
-		ArrayList<String> message = new ArrayList<String>();
+		ArrayList<String> message = new ArrayList<>();
 		Player player = (Player) sender;
 		UUID uuid = player.getUniqueId();
 		JSONArray playerMentios = (JSONArray) mentios.get(uuid.toString());
@@ -150,7 +150,7 @@ public class Mentio implements Module, Listener
 							lastColorCodes += "§" + c;
 						lastChar = c;
 					}
-					Message m = new Message(player, null);
+					Message m = new Message(player, event.getPlayer());
 					m.appendText(event.getFormat().replace("%1$s", event.getPlayer().getDisplayName()).replace("%2$s",
 							event.getMessage().replaceFirst("(?i)(" + Pattern.quote(mentio) + ")([^ ]*)",
 									"§a§o$1$2" + lastColorCodes)));
