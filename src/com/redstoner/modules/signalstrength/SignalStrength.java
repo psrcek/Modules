@@ -1,10 +1,9 @@
 package com.redstoner.modules.signalstrength;
 
-import com.nemez.cmdmgr.Command;
-import com.redstoner.annotations.Commands;
-import com.redstoner.annotations.Version;
-import com.redstoner.misc.CommandHolderType;
-import com.redstoner.modules.Module;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -22,42 +21,52 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
+import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
+import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
+import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class SignalStrength implements Module
 {
-
-	private static final String namePrefix = ChatColor.GREEN.toString() + ChatColor.RESET + ChatColor.DARK_PURPLE + "Signal Strength: " + ChatColor.RED + ChatColor.BOLD;
-
+	
+	private static final String namePrefix = ChatColor.GREEN.toString() + ChatColor.RESET + ChatColor.DARK_PURPLE
+			+ "Signal Strength: " + ChatColor.RED + ChatColor.BOLD;
+	
 	private static String nameForSignalStrength(int strength)
 	{
 		return namePrefix + strength;
 	}
-
+	
 	private static boolean isSignalStrengthNameOrEmpty(String name)
 	{
 		return name == null || name.isEmpty() || name.startsWith(namePrefix);
 	}
-
+	
 	@Command(hook = "ss")
 	public boolean ss(CommandSender sender, int strength)
 	{
 		return ssm(sender, strength, Material.REDSTONE.toString());
 	}
-
+	
 	@Command(hook = "ssm")
 	public boolean ssm(CommandSender sender, int strength, String material)
 	{
+		if (strength < 0 || strength > 15)
+		{
+			getLogger().message(sender, true, "The strength must be between 0 and 15!");
+			return true;
+		}
+		
 		Player player = (Player) sender;
-		if (player.getGameMode() != GameMode.CREATIVE) {
+		if (player.getGameMode() != GameMode.CREATIVE)
+		{
 			getLogger().message(sender, true, "You must be in creative mode to do that");
 			return true;
 		}
-
+		
 		Material itemType = Material.matchMaterial(material);
 		if (itemType == null)
 		{
@@ -79,7 +88,7 @@ public class SignalStrength implements Module
 			getLogger().message(sender, true, "That command can only be used if a container is targeted!");
 			return true;
 		}
-
+		
 		// --------Get the stack size and required amount of items to achieve the desired signal strength---------
 		int stackSize = itemType.getMaxStackSize();
 		int slotCount = inventory.getSize();
@@ -93,16 +102,14 @@ public class SignalStrength implements Module
 		// #--------Add the other side of the chest if target is a double chest and check if player can build---------
 		ArrayList<Block> containerBlocks = new ArrayList<>();
 		containerBlocks.add(targetBlock);
-
+		
 		Material blockType = targetBlock.getType();
 		if (inventory.getType() == InventoryType.CHEST)
 		{
-			Arrays.stream(new BlockFace[]{BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH})
-					.map(targetBlock::getRelative)
-					.filter(b -> b.getType() == blockType)
-					.forEach(containerBlocks::add);
+			Arrays.stream(new BlockFace[] {BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH})
+					.map(targetBlock::getRelative).filter(b -> b.getType() == blockType).forEach(containerBlocks::add);
 		}
-
+		
 		for (Block containerBlock : containerBlocks)
 		{
 			if (!canBuild(player, containerBlock))
@@ -118,29 +125,31 @@ public class SignalStrength implements Module
 		{
 			// Below checks should evaluate to false, but let's be safe.
 			BlockState blockState = containerBlock.getState();
-			if (!(blockState instanceof InventoryHolder)) continue;
-
+			if (!(blockState instanceof InventoryHolder))
+				continue;
+			
 			if (blockState instanceof Nameable && isSignalStrengthNameOrEmpty(((Nameable) blockState).getCustomName()))
 			{
 				((Nameable) blockState).setCustomName(nameForSignalStrength(strength));
 				blockState.update();
 			}
-
+			
 			Inventory inv = ((InventoryHolder) blockState).getInventory();
-			if (inv == null) continue;
-
+			if (inv == null)
+				continue;
+			
 			inv.clear();
 			for (int i = 0; i < fullStackCount; i++)
 				inv.setItem(i, new ItemStack(itemType, stackSize));
 			if (remaining > 0)
 				inv.setItem(fullStackCount, new ItemStack(itemType, remaining));
-
+			
 		}
 		getLogger().message(sender, "Comparators attached to this " + enumNameToHumanName(blockType.name())
 				+ " will now put out a signal strength of " + strength);
 		return true;
 	}
-
+	
 	private static Inventory getInventory(Block b)
 	{
 		BlockState state = b.getState();
@@ -148,7 +157,7 @@ public class SignalStrength implements Module
 			return ((InventoryHolder) state).getInventory();
 		return null;
 	}
-
+	
 	private static int computeRequiredItemCount(int strength, int stackSize, int slotCount)
 	{
 		int itemCount = -1;
@@ -158,7 +167,7 @@ public class SignalStrength implements Module
 			itemCount = 1;
 		else
 			itemCount = (int) Math.ceil(slotCount * stackSize / 14.0 * (strength - 1));
-
+		
 		// Reverse engineer the calculation to verify
 		int resultingStrength = itemCount == 0 ? 0 : (int) Math.floor(1 + 14.0 * itemCount / stackSize / slotCount);
 		if (resultingStrength != strength)
@@ -168,7 +177,7 @@ public class SignalStrength implements Module
 		// Clarification on these formulas at https://minecraft.gamepedia.com/Redstone_Comparator#Containers
 		return itemCount;
 	}
-
+	
 	private static boolean canBuild(Player p, Block b)
 	{
 		BlockPlaceEvent event = new BlockPlaceEvent(b, b.getState(), b.getRelative(BlockFace.DOWN),
@@ -176,11 +185,10 @@ public class SignalStrength implements Module
 		Bukkit.getPluginManager().callEvent(event);
 		return !event.isCancelled();
 	}
-
+	
 	private static String enumNameToHumanName(String enumName)
 	{
 		return enumName.toLowerCase().replace('_', ' ');
 	}
-
-
+	
 }
