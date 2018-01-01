@@ -7,6 +7,7 @@ import com.redstoner.misc.CommandHolderType;
 import com.redstoner.modules.Module;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
@@ -51,14 +52,19 @@ public class SignalStrength implements Module
 	@Command(hook = "ssm")
 	public boolean ssm(CommandSender sender, int strength, String material)
 	{
+		Player player = (Player) sender;
+		if (player.getGameMode() != GameMode.CREATIVE) {
+			getLogger().message(sender, true, "You must be in creative mode to do that");
+			return true;
+		}
+
 		Material itemType = Material.matchMaterial(material);
 		if (itemType == null)
 		{
 			getLogger().message(sender, true, "The material " + material + " could not be recognized");
 			return true;
 		}
-		Player player = (Player) sender;
-
+		
 		// Empty set in the first argument would make it always return the first block, because no block types are
 		// considered to be transparent. Only a value of null is treated as "air only".
 		Block targetBlock = player.getTargetBlock((Set<Material>) null, 5);
