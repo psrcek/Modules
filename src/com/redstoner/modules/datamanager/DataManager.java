@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 3, compatible = 4)
+@Version(major = 4, minor = 1, revision = 4, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -135,7 +135,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void loadData_(String id)
+	protected synchronized void loadData_(String id)
 	{
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
@@ -217,7 +217,7 @@ public final class DataManager implements CoreModule, Listener
 			return loadAndGet(id, module, key);
 	}
 	
-	protected Object loadAndGet(String id, String module, String key)
+	protected synchronized Object loadAndGet(String id, String module, String key)
 	{
 		JSONObject playerData = JsonManager.getObject(new File(dataFolder, id + ".json"));
 		if (playerData == null)
@@ -312,7 +312,7 @@ public final class DataManager implements CoreModule, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void loadAndSet(String id, String module, String key, Object value)
+	protected synchronized void loadAndSet(String id, String module, String key, Object value)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
@@ -379,7 +379,7 @@ public final class DataManager implements CoreModule, Listener
 			loadAndRemove(id, module, key);
 	}
 	
-	protected void loadAndRemove(String id, String module, String key)
+	protected synchronized void loadAndRemove(String id, String module, String key)
 	{
 		File dataFile = new File(dataFolder, id + ".json");
 		JSONObject playerData = JsonManager.getObject(dataFile);
@@ -535,7 +535,7 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	protected void save_(String id)
+	protected synchronized void save_(String id)
 	{
 		Object raw = data.get(id);
 		if (raw == null || ((JSONObject) raw).size() == 0)
