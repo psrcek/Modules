@@ -1,4 +1,5 @@
 command log {
+    perm utils.logs;
     alias logs;
     search [string:file(s)] [string:search...] {
         run search_logs file(s) search;
