@@ -53,8 +53,8 @@ public class LogHandler extends Thread
 	{
 		long starttime = System.currentTimeMillis();
 		int matches = 0;
-		Logs.logger.message(sender, "Starting log search for " + regex + " in " + fileName
-				+ "now. Please do not query any other searches until this one completes.");
+		Logs.logger.message(sender, "Starting log search for &e" + regex + "&7 in &e" + fileName
+				+ " &7now. &cPlease do not query any other searches until this one completes.");
 		try
 		{
 			if (!regex.startsWith("^"))
@@ -82,7 +82,7 @@ public class LogHandler extends Thread
 				return;
 			}
 			else
-				Logs.logger.message(sender, "A total of &e" + totalFiles + "&7 will be searched!");
+				Logs.logger.message(sender, "A total of &e" + totalFiles + "&7 files will be searched!");
 			
 			boolean progress = (boolean) DataManager.getOrDefault(Utils.getID(sender), "Logs", "progress", true);
 			for (File file : files)
