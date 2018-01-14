@@ -3,10 +3,11 @@ package com.redstoner.modules.check;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -17,7 +18,6 @@ import org.bukkit.event.Listener;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
@@ -33,7 +33,9 @@ import com.redstoner.misc.mysql.elements.MysqlDatabase;
 import com.redstoner.misc.mysql.elements.MysqlTable;
 import com.redstoner.modules.Module;
 
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+import net.nemez.chatapi.click.Message;
+
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -95,9 +97,7 @@ public class Check implements Module, Listener
 			return data;
 		}
 		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		{}
 		return null;
 	}
 	
@@ -117,7 +117,6 @@ public class Check implements Module, Listener
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
 				return null;
 			}
 		}
@@ -128,9 +127,7 @@ public class Check implements Module, Listener
 			return (JSONObject) new JSONParser().parse(rawJson);
 		}
 		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		{}
 		return null;
 	}
 	
@@ -188,32 +185,29 @@ public class Check implements Module, Listener
 		try
 		{
 			String rawJson = read(new URL("https://api.mojang.com/user/profiles/" + uuid + "/names"));
-			System.out.println("name for " + uuid + " : " + rawJson);
 			JSONArray names = (JSONArray) new JSONParser().parse(rawJson);
 			for (Object obj : names)
 			{
-				nameString += ((JSONObject) obj).get("name") + ", ";
+				nameString += "&e" + ((JSONObject) obj).get("name") + "&7, ";
 			}
 			nameString = nameString.substring(0, nameString.length() - 2);
 			return nameString;
 		}
-		catch (MalformedURLException | ParseException e)
-		{
-			e.printStackTrace();
-		}
+		catch (Exception e)
+		{}
 		return null;
 	}
 	
 	public void sendData(CommandSender sender, OfflinePlayer player)
 	{
-		JSONObject ipInfo = getIpInfo(player);
 		try
 		{
+			JSONObject ipInfo = getIpInfo(player);
 			// data
 			String firstJoin = getFirstJoin(player);
 			String lastSeen = getLastSeen(player);
-			firstJoin = (firstJoin.equals("1970-01-01 01:00")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm:ss) &e" + firstJoin;
-			lastSeen = (lastSeen.equals("1970-1-1 01:00")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm:ss) &e" + lastSeen;
+			firstJoin = (firstJoin.equals("1970-01-01 01:00")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm) &e" + firstJoin;
+			lastSeen = (lastSeen.equals("1970-1-1 01:00")) ? "&eNever" : "&7(yyyy-MM-dd hh:mm) &e" + lastSeen;
 			Object[] websiteData = getWebsiteData(player);
 			String websiteUrl = (websiteData[0] == null) ? "None" : (String) websiteData[0];
 			String email = (websiteData[0] == null) ? "Unknown" : (String) websiteData[1];
@@ -223,26 +217,30 @@ public class Check implements Module, Listener
 			if (namesUsed == null)
 				namesUsed = "None";
 			// messages
-			// @noformat
-			String[] message = new String[] {
-			"&7Data provided by Redstoner:",
-			"&6>  UUID: &e" + player.getUniqueId(),
-			"&6>  First joined: " + firstJoin,
-			"&6>  Last seen: " + lastSeen,
-			"&6>  Website account: &e" + websiteUrl,
-			"&6>  email: &e" + (emailNotConfirmed ? "&6> &4Email NOT Confirmed!" : email),
-			"&7Data provided by ipinfo:",
-			"&6>  Country: &e" + country,
-			"&7Data provided by Mojang:",
-			"&6>  All ingame names used so far: &e" + namesUsed
-			};
-			//@format
-			getLogger().message(sender, message);
+			List<Message> messages = new ArrayList<>();
+			messages.add(new Message(sender, null).appendText(getLogger().getHeader()));
+			messages.add(new Message(sender, null).appendText("&7Data provided by redstoner:"));
+			messages.add(new Message(sender, null).appendSuggestHover("&6> UUID: &e" + player.getUniqueId().toString(),
+					player.getUniqueId().toString(), "Click to copy into chatbox!"));
+			messages.add(new Message(sender, null).appendText("&6> First joined: &e" + firstJoin));
+			messages.add(new Message(sender, null).appendText("&6> Last seen: &e" + lastSeen));
+			messages.add(
+					new Message(sender, null).appendText("&6> Website account: &e").appendLink(websiteUrl, websiteUrl));
+			messages.add(new Message(sender, null).appendText("&6> Email: &e")
+					.appendLink((emailNotConfirmed ? "&6> &4Email NOT Confirmed!" : "") + email, "mailto:" + email));
+			messages.add(new Message(sender, null).appendText("&7Data provided by ipinfo:"));
+			messages.add(new Message(sender, null).appendText("&6> Country: &e" + country));
+			messages.add(new Message(sender, null).appendText("&6> "));
+			messages.add(new Message(sender, null).appendText("&6> "));
+			messages.add(new Message(sender, null).appendText("&7Data provided by mojang:"));
+			messages.add(new Message(sender, null).appendText("&6> All ingame names used so far: &e" + namesUsed));
+			for (Message m : messages)
+				m.send();
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
 			getLogger().message(sender, true, "Sorry, something went wrong while fetching data");
+			e.printStackTrace();
 		}
 	}
 	
@@ -251,7 +249,7 @@ public class Check implements Module, Listener
 	public String getCommandString()
 	{
 		return "command check {\n" + 
-				"	perm getLogger().check;\n" + 
+				"	perm utils.check;\n" + 
 				"	\n" + 
 				"	[string:player] {\n" + 
 				"		run checkCommand player;\n" + 
