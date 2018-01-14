@@ -35,7 +35,7 @@ import com.redstoner.modules.Module;
 
 import net.nemez.chatapi.click.Message;
 
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -227,11 +227,9 @@ public class Check implements Module, Listener
 			messages.add(
 					new Message(sender, null).appendText("&6> Website account: &e").appendLink(websiteUrl, websiteUrl));
 			messages.add(new Message(sender, null).appendText("&6> Email: &e")
-					.appendLink((emailNotConfirmed ? "&6> &4Email NOT Confirmed!" : "") + email, "mailto:" + email));
+					.appendText((emailNotConfirmed ? "&6> &4Email NOT Confirmed!&e" : "&e") + email));
 			messages.add(new Message(sender, null).appendText("&7Data provided by ipinfo:"));
 			messages.add(new Message(sender, null).appendText("&6> Country: &e" + country));
-			messages.add(new Message(sender, null).appendText("&6> "));
-			messages.add(new Message(sender, null).appendText("&6> "));
 			messages.add(new Message(sender, null).appendText("&7Data provided by mojang:"));
 			messages.add(new Message(sender, null).appendText("&6> All ingame names used so far: &e" + namesUsed));
 			for (Message m : messages)
