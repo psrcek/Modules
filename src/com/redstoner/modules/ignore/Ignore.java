@@ -62,83 +62,38 @@ public class Ignore implements Module{
 		return true;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public boolean ignore(CommandSender sender, String player, boolean allowIgnore)
 	{
-		JSONArray isIgnoredBy;
 		JSONArray ignores = (JSONArray) DataManager.getOrDefault(sender, "ignores", new JSONArray());
-		String uuidOfSender = ((Player)sender).getUniqueId().toString();
-		String uuidOfPlayer = player;
 		
-		if ( sender.getName().equals(player) )
-		{
-			getLogger().message(sender, true, "You can't ignore yourself. :P");
-			return true;
-		}
-		
-		if ( Utils.isUUID(player) )
-		{
-			isIgnoredBy = (JSONArray) DataManager.getOrDefault(player, "isIgnoredBy", new JSONArray());
-			
-			if (isIgnoredBy.contains(uuidOfSender))
-			{
-				isIgnoredBy.remove(uuidOfSender);
-				ignores.remove(uuidOfPlayer);
-				getLogger().message(sender, "§7You are no longer ignoring §3" + player + "§7.");
-			}
-			else if (allowIgnore)
-			{
-				isIgnoredBy.add(uuidOfSender);
-				ignores.add(uuidOfPlayer);
-				getLogger().message(sender, "§7You are now ignoring §3" + player + "§7.");
-			}
-			else
-			{
-				getLogger().message(sender, "§7You weren't ignoring §3" + player + "§7.");
-				return true;
-			}
-			
-			DataManager.setData(player, "isIgnoredBy", isIgnoredBy);
-			DataManager.setData(sender, "ignores", ignores);
-		}
-		else
-		{
-			Player toBeIgnored = Bukkit.getPlayer(player);
-			if (toBeIgnored != null)
-			{
-				isIgnoredBy = (JSONArray) DataManager.getOrDefault(toBeIgnored, "isIgnoredBy", new JSONArray());
-				uuidOfPlayer = toBeIgnored.getUniqueId().toString();
-			}
-			else
-			{
-				getLogger().message(sender, true, "§3" + player + "§7 isn't online. To ignore them, use their UUID.");
-				return true;
-			}
-			
-			if (isIgnoredBy.contains(uuidOfSender))
-			{
-				isIgnoredBy.remove(uuidOfSender);
-				ignores.remove(uuidOfPlayer);
-				getLogger().message(sender, "§7You are no longer ignoring §3" + toBeIgnored.getDisplayName() + "§7.");
-			}
-			else if (allowIgnore)
-			{
-				isIgnoredBy.add(uuidOfSender);
-				ignores.add(uuidOfPlayer);
-				getLogger().message(sender, "§7You are now ignoring §3" + toBeIgnored.getDisplayName() + "§7.");
-			}
-			else
-			{
-				getLogger().message(sender, "§7You weren't ignoring §3" + toBeIgnored.getDisplayName() + "§7.");
-				return true;
-			}
-			
-			DataManager.setData(toBeIgnored, "isIgnoredBy", isIgnoredBy);
-			DataManager.setData(sender, "ignores", ignores);
-		}
+		OfflinePlayer p =  Utils.isUUID(player)?
+				           Bukkit.getOfflinePlayer(UUID.fromString(player)) :
+				           Bukkit.getOfflinePlayer(player);
+				           
+       String pName = ((Player) p).getDisplayName();
+	   String pUUID = p.getUniqueId().toString();
+	   String sUUID = ((Player) sender).getUniqueId().toString();
+	   
+	   if (pUUID.equals(sUUID)) {
+		   getLogger().message(sender, true, "§7You can't ignore yourself :P");
+		   return true;
+	   }
+	   
+	   if (ignores.contains(pUUID)) {
+		   ignores.remove(pUUID);
+		   getLogger().message(sender, "§7You are no longer ignoring §3" + pName + "§7.");
+	   }
+	   else if (!allowIgnore){
+		   getLogger().message(sender, "§7You were never ignoring §3" + pName + "§7.");
+	   }
+	   else {
+		   ignores.add(pUUID);
+		   getLogger().message(sender, "§7You are now ignoring §3" + pName + "§7.");
+	   }
+	   return true;
 		
 		
-		return true;
 	}
 	
 	public static BroadcastFilter getIgnoredBy(CommandSender sender) {
@@ -158,10 +113,15 @@ public class Ignore implements Module{
 	
 	@SuppressWarnings("unused")
 	private BroadcastFilter _getIgnoredBy(CommandSender sender) {
-		JSONArray isIgnoredBy = (JSONArray) DataManager.getOrDefault(sender, "isIgnoredBy", new JSONArray());
 		return new BroadcastFilter() {
+			
+			private final String sUUID = sender instanceof Player?
+					                     ((Player) sender).getUniqueId().toString() : "CONSOLE";
+			
 			@Override
 			public boolean sendTo(CommandSender recipient) {
+				if (sUUID.equals("CONSOLE"))
+					return true;
 				
 				if (recipient instanceof Player)
 				{
@@ -169,7 +129,9 @@ public class Ignore implements Module{
 					
 					if (player.hasPermission("utils.ignore.override"))
 						return true;
-					return !isIgnoredBy.contains( player.getUniqueId().toString() );
+					
+					JSONArray ignores = (JSONArray) DataManager.getOrDefault(player, "ignores", new JSONArray());
+					return !ignores.contains(sUUID);
 				}
 				else
 					return true;
