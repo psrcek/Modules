@@ -1,5 +1,7 @@
 package com.redstoner.modules.ignore;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -11,6 +13,7 @@ import org.json.simple.JSONArray;
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
@@ -139,8 +142,39 @@ public class Ignore implements Module{
 	}
 	
 	public static BroadcastFilter getIgnoredBy(CommandSender sender) {
+		try
+	    {
+	        Module mod = ModuleLoader.getModule("Ignore");
+	        Method m = mod.getClass().getDeclaredMethod("_getIgnoredBy", CommandSender.class,
+	                Object.class);
+	        m.setAccessible(true);
+	        return (BroadcastFilter) m.invoke(mod, sender);
+	    }
+	    catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+	            | InvocationTargetException e)
+	    {}
+		return null;
+	}
+	
+	@SuppressWarnings("unused")
+	private BroadcastFilter _getIgnoredBy(CommandSender sender) {
 		JSONArray isIgnoredBy = (JSONArray) DataManager.getOrDefault(sender, "isIgnoredBy", new JSONArray());
-		return new IgnoredByFilter(isIgnoredBy);
+		return new BroadcastFilter() {
+			@Override
+			public boolean sendTo(CommandSender recipient) {
+				
+				if (recipient instanceof Player)
+				{
+					Player player = (Player) recipient;
+					
+					if (player.hasPermission("utils.ignore.override"))
+						return true;
+					return !isIgnoredBy.contains( player.getUniqueId().toString() );
+				}
+				else
+					return true;
+			}
+		};
 	}
 	
 		
