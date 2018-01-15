@@ -46,11 +46,13 @@ public class Ignore implements Module{
 		JSONArray ignores = (JSONArray) DataManager.getOrDefault(sender, "ignores", new JSONArray());
 		
 		String players;
-		if ( ignores.isEmpty() )
+		if ( ignores.isEmpty() ) {
 			players = " §7Nobody \\o/";
-		
-		OfflinePlayer pi = Bukkit.getOfflinePlayer(UUID.fromString((String)ignores.get(0)));
-		players = " §3" + pi.getName() + "§7";
+		}
+		else {
+			OfflinePlayer pi = Bukkit.getOfflinePlayer(UUID.fromString((String)ignores.get(0)));
+			players = " §3" + pi.getName() + "§7";
+		}
 		
 		for (int i = 1; i < ignores.size(); i++) {
 			OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString((String)ignores.get(i)));
@@ -67,12 +69,16 @@ public class Ignore implements Module{
 	{
 		JSONArray ignores = (JSONArray) DataManager.getOrDefault(sender, "ignores", new JSONArray());
 		
-		OfflinePlayer p =  Utils.isUUID(player)?
+		Player p = Utils.isUUID(player)?
+		           Bukkit.getPlayer(UUID.fromString(player)) :
+		           Bukkit.getPlayer(player);
+		           
+		OfflinePlayer op = Utils.isUUID(player)?
 				           Bukkit.getOfflinePlayer(UUID.fromString(player)) :
 				           Bukkit.getOfflinePlayer(player);
 				           
-       String pName = ((Player) p).getDisplayName();
-	   String pUUID = p.getUniqueId().toString();
+       String pName = p != null? p.getDisplayName() : op.getName();
+	   String pUUID = p != null? p.getUniqueId().toString() : op.getUniqueId().toString();
 	   String sUUID = ((Player) sender).getUniqueId().toString();
 	   
 	   if (pUUID.equals(sUUID)) {
@@ -85,7 +91,7 @@ public class Ignore implements Module{
 		   getLogger().message(sender, "§7You are no longer ignoring §3" + pName + "§7.");
 	   }
 	   else if (!allowIgnore){
-		   getLogger().message(sender, "§7You were never ignoring §3" + pName + "§7.");
+		   getLogger().message(sender, "§7You weren't ignoring §3" + pName + "§7.");
 	   }
 	   else {
 		   ignores.add(pUUID);
