@@ -24,6 +24,7 @@ import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.ignore.Ignore;
 import com.redstoner.modules.socialspy.Socialspy;
 
 import net.nemez.chatapi.ChatAPI;
@@ -358,13 +359,16 @@ public class Chatgroups implements Module, Listener
 		String name = Utils.getName(sender);
 		String group = getGroup(sender);
 		message = ChatAPI.colorify(null, message);
+		
+		BroadcastFilter ignore = ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null;
 		Utils.broadcast("§8[§bCG§8] §9", name + "§8: §6" + message, new BroadcastFilter()
 		{
 			@Override
 			public boolean sendTo(CommandSender recipient)
 			{
+				
 				String rgroup = getGroup(recipient);
-				if (rgroup != null)
+				if ( rgroup != null && (ignore == null? true : ignore.sendTo(recipient)) )
 					return rgroup.equals(group);
 				else
 					return false;
