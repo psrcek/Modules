@@ -32,7 +32,7 @@ import com.redstoner.modules.ignore.Ignore;
 import net.nemez.chatapi.ChatAPI;
 import net.nemez.chatapi.click.Message;
 
-@Commands(CommandHolderType.String)
+@Commands(CommandHolderType.File)
 @AutoRegisterListener
 @Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Misc implements Module, Listener
@@ -179,7 +179,17 @@ public class Misc implements Module, Listener
 		else
 			name = "§9" + sender.getName();
 		text = ChatAPI.colorify(sender, text);
-		Utils.broadcast(" §7- " + name + " §7⇦ ", text, ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
+		Utils.broadcast(" §7- " + name + " §7⇦ ", text,
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
+		return true;
+	}
+	
+	@Command(hook = "chat")
+	public boolean chat(CommandSender sender, String message)
+	{
+		String name = Utils.getName(sender);
+		Utils.broadcast(" " + name, " §7→§r " + ChatAPI.colorify(sender, message),
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
 		return true;
 	}
 	
@@ -188,7 +198,8 @@ public class Misc implements Module, Listener
 	{
 		String name = Utils.getName(sender);
 		Utils.broadcast(" §7[§9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "§7]: ",
-				"§r" + ChatAPI.colorify(null, message), null);
+				"§r" + ChatAPI.colorify(null, message),
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
 		return true;
 	}
 	
@@ -196,7 +207,16 @@ public class Misc implements Module, Listener
 	public boolean say(CommandSender sender, String name, String message)
 	{
 		Utils.broadcast(" §7[§9" + ChatAPI.colorify(sender, name) + "§7]: ", "§r" + ChatAPI.colorify(null, message),
-				null);
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
+		return true;
+	}
+	
+	@Command(hook = "shrug")
+	public boolean shrug(CommandSender sender, String message)
+	{
+		String name = Utils.getName(sender);
+		Utils.broadcast(" " + name, " §7→§r " + ChatAPI.colorify(sender, message) + " ¯\\_(ツ)_/¯",
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
 		return true;
 	}
 	
@@ -291,74 +311,4 @@ public class Misc implements Module, Listener
 		Bukkit.getPluginManager().callEvent(event);
 		return event.isCancelled();
 	}
-	
-	// @noformat
-	@Override
-	public String getCommandString()
-	{
-		return "command tempadd {\n" + 
-				"    perm pex;\n" + 
-				"    [string:user] [string:group] {\n" + 
-				"        help Adds a user to a group for 1w.;\n" + 
-				"        run tempadddef user group;\n" + 
-				"    }\n" + 
-				"    [string:user] [string:group] [string:duration] {\n" + 
-				"        help Adds a user to a group for a specified duration.;\n" + 
-				"        run tempadd user group duration;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command echo {\n" + 
-				"    [string:text...] {\n" + 
-				"        help Echoes back to you.;\n" + 
-				"        run echo text;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command ping {\n" + 
-				"    [empty] {\n" + 
-				"        help Pongs :D;\n" + 
-				"        run ping;\n" + 
-				"    }\n" + 
-				"    [string:password] {\n" + 
-				"        help Pongs :D;\n" + 
-				"        run ping2 password;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command me {\n" + 
-				"    perm utils.me;\n" + 
-				"    [string:text...] {\n" + 
-				"        help /me's in chat.;\n" + 
-				"        run me text;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command sudo {\n" + 
-				"    perm utils.sudo;\n" + 
-				"    [string:name] [string:command...] {\n" + 
-				"        help Sudo'es another user (or console);\n" + 
-				"        run sudo name command;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command hasperm {\n" +
-				"    [flag:-f] [string:name] [string:node] {\n" + 
-				"        perm utils.hasperm;\n" + 
-				"        run hasperm -f name node;\n" +
-				"        help Checks if a player has a given permission node or not. Returns \"true/false\" in chat. When -f is set, it returns it unformatted.;\n" + 
-				"    }\n" + 
-				"}" + 
-				"command say {\n" +
-				"    [string:message...] {\n" + 
-				"        perm utils.say;\n" + 
-				"        run say message;\n" +
-				"        help A replacement for the default say command to make the format be more consistant.;\n" + 
-				"    }\n" + 
-				"}" + 
-				"command sayn {\n" +
-				"    [string:name] [string:message...] {\n" + 
-				"        perm utils.sayn;\n" +
-				"        type console;\n" +
-				"        run sayn name message;\n" +
-				"        help A replacement for the default say command to make the format be more consistant.;\n" + 
-				"    }\n" + 
-				"}";
-	}
-	// @format
 }
