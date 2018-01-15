@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 
 import com.nemez.cmdmgr.Command;
+import com.nemez.cmdmgr.Command.AsyncType;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
@@ -27,37 +28,39 @@ import net.nemez.chatapi.click.Message;
 public class Ignore implements Module{
 	
 	
-	@Command(hook = "unignore")
+	@Command(hook = "unignore", async = AsyncType.ALWAYS)
 	public boolean unignore(CommandSender sender, String player)
 	{
 		return ignore(sender,player,false);
 	}
 	
-	@Command(hook = "ignore")
+	@Command(hook = "ignore", async = AsyncType.ALWAYS)
 	public boolean ignore(CommandSender sender, String player)
 	{
 		return ignore(sender, player, true);
 	}
 	
-	@Command(hook = "list")
+	@Command(hook = "list", async = AsyncType.ALWAYS)
 	public boolean list(CommandSender sender) {
 		getLogger().message(sender, "§7You are currently ignoring:");
 		
 		JSONArray ignores = (JSONArray) DataManager.getOrDefault(sender, "ignores", new JSONArray());
 		
-		String players;
+		
 		if ( ignores.isEmpty() ) {
-			players = " §7Nobody \\o/";
+			new Message(sender, null).appendText(" §7Nobody \\o/").send();
+			return true;
 		}
-		else {
-			OfflinePlayer pi = Bukkit.getOfflinePlayer(UUID.fromString((String)ignores.get(0)));
-			players = " §3" + pi.getName() + "§7";
-		}
+		
+		String players;
+		OfflinePlayer pi = Bukkit.getOfflinePlayer(UUID.fromString((String)ignores.get(0)));
+		players = " §3" + pi.getName() + "§7";
 		
 		for (int i = 1; i < ignores.size(); i++) {
 			OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString((String)ignores.get(i)));
 			players += ", §3" + p.getName() + "§7"; 
 		}
+		
 		Message m = new Message(sender, null);
 		m.appendText(players);
 		m.send();
