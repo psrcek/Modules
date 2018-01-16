@@ -16,6 +16,7 @@ import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
+import com.redstoner.modules.ignore.Ignore;
 import com.redstoner.modules.socialspy.Socialspy;
 
 @Commands(CommandHolderType.File)
@@ -35,6 +36,10 @@ public class Message implements Module
 		if (p == null)
 		{
 			getLogger().message(sender, true, "That player couldn't be found!");
+			return true;
+		}
+		else if (ModuleLoader.exists("Ignore")? !Ignore.getIgnoredBy(sender).sendTo(p) : true) {
+			getLogger().message(sender, true, Utils.getName(p) + " has ignored you. Your message was not sent.");
 			return true;
 		}
 		else
@@ -75,6 +80,10 @@ public class Message implements Module
 		if (target == null || ((target instanceof OfflinePlayer) && !((OfflinePlayer) target).isOnline()))
 		{
 			getLogger().message(sender, true, "You don't have anyone to reply to!");
+			return true;
+		}
+		else if (ModuleLoader.exists("Ignore")? !Ignore.getIgnoredBy(sender).sendTo(target) : true) {
+			getLogger().message(sender, true, Utils.getName(target) + " has ignored you. Your message was not sent.");
 			return true;
 		}
 		else
