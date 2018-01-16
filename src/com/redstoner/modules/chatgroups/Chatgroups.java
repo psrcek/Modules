@@ -405,8 +405,7 @@ public class Chatgroups implements Module, Listener
 			public boolean sendTo(CommandSender recipient)
 			{
 				String rgroup = getGroup(recipient);
-				if (rgroup != null
-				&& (ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender).sendTo(recipient)?  true : false : true))
+				if (rgroup != null)
 					return rgroup.equals(group);
 				else
 					return false;
