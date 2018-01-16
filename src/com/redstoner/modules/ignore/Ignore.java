@@ -100,6 +100,7 @@ public class Ignore implements Module{
 		   ignores.add(pUUID);
 		   getLogger().message(sender, "§7You are now ignoring §3" + pName + "§7.");
 	   }
+	   DataManager.setData(sender, "ignores", ignores);
 	   return true;
 		
 		
@@ -109,8 +110,7 @@ public class Ignore implements Module{
 		try
 	    {
 	        Module mod = ModuleLoader.getModule("Ignore");
-	        Method m = mod.getClass().getDeclaredMethod("_getIgnoredBy", CommandSender.class,
-	                Object.class);
+	        Method m = mod.getClass().getDeclaredMethod("_getIgnoredBy", CommandSender.class);
 	        m.setAccessible(true);
 	        return (BroadcastFilter) m.invoke(mod, sender);
 	    }
@@ -139,11 +139,11 @@ public class Ignore implements Module{
 					if (player.hasPermission("utils.ignore.override"))
 						return true;
 					
-					JSONArray ignores = (JSONArray) DataManager.getOrDefault(player, "ignores", new JSONArray());
+					JSONArray ignores = (JSONArray) DataManager.getOrDefault(recipient, "ignores", new JSONArray());
 					return !ignores.contains(sUUID);
 				}
 				else
-					return true;
+					return true;agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=
 			}
 		};
 	}
