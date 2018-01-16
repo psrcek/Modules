@@ -368,7 +368,8 @@ public class Chatgroups implements Module, Listener
 			{
 				
 				String rgroup = getGroup(recipient);
-				if ( rgroup != null && (ignore == null? true : ignore.sendTo(recipient)) )
+				if ( rgroup != null && (ignore == null? true : ignore.sendTo(recipient))
+				&& (ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender).sendTo(recipient)?  true : false : true))
 					return rgroup.equals(group);
 				else
 					return false;
@@ -404,7 +405,8 @@ public class Chatgroups implements Module, Listener
 			public boolean sendTo(CommandSender recipient)
 			{
 				String rgroup = getGroup(recipient);
-				if (rgroup != null)
+				if (rgroup != null
+				&& (ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender).sendTo(recipient)?  true : false : true))
 					return rgroup.equals(group);
 				else
 					return false;
