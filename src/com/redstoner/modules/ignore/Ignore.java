@@ -143,7 +143,7 @@ public class Ignore implements Module{
 					return !ignores.contains(sUUID);
 				}
 				else
-					return true;agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=
+					return true;
 			}
 		};
 	}
