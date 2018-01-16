@@ -27,6 +27,14 @@ import net.nemez.chatapi.click.Message;
 @Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Ignore implements Module{
 	
+	@EventHandler(Priority=HIGHEST)
+	public void onPlayerChat(AsyncPlayerChatEvent)
+	{
+		Player player = event.getPlayer();
+		event.setCancelled(true);
+		Utils.broadcast(" " + player.getDisplayName(), " §7→§r " + ChatAPI.colorify(sender, message),
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(player) : null); 
+	}
 	
 	@Command(hook = "unignore", async = AsyncType.ALWAYS)
 	public boolean unignore(CommandSender sender, String player)
