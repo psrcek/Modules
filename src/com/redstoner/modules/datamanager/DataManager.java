@@ -172,7 +172,7 @@ public final class DataManager implements CoreModule, Listener
 	
 	protected Object getOrDefault_(String id, String module, String key, Object fallback)
 	{
-		Object o = getData_(id, "Ignore", key);
+		Object o = getData_(id, module, key);
 		return o == null ? fallback : o;
 	}
 	
