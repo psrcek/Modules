@@ -8,10 +8,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.json.simple.JSONArray;
 
 import com.nemez.cmdmgr.Command;
 import com.nemez.cmdmgr.Command.AsyncType;
+import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
@@ -20,23 +25,27 @@ import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
+
+import net.nemez.chatapi.ChatAPI;
 import net.nemez.chatapi.click.Message;
 
 
 @Commands(CommandHolderType.File)
+@AutoRegisterListener
 @Version(major = 4, minor = 0, revision = 0, compatible = 4)
-public class Ignore implements Module{
+public class Ignore implements Module, Listener{
 	
-	@EventHandler(Priority=HIGHEST)
-	public void onPlayerChat(AsyncPlayerChatEvent)
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerChat(AsyncPlayerChatEvent event)
 	{
 		Player player = event.getPlayer();
+		String msg = event.getMessage();
 		event.setCancelled(true);
+		
 		if  (player.hasPermission("utils.chat"))
-			Utils.broadcast(" " + player.getDisplayName(), " §7→§r " + ChatAPI.colorify(sender, message),
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(player) : null);
+			Utils.broadcast(" " + player.getDisplayName(), " §7→§r " + ChatAPI.colorify(player, msg), getIgnoredBy(player));
 		else
-			new Message(sender, "§8[§cServer§8]").appendText("You don't have permission to chat.").send();
+			player.sendMessage("§8[§cServer§8] You don't have permission to chat.");
 	}
 	
 	@Command(hook = "unignore", async = AsyncType.ALWAYS)
