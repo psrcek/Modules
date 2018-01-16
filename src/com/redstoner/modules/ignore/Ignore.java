@@ -32,8 +32,11 @@ public class Ignore implements Module{
 	{
 		Player player = event.getPlayer();
 		event.setCancelled(true);
-		Utils.broadcast(" " + player.getDisplayName(), " §7→§r " + ChatAPI.colorify(sender, message),
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(player) : null); 
+		if  (player.hasPermission("utils.chat"))
+			Utils.broadcast(" " + player.getDisplayName(), " §7→§r " + ChatAPI.colorify(sender, message),
+				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(player) : null);
+		else
+			new Message(sender, "§8[§cServer§8]").appendText("You don't have permission to chat.").send();
 	}
 	
 	@Command(hook = "unignore", async = AsyncType.ALWAYS)
