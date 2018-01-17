@@ -16,6 +16,8 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -23,12 +25,9 @@ import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
-import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
-import com.redstoner.modules.ignore.Ignore;
-
 import net.nemez.chatapi.ChatAPI;
 import net.nemez.chatapi.click.Message;
 
@@ -170,56 +169,6 @@ public class Misc implements Module, Listener
 		return ((CraftPlayer) player).getHandle().ping;
 	}
 	
-	@Command(hook = "me")
-	public boolean me(CommandSender sender, String text)
-	{
-		String name;
-		if (sender instanceof Player)
-			name = ((Player) sender).getDisplayName();
-		else
-			name = "§9" + sender.getName();
-		text = ChatAPI.colorify(sender, text);
-		Utils.broadcast(" §7- " + name + " §7⇦ ", text,
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
-		return true;
-	}
-	
-	@Command(hook = "chat")
-	public boolean chat(CommandSender sender, String message)
-	{
-		String name = Utils.getName(sender);
-		Utils.broadcast(" " + name, " §7→§r " + ChatAPI.colorify(sender, message),
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
-		return true;
-	}
-	
-	@Command(hook = "say")
-	public boolean say(CommandSender sender, String message)
-	{
-		String name = Utils.getName(sender);
-		Utils.broadcast(" §7[§9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "§7]: ",
-				"§r" + ChatAPI.colorify(null, message),
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
-		return true;
-	}
-	
-	@Command(hook = "sayn")
-	public boolean say(CommandSender sender, String name, String message)
-	{
-		Utils.broadcast(" §7[§9" + ChatAPI.colorify(sender, name) + "§7]: ", "§r" + ChatAPI.colorify(null, message),
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
-		return true;
-	}
-	
-	@Command(hook = "shrug")
-	public boolean shrug(CommandSender sender, String message)
-	{
-		String name = Utils.getName(sender);
-		Utils.broadcast(" " + name, " §7→§r " + ChatAPI.colorify(sender, message) + " ¯\\_(ツ)_/¯",
-				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
-		return true;
-	}
-	
 	@Command(hook = "sudo")
 	public boolean sudo(CommandSender sender, String name, String command)
 	{
@@ -310,5 +259,23 @@ public class Misc implements Module, Listener
 		BlockBreakEvent event = new BlockBreakEvent(location.getBlock(), player);
 		Bukkit.getPluginManager().callEvent(event);
 		return event.isCancelled();
+	}
+	
+	PotionEffect nightvision = new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false);
+	
+	@Command(hook = "illuminate")
+	public void illuminate(CommandSender sender)
+	{
+		Player player = (Player) sender;
+		if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION))
+		{
+			player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+			getLogger().message(sender, "Night Vision Disabled.");
+		}
+		else
+		{
+			player.addPotionEffect(nightvision, true);
+			getLogger().message(sender, "Night Vision Enabled.");
+		}
 	}
 }

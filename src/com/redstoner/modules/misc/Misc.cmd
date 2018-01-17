@@ -25,13 +25,6 @@ command ping {
         run ping2 password; 
     } 
 } 
-command me { 
-    perm utils.me; 
-    [string:text...] { 
-        help /me's in chat.; 
-        run me text; 
-    } 
-} 
 command sudo { 
     perm utils.sudo; 
     [string:name] [string:command...] { 
@@ -46,33 +39,12 @@ command hasperm {
         help Checks if a player has a given permission node or not. Returns \"true/false\" in chat. When -f is set, it returns it unformatted.; 
     } 
 }
-command say {
-    [string:message...] { 
-        perm utils.say; 
-        run say message;
-        help A replacement for the default say command to make the format be more consistant.; 
-    } 
-}
-command sayn {
-    [string:name] [string:message...] { 
-        perm utils.sayn;
-        type console;
-        run sayn name message;
-        help A replacement for the default say command to make the format be more consistant.; 
-    }
-}
-command shrug {
-    [string:message...] {
-        perm utils.shrug;
-        run shrug message;
-        help Appends the shrug emoticon to the end of your message.; 
-    }
-}
-command chat {
-    alias speak;
-    [string:message...] {
-        perm utils.speak;
-        run chat message;
-        help A way to speak in normal chat with normal formatting if you have ACT or CGT on.; 
-    }
+command nightvision {
+alias nv; 
+	[empty] {
+		run illuminate; 
+		type player;
+		help Gives the player infinte night vision; 
+		perm utils.illuminate; 
+	} 
 }
