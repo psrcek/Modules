@@ -368,8 +368,7 @@ public class Chatgroups implements Module, Listener
 			{
 				
 				String rgroup = getGroup(recipient);
-				if ( rgroup != null && (ignore == null? true : ignore.sendTo(recipient))
-				&& (ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender).sendTo(recipient)?  true : false : true))
+				if ( rgroup != null && (ignore == null? true : ignore.sendTo(recipient)) )
 					return rgroup.equals(group);
 				else
 					return false;
