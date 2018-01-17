@@ -1,12 +1,15 @@
 package com.redstoner.modules.seen;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,7 +34,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
@@ -200,5 +203,62 @@ public class Seen implements Module, Listener
 			return null;
 		else
 			return (JSONArray) json.get("ips");
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Command(hook = "firstseenP")
+	public void firstseen(CommandSender sender, String person)
+	{
+		OfflinePlayer oPlayer = Bukkit.getPlayer(person);
+		if (oPlayer == null)
+			oPlayer = Bukkit.getServer().getOfflinePlayer(person);
+		Long firstJoin = oPlayer.getFirstPlayed();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		String disDate = format.format(new Date(firstJoin));
+		if (disDate.equals("1969-12-31 19:00"))
+		{
+			getLogger().message(sender, true, "&3" + oPlayer.getName() + "&c has never joined.");
+		}
+		else
+		{
+			getLogger().message(sender, "&3" + oPlayer.getName() + " &efirst joined&a " + disDate + "&e.");
+		}
+	}
+	
+	@Command(hook = "firstseen")
+	public void firstseen(CommandSender sender)
+	{
+		firstseen(sender, sender.getName());
+	}
+	
+	@Command(hook = "playtimeDef")
+	public boolean playtime(CommandSender sender)
+	{
+		return playtime(sender, sender.getName());
+	}
+	
+	@Command(hook = "playtime")
+	public boolean playtime(CommandSender sender, String name)
+	{
+		if (name == null)
+			name = sender.getName();
+		Player player = Bukkit.getPlayer(name);
+		if (player == null)
+		{
+			getLogger().message(sender, true,
+					"That player couldn't be found! Hint: Currently, you can only check statistics of players that are online!");
+			return true;
+		}
+		int ticks_lived = player.getStatistic(Statistic.PLAY_ONE_TICK);
+		int days = ticks_lived / 1728000;
+		int hours = (ticks_lived % 1728000) / 72000;
+		int minutes = (ticks_lived % 72000) / 1200;
+		getLogger().message(sender,
+				"The player &e" + name + " &7has been online for "
+						+ (days == 0 && hours == 0 && minutes == 0 ? "less than a minute."
+								: ("a total of: &e" + (days != 0 ? (days + "d ") : "")
+										+ ((hours != 0 || days != 0) ? (hours + "h ") : "")
+										+ ((minutes != 0 || hours != 0 || days != 0) ? (minutes + "m") : ""))));
+		return true;
 	}
 }
