@@ -41,11 +41,7 @@ public class Chat implements Module, Listener{
 	@Command(hook = "me")
 	public boolean me(CommandSender sender, String text)
 	{
-		String name;
-		if (sender instanceof Player)
-			name = ((Player) sender).getDisplayName();
-		else
-			name = "§9" + sender.getName();
+		String name = Utils.getName(sender);
 		text = ChatAPI.colorify(sender, text);
 		Utils.broadcast(" §7- " + name + " §7⇦ ", text,
 				ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
