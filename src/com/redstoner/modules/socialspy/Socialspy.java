@@ -25,7 +25,7 @@ import com.redstoner.modules.datamanager.DataManager;
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Socialspy implements CoreModule
 {
 	@Command(hook = "config_prefix_default")
@@ -130,7 +130,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "commands_list")
 	public boolean commands_list(CommandSender sender)
 	{
-		ArrayList<String> message = new ArrayList<String>();
+		ArrayList<String> message = new ArrayList<>();
 		JSONArray commands = (JSONArray) DataManager.getOrDefault(sender, "commands", getDefaultCommandList());
 		if (commands == null || commands.size() == 0)
 			message.add("You are not listening to any commands!");
@@ -265,7 +265,7 @@ public class Socialspy implements CoreModule
 		if (s.equals("on"))
 			message = ChatColor.stripColor(message);
 		else if (s.equals("partial"))
-			message = message.replace("§", "&");
+			message = message.replace("§", "&&");
 		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
@@ -284,7 +284,7 @@ public class Socialspy implements CoreModule
 		format = format.replace("%c", command);
 		format = format.replace("%m", message);
 		// Convert placeholder back
-		format = format.replace("§§", "%%");
+		format = format.replace("§§", "%");
 		return format;
 	}
 	
@@ -305,7 +305,7 @@ public class Socialspy implements CoreModule
 		if (s.equals("on"))
 			message = ChatColor.stripColor(message);
 		else if (s.equals("partial"))
-			message = message.replace("§", "&");
+			message = message.replace("§", "&&");
 		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
@@ -324,7 +324,7 @@ public class Socialspy implements CoreModule
 		format = format.replace("%c", command);
 		format = format.replace("%m", message);
 		// Convert placeholder back
-		format = format.replace("§§", "%%");
+		format = format.replace("§§", "%");
 		return format;
 	}
 	
