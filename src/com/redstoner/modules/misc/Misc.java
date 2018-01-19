@@ -32,7 +32,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Misc implements Module, Listener
 {
 	private final String[] sudoBlacklist = new String[] {"(.*:)?e?sudo", "(.*:)?script.*", "(.*:)?stop",
@@ -218,7 +218,7 @@ public class Misc implements Module, Listener
 			String[] args = command.split(" ");
 			for (String regex : sudoBlacklist)
 			{
-				if (args[0].matches("\\/" + regex))
+				if (args[0].matches((target.equals(Bukkit.getConsoleSender()) ? "" : "\\/") + regex))
 				{
 					getLogger().message(sender, true, "You can't sudo anyone into using that command!");
 					return true;
