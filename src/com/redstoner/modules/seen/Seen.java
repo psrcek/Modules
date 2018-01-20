@@ -68,7 +68,7 @@ public class Seen implements Module, Listener
 		}
 		if (p == null || (!p.isOnline() && !p.hasPlayedBefore()))
 		{
-			getLogger().message(sender, true, "That player has never joined the server!");
+			getLogger().message(sender, true, "§e" + player + "§7 has never joined the server!");
 			return true;
 		}
 		boolean cansee = (sender instanceof Player ? p instanceof Player && ((Player) sender).canSee((Player) p)
@@ -87,19 +87,19 @@ public class Seen implements Module, Listener
 			timestamp = (long) DataManager.getOrDefault(p.getUniqueId().toString(), "lastquit", p.getLastPlayed());
 		}
 		String time = DateUtil.formatDateDiff(timestamp);
-		message.add("The player &e" + p.getName() + " &7has been " + state + " &7since &e" + time + "&7.");
+		message.add("&e" + p.getName() + " &7has been " + state + " &7for &e" + time + "&7.");
 		JSONArray _names;
 		if (online)
 		{
 			if (DataManager.getState((Player) p, "afk"))
 			{
-				message.add("This player is currently &eAFK&7:");
+				message.add("They're currently &eAFK&7:");
 				String reason = (String) DataManager.getOrDefault(p.getUniqueId().toString(), "AFK", "afk_reason", "");
 				if (reason.length() >= 1)
 					message.add(" &5- " + reason);
 			}
 			if (DataManager.getState((Player) p, "vanished"))
-				message.add("This player is currently &evanished&7!");
+				message.add("They're currently &evanished&7!");
 			_names = names.get(p.getUniqueId());
 		}
 		else
@@ -107,7 +107,7 @@ public class Seen implements Module, Listener
 			_names = loadNames(p.getUniqueId());
 		}
 		if (_names != null && _names.size() > 1)
-			message.add("This player has also been known as: &e"
+			message.add("They've also been known as: &e"
 					+ _names.toJSONString().replaceAll("[\"\\[\\]]", "").replace(",", "&7, &e"));
 		if (sender.hasPermission("utils.seen.ip"))
 		{
@@ -119,10 +119,10 @@ public class Seen implements Module, Listener
 				else
 					_ips = loadIPs(p.getUniqueId());
 				if (_ips != null && _ips.size() > 0)
-					message.add("This player has joined with the following IPs: &e"
+					message.add("They have joined with the following IPs: &e"
 							+ _ips.toJSONString().replaceAll("[\"\\[\\]]", "").replace(",", "&7, &e"));
 			}
-			message.add("This players current IP is: &a"
+			message.add("Their current IP is: &a"
 					+ DataManager.getOrDefault(p.getUniqueId().toString(), "ip", "unknown"));
 		}
 		getLogger().message(sender, message.toArray(new String[] {}));
@@ -215,7 +215,7 @@ public class Seen implements Module, Listener
 		Long firstJoin = oPlayer.getFirstPlayed();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String disDate = format.format(new Date(firstJoin));
-		if (disDate.equals("1969-12-31 19:00"))
+		if (disDate.equals("1970-01-01 00:00"))
 		{
 			getLogger().message(sender, true, "&3" + oPlayer.getName() + "&c has never joined.");
 		}
@@ -246,9 +246,9 @@ public class Seen implements Module, Listener
 		if (player == null)
 		{
 			getLogger().message(sender, true,
-					"That player couldn't be found! Hint: Currently, you can only check statistics of players that are online!");
+			"§e" + name + "§7 couldn't be found! Hint: Currently, you can only check statistics of players that are online!");
 			return true;
-		}
+			}
 		int ticks_lived = player.getStatistic(Statistic.PLAY_ONE_TICK);
 		int days = ticks_lived / 1728000;
 		int hours = (ticks_lived % 1728000) / 72000;
