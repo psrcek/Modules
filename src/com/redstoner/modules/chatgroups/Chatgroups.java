@@ -34,7 +34,7 @@ import net.nemez.chatapi.ChatAPI;
  * @author Pepich */
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Chatgroups implements Module, Listener
 {
 	private static final char defaultKey = ':';
