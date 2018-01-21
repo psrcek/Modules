@@ -119,7 +119,7 @@ public class Seen implements Module, Listener
 				else
 					_ips = loadIPs(p.getUniqueId());
 				if (_ips != null && _ips.size() > 0)
-					message.add("They have joined with the following IPs: &e"
+					message.add("They've joined with the following IPs: &e"
 							+ _ips.toJSONString().replaceAll("[\"\\[\\]]", "").replace(",", "&7, &e"));
 			}
 			message.add("Their current IP is: &a"
