@@ -8,6 +8,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import org.bukkit.command.CommandSender;
@@ -61,17 +62,14 @@ public class LogHandler extends Thread
 				regex = "^.*" + regex;
 			if (!regex.endsWith("$"))
 				regex += ".*$";
-			boolean singleFile = true;
-			if (fileName.contains("*"))
-				singleFile = false;
 			File logFolder = Logs.getLogsDir();
+			Pattern fileNamePattern = Pattern.compile(fileName);
 			File[] files = logFolder.listFiles(new FilenameFilter()
 			{
-				
 				@Override
 				public boolean accept(File dir, String name)
 				{
-					return name.matches(fileName);
+					return fileNamePattern.matcher(name).matches();
 				}
 			});
 			totalFiles = files.length;
@@ -85,6 +83,7 @@ public class LogHandler extends Thread
 				Logs.logger.message(sender, "A total of &e" + totalFiles + "&7 files will be searched!");
 			
 			boolean progress = (boolean) DataManager.getOrDefault(Utils.getID(sender), "Logs", "progress", true);
+			Pattern searchPattern = Pattern.compile(regex);
 			for (File file : files)
 			{
 				if (file.getName().endsWith(".gz"))
@@ -92,13 +91,13 @@ public class LogHandler extends Thread
 					
 					BufferedReader inputReader = new BufferedReader(
 							new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-					matches += searchStream(inputReader, regex, sender, singleFile, file.getName());
+					matches += searchStream(inputReader, searchPattern, sender, file.getName());
 					inputReader.close();
 				}
 				else
 				{
 					BufferedReader inputReader = new BufferedReader(new FileReader(file));
-					matches += searchStream(inputReader, regex, sender, singleFile, file.getName());
+					matches += searchStream(inputReader, searchPattern, sender, file.getName());
 					inputReader.close();
 				}
 				filesSearched++;
@@ -137,8 +136,8 @@ public class LogHandler extends Thread
 	 * @param filename the name of the file that is currently being searched
 	 * @return how many matches it found
 	 * @throws IOException if something goes wrong */
-	private int searchStream(BufferedReader inputReader, String regex, CommandSender sender, boolean singleFile,
-			String filename) throws IOException
+	private int searchStream(BufferedReader inputReader, Pattern searchPattern, CommandSender sender, String filename)
+			throws IOException
 	{
 		String format = (String) DataManager.getOrDefault(Utils.getID(sender), "Logs", "format", Logs.defaultFormat);
 		boolean colors = (boolean) DataManager.getOrDefault(Utils.getID(sender), "Logs", "colors", true);
@@ -152,7 +151,7 @@ public class LogHandler extends Thread
 		{
 			totalLines++;
 			currentLine++;
-			if (line.matches(regex))
+			if (searchPattern.matcher(line).matches())
 			{
 				if (((p != null) && (!p.isOnline())))
 				{

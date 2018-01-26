@@ -15,7 +15,7 @@ import com.redstoner.modules.ModuleLogger;
 import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Logs implements Module
 {
 	public static final String defaultFormat = "§7 > %f: %r";
