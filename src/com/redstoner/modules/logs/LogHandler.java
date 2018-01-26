@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.zip.GZIPInputStream;
 
 import org.bukkit.command.CommandSender;
@@ -63,7 +64,17 @@ public class LogHandler extends Thread
 			if (!regex.endsWith("$"))
 				regex += ".*$";
 			File logFolder = Logs.getLogsDir();
-			Pattern fileNamePattern = Pattern.compile(fileName);
+			Pattern fileNamePattern;
+			try
+			{
+				fileNamePattern = Pattern.compile(fileName);
+			}
+			catch (PatternSyntaxException e)
+			{
+				Logs.logger.message(sender, true, "An error occured trying to compile the filename pattern!");
+				stillSearching.remove(sender);
+				return;
+			}
 			File[] files = logFolder.listFiles(new FilenameFilter()
 			{
 				@Override
@@ -83,7 +94,17 @@ public class LogHandler extends Thread
 				Logs.logger.message(sender, "A total of &e" + totalFiles + "&7 files will be searched!");
 			
 			boolean progress = (boolean) DataManager.getOrDefault(Utils.getID(sender), "Logs", "progress", true);
-			Pattern searchPattern = Pattern.compile(regex);
+			Pattern searchPattern;
+			try
+			{
+				searchPattern = Pattern.compile(regex);
+			}
+			catch (PatternSyntaxException e)
+			{
+				Logs.logger.message(sender, true, "An error occured trying to compile the search pattern!");
+				stillSearching.remove(sender);
+				return;
+			}
 			for (File file : files)
 			{
 				if (file.getName().endsWith(".gz"))
