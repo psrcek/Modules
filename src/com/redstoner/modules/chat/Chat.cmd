@@ -35,3 +35,19 @@ command sayn {
         help A replacement for the default say command to make the format be more consistant.; 
     }
 }
+
+command mute {
+    [string:player] {
+        perm utils.chat.admin;
+        run mute player;
+        help Mutes a player.;
+    }
+}
+
+command unmute {
+    [string:player] {
+        perm utils.chat.admin;
+        run unmute player;
+        help Unmutes a player.;
+    }
+}
