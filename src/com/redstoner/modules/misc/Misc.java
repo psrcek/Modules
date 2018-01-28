@@ -16,6 +16,8 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -26,13 +28,12 @@ import com.redstoner.annotations.Version;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
-
 import net.nemez.chatapi.ChatAPI;
 import net.nemez.chatapi.click.Message;
 
-@Commands(CommandHolderType.String)
+@Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 1, revision = 0, compatible = 4)
 public class Misc implements Module, Listener
 {
 	private final String[] sudoBlacklist = new String[] {"(.*:)?e?sudo", "(.*:)?script.*", "(.*:)?stop",
@@ -168,36 +169,6 @@ public class Misc implements Module, Listener
 		return ((CraftPlayer) player).getHandle().ping;
 	}
 	
-	@Command(hook = "me")
-	public boolean me(CommandSender sender, String text)
-	{
-		String name;
-		if (sender instanceof Player)
-			name = ((Player) sender).getDisplayName();
-		else
-			name = "§9" + sender.getName();
-		text = ChatAPI.colorify(sender, text);
-		Utils.broadcast(" §7- " + name + " §7⇦ ", text, null);
-		return true;
-	}
-	
-	@Command(hook = "say")
-	public boolean say(CommandSender sender, String message)
-	{
-		String name = Utils.getName(sender);
-		Utils.broadcast(" §7[§9" + name.replaceAll("[^0-9a-zA-Z§&\\[\\]]", "") + "§7]: ",
-				"§r" + ChatAPI.colorify(null, message), null);
-		return true;
-	}
-	
-	@Command(hook = "sayn")
-	public boolean say(CommandSender sender, String name, String message)
-	{
-		Utils.broadcast(" §7[§9" + ChatAPI.colorify(sender, name) + "§7]: ", "§r" + ChatAPI.colorify(null, message),
-				null);
-		return true;
-	}
-	
 	@Command(hook = "sudo")
 	public boolean sudo(CommandSender sender, String name, String command)
 	{
@@ -290,73 +261,21 @@ public class Misc implements Module, Listener
 		return event.isCancelled();
 	}
 	
-	// @noformat
-	@Override
-	public String getCommandString()
+	PotionEffect nightvision = new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false);
+	
+	@Command(hook = "illuminate")
+	public void illuminate(CommandSender sender)
 	{
-		return "command tempadd {\n" + 
-				"    perm pex;\n" + 
-				"    [string:user] [string:group] {\n" + 
-				"        help Adds a user to a group for 1w.;\n" + 
-				"        run tempadddef user group;\n" + 
-				"    }\n" + 
-				"    [string:user] [string:group] [string:duration] {\n" + 
-				"        help Adds a user to a group for a specified duration.;\n" + 
-				"        run tempadd user group duration;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command echo {\n" + 
-				"    [string:text...] {\n" + 
-				"        help Echoes back to you.;\n" + 
-				"        run echo text;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command ping {\n" + 
-				"    [empty] {\n" + 
-				"        help Pongs :D;\n" + 
-				"        run ping;\n" + 
-				"    }\n" + 
-				"    [string:password] {\n" + 
-				"        help Pongs :D;\n" + 
-				"        run ping2 password;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command me {\n" + 
-				"    perm utils.me;\n" + 
-				"    [string:text...] {\n" + 
-				"        help /me's in chat.;\n" + 
-				"        run me text;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command sudo {\n" + 
-				"    perm utils.sudo;\n" + 
-				"    [string:name] [string:command...] {\n" + 
-				"        help Sudo'es another user (or console);\n" + 
-				"        run sudo name command;\n" + 
-				"    }\n" + 
-				"}\n" + 
-				"command hasperm {\n" +
-				"    [flag:-f] [string:name] [string:node] {\n" + 
-				"        perm utils.hasperm;\n" + 
-				"        run hasperm -f name node;\n" +
-				"        help Checks if a player has a given permission node or not. Returns \"true/false\" in chat. When -f is set, it returns it unformatted.;\n" + 
-				"    }\n" + 
-				"}" + 
-				"command say {\n" +
-				"    [string:message...] {\n" + 
-				"        perm utils.say;\n" + 
-				"        run say message;\n" +
-				"        help A replacement for the default say command to make the format be more consistant.;\n" + 
-				"    }\n" + 
-				"}" + 
-				"command sayn {\n" +
-				"    [string:name] [string:message...] {\n" + 
-				"        perm utils.sayn;\n" +
-				"        type console;\n" +
-				"        run sayn name message;\n" +
-				"        help A replacement for the default say command to make the format be more consistant.;\n" + 
-				"    }\n" + 
-				"}";
+		Player player = (Player) sender;
+		if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION))
+		{
+			player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+			getLogger().message(sender, "Night Vision Disabled.");
+		}
+		else
+		{
+			player.addPotionEffect(nightvision, true);
+			getLogger().message(sender, "Night Vision Enabled.");
+		}
 	}
-	// @format
 }

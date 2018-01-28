@@ -31,8 +31,4 @@ command config {
         type console;
         help Deletes all config settings of a given module.;
     }
-    remove [string:module] [string:key] {
-        run remove module key;
-        help Deletes the specified config setting;
-    }
 }
