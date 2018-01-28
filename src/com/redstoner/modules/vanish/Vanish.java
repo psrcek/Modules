@@ -2,6 +2,7 @@ package com.redstoner.modules.vanish;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -23,12 +24,13 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
-@Commands(CommandHolderType.String)
+@Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 1, revision = 0, compatible = 4)
 public class Vanish implements Module, Listener
 {
 	private ArrayList<UUID> vanished = new ArrayList<>();
+	List<String> imouted = new ArrayList<String>();
 	private HashMap<UUID, ArrayList<UUID>> vanishOthers = new HashMap<>();
 	
 	@Override
@@ -141,6 +143,7 @@ public class Vanish implements Module, Listener
 		return true;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event)
 	{
@@ -209,6 +212,7 @@ public class Vanish implements Module, Listener
 			unvanishPlayer(player);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void vanishPlayer(Player player)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
@@ -220,6 +224,7 @@ public class Vanish implements Module, Listener
 		DataManager.setData(Utils.getID(player), "Seen", "lastquit", System.currentTimeMillis());
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void unvanishPlayer(Player player)
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
@@ -228,35 +233,28 @@ public class Vanish implements Module, Listener
 		DataManager.setData(Utils.getID(player), "Seen", "lastjoined", System.currentTimeMillis());
 	}
 	
-	// @noformat
-	@Override
-	public String getCommandString()
+	@Command(hook = "imout")
+	public void onImoutCommand(CommandSender sender)
 	{
-		return "command vanish {\n" + 
-				"    [empty] {\n" + 
-				"        help Toggles your vanish status.;\n" + 
-				"        type player;\n" + 
-				"        run vanish;\n" + 
-				"        perm utils.vanish;\n" + 
-				"    }\n" + 
-				"    on {\n" + 
-				"        help Turns your vanish on.;\n" + 
-				"        type player;\n" + 
-				"        run vanish_on;\n" + 
-				"        perm utils.vanish;\n" + 
-				"    }\n" + 
-				"    off {\n" + 
-				"        help Turns your vanish off.;\n" + 
-				"        type player;\n" + 
-				"        run vanish_off;\n" + 
-				"        perm utils.vanish;\n" + 
-				"    }\n" + 
-				"    [string:name] {\n" + 
-				"        help Toggles someone elses vanish;\n" + 
-				"        run vanish_other name;\n" + 
-				"        perm utils.vanishother;\n" + 
-				"    }\n" + 
-				"}";
+		String symbol;
+		Player s = (Player) sender;
+		String name = sender.getName();
+		if (imouted.contains(name))
+		{
+			symbol = "§a§l+";
+			getLogger().message(sender, "§eWelcome back! You are no longer hidden", "");
+			s.performCommand("vanish off");
+			s.performCommand("act off");
+			imouted.remove(name);
+		}
+		else
+		{
+			symbol = "§c§l-";
+			getLogger().message(sender, "§e§oPoof!§e You are now gone!", "");
+			s.performCommand("vanish on");
+			s.performCommand("act on");
+			imouted.add(name);
+		}
+		Utils.broadcast(symbol, " §7" + name, null);
 	}
-	// @format
 }
