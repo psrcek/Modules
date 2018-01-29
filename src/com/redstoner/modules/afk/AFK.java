@@ -30,10 +30,10 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 5, compatible = 5)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class AFK implements Module, Listener
 {
-	private CustomListener listener;
+	private CustomListener listener = new CustomListener();
 	boolean move = true, look = false;
 	
 	@Override
@@ -43,7 +43,7 @@ public class AFK implements Module, Listener
 		DataManager.setConfig("indicator", "&7[AFK]");
 		String[] choices = new String[] {"listen", "ignore"};
 		DataManager.setConfig("move", "listen", choices);
-		DataManager.setConfig("look", "ignore", choices);
+		DataManager.setConfig("look", "listen", choices);
 		DataManager.setConfig("chat", "listen", choices);
 		DataManager.setConfig("interact", "listen", choices);
 		DataManager.setConfig("command", "ignore", choices);
@@ -53,10 +53,10 @@ public class AFK implements Module, Listener
 	public void migrate(Version old)
 	{
 		Module.super.migrate(old);
-		if ((old.major() == 4) && (old.minor() == 0) && (old.revision() == 3))
+		if ((old.major() == 4) && (old.minor() == 0) && (old.revision()) == 3)
 		{
 			String[] choices = new String[] {"listen", "ignore"};
-			DataManager.setConfig("look", "ignore", choices);
+			DataManager.setConfig("look", "listen", choices);
 		}
 	}
 	
@@ -64,7 +64,6 @@ public class AFK implements Module, Listener
 	public void postEnable()
 	{
 		Module.super.postEnable();
-		listener = new CustomListener();
 		update_afk_listeners(Bukkit.getConsoleSender());
 	}
 	
