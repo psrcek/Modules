@@ -26,7 +26,7 @@ import net.md_5.bungee.api.ChatColor;
  * 
  * @author Redempt */
 @Commands(CommandHolderType.String)
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class Reports implements Module
 {
 	private int task = 0;
@@ -40,9 +40,13 @@ public class Reports implements Module
 		reports = JsonManager.getArray(new File(Main.plugin.getDataFolder(), "reports.json"));
 		archived = JsonManager.getArray(new File(Main.plugin.getDataFolder(), "archived_reports.json"));
 		if (reports == null)
+		{
 			reports = new JSONArray();
+		}
 		if (archived == null)
+		{
 			archived = new JSONArray();
+		}
 		// Notify online staff of open reports
 		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.plugin, () ->
 		{
@@ -54,13 +58,11 @@ public class Reports implements Module
 			{
 				if (player.hasPermission("utils.report"))
 				{
-					getLogger().message(player, "&cThere are &e" + reports.size() 
-							+ " &copen reports!");
+					player.sendMessage(ChatColor.RED + "There are " + ChatColor.YELLOW + reports.size() + ChatColor.RED
+							+ " open reports!");
 				}
 			}
-			getLogger().info("&cThere are &e" + reports.size() 
-							+ " &copen reports!");
-		}, 2400, 2400);
+		} , 2400, 2400);
 		return true;
 	}
 	
@@ -90,7 +92,7 @@ public class Reports implements Module
 		Player player = (Player) sender;
 		if (id > reports.size() - 1 || id < 0)
 		{
-			getLogger().message(sender, true, "Invalid ID!");
+			sender.sendMessage(ChatColor.RED + "Invalid ID!");
 			return;
 		}
 		JSONObject report = (JSONObject) reports.get(id);
@@ -112,7 +114,7 @@ public class Reports implements Module
 		// Check for invalid ID
 		if (id > reports.size() - 1 || id < 0)
 		{
-			getLogger().message(sender, true, "Invalid ID!");
+			sender.sendMessage(ChatColor.RED + "Invalid ID!");
 			return;
 		}
 		// Move report to archived reports

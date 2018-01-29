@@ -28,7 +28,7 @@ import com.redstoner.modules.Module;
  * @author Pepich */
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 0, compatible = 4)
 public class BuildChat implements Module, Listener
 {
 	private static final char defaultKey = ';';
@@ -45,7 +45,7 @@ public class BuildChat implements Module, Listener
 			keys = new JSONObject();
 			saveKeys();
 		}
-		bctoggled = new ArrayList<>();
+		bctoggled = new ArrayList<UUID>();
 		return true;
 	}
 	
@@ -176,7 +176,7 @@ public class BuildChat implements Module, Listener
 	@Command(hook = "bct_off")
 	public boolean bcToggleOffCommand(CommandSender sender)
 	{
-		if (bctoggled.remove(((Player) sender).getUniqueId()))
+		if (bctoggled.remove(((Player) sender).getUniqueId().toString()))
 			getLogger().message(sender, "BCT now §cdisabled");
 		else
 			getLogger().message(sender, "BCT was already disabled");

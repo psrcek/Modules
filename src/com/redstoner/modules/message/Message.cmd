@@ -28,16 +28,3 @@ command reply {
         perm utils.message;
     }
 }
-
-command pmtoggle {
-    [empty] {
-        help Turns off your toggle.;
-        type player;
-        run pmtoggle_off;
-    }
-    [string:player] {
-        help Turns on your pmtoggle and locks onto <player>.;
-        type player;
-        run pmtoggle player;
-    }
-}

@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 5, compatible = 4)
+@Version(major = 4, minor = 1, revision = 4, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -651,7 +651,7 @@ public final class DataManager implements CoreModule, Listener
 		if (prefix == null || prefix.equals(""))
 			return list;
 		for (String s : list)
-			if (s.toLowerCase().startsWith(prefix.toLowerCase()))
+			if (s.startsWith(prefix))
 				subset.add(s);
 		return subset;
 	}
@@ -675,6 +675,7 @@ public final class DataManager implements CoreModule, Listener
 					case "list":
 					case "get":
 					case "set":
+					case "remove":
 					{
 						event.setCompletions(
 								subsetWhereStartsWith(module_index, arguments.length == 3 ? arguments[2] : ""));
@@ -688,6 +689,7 @@ public final class DataManager implements CoreModule, Listener
 				{
 					case "get":
 					case "set":
+					case "remove":
 					{
 						Object o = config_data.get(arguments[2]);
 						if (o == null)
@@ -766,6 +768,16 @@ public final class DataManager implements CoreModule, Listener
 			getLogger().message(sender, true,
 					"§7\"§e" + value + "§7\" is not a valid value for setting §e" + module + "." + key);
 		}
+		return true;
+	}
+	
+	@Command(hook = "remove")
+	public boolean remove(CommandSender sender, String module, String key)
+	{
+		if (removeConfig_(module, key))
+			getLogger().message(sender, "Successfully deleted the config entry §e" + module + "." + key + "§7!");
+		else
+			getLogger().message(sender, true, "Could not delete the config entry §e" + module + "." + key + "§7!");
 		return true;
 	}
 	
