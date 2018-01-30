@@ -1,9 +1,11 @@
 package com.redstoner.modules.signalstrength;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
-
+import com.nemez.cmdmgr.Command;
+import com.redstoner.annotations.Commands;
+import com.redstoner.annotations.Version;
+import com.redstoner.misc.CommandHolderType;
+import com.redstoner.modules.Module;
+import com.redstoner.nms.NmsFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -21,11 +23,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import com.nemez.cmdmgr.Command;
-import com.redstoner.annotations.Commands;
-import com.redstoner.annotations.Version;
-import com.redstoner.misc.CommandHolderType;
-import com.redstoner.modules.Module;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 
 @Commands(CommandHolderType.File)
 @Version(major = 4, minor = 0, revision = 2, compatible = 4)
@@ -143,7 +143,8 @@ public class SignalStrength implements Module
 				inv.setItem(i, new ItemStack(itemType, stackSize));
 			if (remaining > 0)
 				inv.setItem(fullStackCount, new ItemStack(itemType, remaining));
-			
+
+			NmsFactory.getDriver().updateAdjacentComparators(containerBlock);
 		}
 		getLogger().message(sender, "Comparators attached to this " + enumNameToHumanName(blockType.name())
 				+ " will now put out a signal strength of " + strength);
