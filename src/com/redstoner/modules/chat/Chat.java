@@ -13,6 +13,7 @@ import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
 import com.redstoner.coremods.moduleLoader.ModuleLoader;
+import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
@@ -116,10 +117,21 @@ public class Chat implements Module, Listener
 	
 	public boolean broadcastFormatted(String format, CommandSender sender, String message)
 	{
-		return broadcastFormatted(format, sender, message, Utils.getName(sender));
+		return broadcastFormatted(format, sender, message, Utils.getName(sender), null);
 	}
 	
 	public boolean broadcastFormatted(String format, CommandSender sender, String message, String name)
+	{
+		return broadcastFormatted(format, sender, message, name, null);
+	}
+	
+	public boolean broadcastFormatted(String format, CommandSender sender, String message, AsyncPlayerChatEvent event)
+	{
+		return broadcastFormatted(format, sender, message, Utils.getName(sender), null);
+	}
+	
+	public boolean broadcastFormatted(String format, CommandSender sender, String message, String name,
+			AsyncPlayerChatEvent event)
 	{
 		if ((boolean) DataManager.getOrDefault(sender, "muted", false))
 		{
@@ -130,7 +142,22 @@ public class Chat implements Module, Listener
 		}
 		String raw = (String) DataManager.getConfigOrDefault(format, " %n §7→§r %m");
 		String formatted = raw.replace("%n", name).replace("%m", message);
-		Utils.broadcast("", formatted, ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null);
+		Utils.broadcast("", formatted, wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
 		return true;
+	}
+	
+	public BroadcastFilter wrap(BroadcastFilter filter, AsyncPlayerChatEvent event)
+	{
+		if (event == null)
+			return filter;
+		else
+			return new BroadcastFilter()
+			{
+				@Override
+				public boolean sendTo(CommandSender recipient)
+				{
+					return filter.sendTo(recipient) && event.getRecipients().contains(recipient);
+				}
+			};
 	}
 }
