@@ -11,12 +11,14 @@ import org.json.simple.JSONArray;
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.BroadcastFilter;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.ignore.Ignore;
 
 import net.nemez.chatapi.ChatAPI;
 import net.nemez.chatapi.click.ClickCallback;
@@ -184,14 +186,8 @@ public class Saylol implements Module
 			name = "&9" + sender.getName();
 		Random random = new Random();
 		int id = random.nextInt(lols.size());
-		Utils.broadcast(LOL_PREFIX, ChatAPI.colorify(null, name + "&8: &e" + lols.get(id)), new BroadcastFilter()
-		{
-			@Override
-			public boolean sendTo(CommandSender recipient)
-			{
-				return recipient.hasPermission("utils.lol.see");
-			}
-		});
+		Utils.broadcast(LOL_PREFIX, ChatAPI.colorify(null, name + "&8: &e" + lols.get(id)),
+				        ModuleLoader.exists("Ignore")? Ignore.getIgnoredBy(sender) : null);
 		lastLol = time;
 		return true;
 	}

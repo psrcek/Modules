@@ -5,6 +5,13 @@ command me {
         run me text; 
     } 
 } 
+command action { 
+    perm utils.action; 
+    [string:text...] { 
+        help /action's in chat.; 
+        run action text; 
+    } 
+} 
 command chat {
     alias speak;
     [string:message...] {

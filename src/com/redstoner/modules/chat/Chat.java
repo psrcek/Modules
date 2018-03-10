@@ -32,6 +32,7 @@ public class Chat implements Module, Listener
 		Module.super.firstLoad();
 		DataManager.setConfig("chat", " %n §7→§r %m");
 		DataManager.setConfig("me", " §7- %n §7⇦ %m");
+		DataManager.setConfig("action", " %n §7 <- §r %m");
 		DataManager.setConfig("say", " §7[§9%n§7]:§r %m");
 		DataManager.setConfig("shrug", " %n §7→§r %m ¯\\_(ツ)_/¯");
 	}
@@ -56,6 +57,13 @@ public class Chat implements Module, Listener
 	public boolean chat(CommandSender sender, String message)
 	{
 		broadcastFormatted("chat", sender, message);
+		return true;
+	}
+	
+	@Command(hook = "action")
+	public boolean action(CommandSender sender, String message)
+	{
+		broadcastFormatted("action", sender, message);
 		return true;
 	}
 	
@@ -135,7 +143,7 @@ public class Chat implements Module, Listener
 	{
 		if ((boolean) DataManager.getOrDefault(sender, "muted", false))
 		{
-			Utils.noPerm(sender, "You have been muted!");
+			getLogger().message(sender, true, "You have been muted!");
 			getLogger().info(" &7User &e" + Utils.getName(sender) + " &7tried to &e" + format + " &7(&e" + message
 					+ "&7) while being &cmuted&7.");
 			return false;

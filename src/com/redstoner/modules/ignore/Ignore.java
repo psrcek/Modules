@@ -144,7 +144,7 @@ public class Ignore implements Module
 				{
 					Player player = (Player) recipient;
 					
-					if (player.hasPermission("utils.ignore.override"))
+					if (sender.hasPermission("utils.ignore.override"))
 						return true;
 					
 					JSONArray ignores = (JSONArray) DataManager.getOrDefault(recipient, "ignores", new JSONArray());
