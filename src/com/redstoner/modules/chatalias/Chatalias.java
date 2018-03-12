@@ -32,11 +32,11 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Chatalias implements Module, Listener
 {
 	private final String[] commands = new String[] {"e?r", "e?m .+?", "e?t", "e?w", "e?msg .+?", "e?message .+?",
-			"e?whisper .+?", "e?me", "cgsay", "ac", "bc"};
+			"e?whisper .+?", "e?me", "cgsay", "ac", "bc", "say", "sayn", ".+?", "chat", "shrug", "action"};
 	private JSONObject aliases = new JSONObject();
 	
 	@Override

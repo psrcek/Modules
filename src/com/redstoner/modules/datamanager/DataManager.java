@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 4, compatible = 4)
+@Version(major = 4, minor = 1, revision = 6, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -45,8 +45,10 @@ public final class DataManager implements CoreModule, Listener
 	protected ArrayList<String> module_index;
 	int old_hash = 0;
 	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<>();
-	private DataManager previous_instance = null;
+	private static DataManager previous_instance = null;
 	protected ArrayList<String> subcommands;
+	protected List<String> scheduled_saves = new ArrayList<>();
+	int task_id;
 	
 	@Override
 	public void postEnable()
@@ -75,6 +77,24 @@ public final class DataManager implements CoreModule, Listener
 		fixJson();
 		updateIndex();
 		CommandManager.registerCommand(getClass().getResourceAsStream("DataManager.cmd"), this, Main.plugin);
+		
+		// Schedule save every ten seconds
+		task_id = Bukkit.getScheduler().runTaskTimerAsynchronously(Main.plugin, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				for (String id : scheduled_saves)
+				{
+					scheduled_saves.remove(id);
+					Object raw = data.get(id);
+					if (raw == null || ((JSONObject) raw).size() == 0)
+						return;
+					JSONObject json = (JSONObject) raw;
+					JsonManager.save(json, new File(dataFolder, id + ".json"));
+				}
+			}
+		}, 0, 10000).getTaskId();
 	}
 	
 	@Override
@@ -86,6 +106,7 @@ public final class DataManager implements CoreModule, Listener
 			saveAndUnload(p);
 		}
 		JsonManager.save(config_data, new File(dataFolder, "configs.json"));
+		Bukkit.getScheduler().cancelTask(task_id);
 	}
 	
 	@Command(hook = "import_file")
@@ -535,12 +556,9 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	protected synchronized void save_(String id)
+	protected void save_(String id)
 	{
-		Object raw = data.get(id);
-		if (raw == null || ((JSONObject) raw).size() == 0)
-			return;
-		JsonManager.save((JSONObject) raw, new File(dataFolder, id + ".json"));
+		scheduled_saves.add(id);
 	}
 	
 	protected void saveAndUnload(CommandSender sender)
@@ -651,7 +669,7 @@ public final class DataManager implements CoreModule, Listener
 		if (prefix == null || prefix.equals(""))
 			return list;
 		for (String s : list)
-			if (s.startsWith(prefix))
+			if (s.toLowerCase().startsWith(prefix.toLowerCase()))
 				subset.add(s);
 		return subset;
 	}
@@ -675,7 +693,6 @@ public final class DataManager implements CoreModule, Listener
 					case "list":
 					case "get":
 					case "set":
-					case "remove":
 					{
 						event.setCompletions(
 								subsetWhereStartsWith(module_index, arguments.length == 3 ? arguments[2] : ""));
@@ -689,7 +706,6 @@ public final class DataManager implements CoreModule, Listener
 				{
 					case "get":
 					case "set":
-					case "remove":
 					{
 						Object o = config_data.get(arguments[2]);
 						if (o == null)
@@ -768,16 +784,6 @@ public final class DataManager implements CoreModule, Listener
 			getLogger().message(sender, true,
 					"§7\"§e" + value + "§7\" is not a valid value for setting §e" + module + "." + key);
 		}
-		return true;
-	}
-	
-	@Command(hook = "remove")
-	public boolean remove(CommandSender sender, String module, String key)
-	{
-		if (removeConfig_(module, key))
-			getLogger().message(sender, "Successfully deleted the config entry §e" + module + "." + key + "§7!");
-		else
-			getLogger().message(sender, true, "Could not delete the config entry §e" + module + "." + key + "§7!");
 		return true;
 	}
 	
