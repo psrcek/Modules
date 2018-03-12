@@ -24,7 +24,7 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Chat implements Module, Listener
 {
 	
@@ -42,7 +42,7 @@ public class Chat implements Module, Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerChat(AsyncPlayerChatEvent event)
 	{
-	        if (event.isCancelled())
+		if (event.isCancelled())
 			return;
 		Player player = event.getPlayer();
 		String message = event.getMessage();
@@ -154,7 +154,8 @@ public class Chat implements Module, Listener
 		}
 		String raw = (String) DataManager.getConfigOrDefault(format, " %n §7→§r %m");
 		String formatted = raw.replace("%n", name).replace("%m", message);
-		Utils.broadcast("", ChatAPI.colorify(sender, formatted), wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
+		Utils.broadcast("", ChatAPI.colorify(sender, formatted),
+				wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
 		return true;
 	}
 	
