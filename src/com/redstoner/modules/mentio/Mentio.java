@@ -30,7 +30,7 @@ import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Mentio implements Module, Listener
 {
 	private File mentioLocation = new File(Main.plugin.getDataFolder(), "mentio.json");
