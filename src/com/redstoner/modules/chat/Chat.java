@@ -39,9 +39,11 @@ public class Chat implements Module, Listener
 		DataManager.setConfig("shrug", " %n §7→§r %m ¯\\_(ツ)_/¯");
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerChat(AsyncPlayerChatEvent event)
 	{
+	        if (event.isCancelled())
+			return;
 		Player player = event.getPlayer();
 		String message = event.getMessage();
 		event.setCancelled(true);
