@@ -20,6 +20,8 @@ import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 import com.redstoner.modules.ignore.Ignore;
 
+import net.nemez.chatapi.ChatAPI;
+
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
 @Version(major = 4, minor = 0, revision = 1, compatible = 4)
@@ -150,7 +152,7 @@ public class Chat implements Module, Listener
 		}
 		String raw = (String) DataManager.getConfigOrDefault(format, " %n §7→§r %m");
 		String formatted = raw.replace("%n", name).replace("%m", message);
-		Utils.broadcast("", formatted, wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
+		Utils.broadcast("", ChatAPI.colorify(sender, formatted), wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
 		return true;
 	}
 	

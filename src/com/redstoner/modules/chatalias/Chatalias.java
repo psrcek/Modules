@@ -36,7 +36,7 @@ import net.nemez.chatapi.ChatAPI;
 public class Chatalias implements Module, Listener
 {
 	private final String[] commands = new String[] {"e?r", "e?m .+?", "e?t", "e?w", "e?msg .+?", "e?message .+?",
-			"e?whisper .+?", "e?me", "cgsay", "ac", "bc", "say", "sayn" ."+?", "chat", "shrug", "action"};
+			"e?whisper .+?", "e?me", "cgsay", "ac", "bc", "say", "sayn", ".+?", "chat", "shrug", "action"};
 	private JSONObject aliases = new JSONObject();
 	
 	@Override
