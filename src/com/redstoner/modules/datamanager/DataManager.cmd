@@ -1,6 +1,6 @@
 command data {
     import [string:file] as [string:module] {
-        run config_import_file file module;
+        run import_file file module;
         type console;
     }
 }
@@ -19,7 +19,7 @@ command config {
         help Lists all config settings of the specified module.;
     }
     get [string:module] [string:key] {
-        run get module key;
+        run config_get module key;
         help Displays the value of the specified setting.;
     }
     set [string:module] [string:key] [string:value...] {
