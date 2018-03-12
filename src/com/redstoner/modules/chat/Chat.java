@@ -2,6 +2,7 @@ package com.redstoner.modules.chat;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +25,7 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 6, compatible = 4)
+@Version(major = 4, minor = 0, revision = 7, compatible = 4)
 public class Chat implements Module, Listener
 {
 	
@@ -176,6 +177,8 @@ public class Chat implements Module, Listener
 				@Override
 				public boolean sendTo(CommandSender recipient)
 				{
+					if (recipient instanceof ConsoleCommandSender)
+						return true;
 					return filter.sendTo(recipient) && event.getRecipients().contains(recipient);
 				}
 			};
