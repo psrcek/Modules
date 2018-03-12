@@ -28,7 +28,7 @@ command shrug {
     }
     [empty] {
         perm utils.shrug;
-        run shrug;
+        run shrugnoarg;
         help Just the shrug emoticon.; 
     }
 }
