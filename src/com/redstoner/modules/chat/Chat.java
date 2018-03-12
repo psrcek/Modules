@@ -97,6 +97,13 @@ public class Chat implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "shrugnoarg")
+	public boolean shrug(CommandSender sender)
+	{
+		broadcastFormatted("shrug", sender, "");
+		return true;
+	}
+	
 	@Command(hook = "mute")
 	public boolean mute(CommandSender sender, String player)
 	{

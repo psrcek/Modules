@@ -19,10 +19,12 @@ import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.ignore.Ignore;
 
 import net.nemez.chatapi.click.Message;
 
@@ -127,6 +129,8 @@ public class Mentio implements Module, Listener
 			return;
 		for (Player player : event.getRecipients())
 		{
+			if (ModuleLoader.exists("Ignore") ? !Ignore.getIgnoredBy(event.getPlayer()).sendTo(player) : false)
+				return;
 			UUID uuid = player.getUniqueId();
 			JSONArray playerMentios = (JSONArray) mentios.get(uuid.toString());
 			if (playerMentios == null)
