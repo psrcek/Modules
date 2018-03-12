@@ -24,7 +24,7 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Chat implements Module, Listener
 {
 	
@@ -47,7 +47,7 @@ public class Chat implements Module, Listener
 		Player player = event.getPlayer();
 		String message = event.getMessage();
 		event.setCancelled(true);
-		broadcastFormatted("chat", player, message);
+		broadcastFormatted("chat", player, message, event);
 	}
 	
 	@Command(hook = "me")
