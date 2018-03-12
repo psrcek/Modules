@@ -19,16 +19,18 @@ import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
 import com.redstoner.annotations.Version;
+import com.redstoner.coremods.moduleLoader.ModuleLoader;
 import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.JsonManager;
 import com.redstoner.misc.Main;
 import com.redstoner.modules.Module;
+import com.redstoner.modules.ignore.Ignore;
 
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Mentio implements Module, Listener
 {
 	private File mentioLocation = new File(Main.plugin.getDataFolder(), "mentio.json");
@@ -120,13 +122,15 @@ public class Mentio implements Module, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerChat(AsyncPlayerChatEvent event)
 	{
 		if (event.isCancelled())
 			return;
 		for (Player player : event.getRecipients())
 		{
+			if (ModuleLoader.exists("Ignore") ? !Ignore.getIgnoredBy(event.getPlayer()).sendTo(player) : false)
+				return;
 			UUID uuid = player.getUniqueId();
 			JSONArray playerMentios = (JSONArray) mentios.get(uuid.toString());
 			if (playerMentios == null)

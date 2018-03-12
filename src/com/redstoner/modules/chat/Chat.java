@@ -24,7 +24,7 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class Chat implements Module, Listener
 {
 	
@@ -39,13 +39,15 @@ public class Chat implements Module, Listener
 		DataManager.setConfig("shrug", " %n §7→§r %m ¯\\_(ツ)_/¯");
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerChat(AsyncPlayerChatEvent event)
 	{
+		if (event.isCancelled())
+			return;
 		Player player = event.getPlayer();
 		String message = event.getMessage();
 		event.setCancelled(true);
-		broadcastFormatted("chat", player, message);
+		broadcastFormatted("chat", player, message, event);
 	}
 	
 	@Command(hook = "me")
@@ -95,6 +97,13 @@ public class Chat implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "shrugnoarg")
+	public boolean shrug(CommandSender sender)
+	{
+		broadcastFormatted("shrug", sender, "");
+		return true;
+	}
+	
 	@Command(hook = "mute")
 	public boolean mute(CommandSender sender, String player)
 	{
@@ -137,7 +146,7 @@ public class Chat implements Module, Listener
 	
 	public boolean broadcastFormatted(String format, CommandSender sender, String message, AsyncPlayerChatEvent event)
 	{
-		return broadcastFormatted(format, sender, message, Utils.getName(sender), null);
+		return broadcastFormatted(format, sender, message, Utils.getName(sender), event);
 	}
 	
 	public boolean broadcastFormatted(String format, CommandSender sender, String message, String name,
@@ -152,7 +161,8 @@ public class Chat implements Module, Listener
 		}
 		String raw = (String) DataManager.getConfigOrDefault(format, " %n §7→§r %m");
 		String formatted = raw.replace("%n", name).replace("%m", message);
-		Utils.broadcast("", ChatAPI.colorify(sender, formatted), wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
+		Utils.broadcast("", ChatAPI.colorify(sender, formatted),
+				wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
 		return true;
 	}
 	

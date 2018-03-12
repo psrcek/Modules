@@ -26,6 +26,11 @@ command shrug {
         run shrug message;
         help Appends the shrug emoticon to the end of your message.; 
     }
+    [empty] {
+        perm utils.shrug;
+        run shrug;
+        help Just the shrug emoticon.; 
+    }
 }
 command say {
     [string:message...] { 
