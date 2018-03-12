@@ -120,7 +120,7 @@ public class Mentio implements Module, Listener
 	}
 	
 	@SuppressWarnings("unchecked")
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerChat(AsyncPlayerChatEvent event)
 	{
 		if (event.isCancelled())
