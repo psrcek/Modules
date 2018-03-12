@@ -24,7 +24,7 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class Chat implements Module, Listener
 {
 	
@@ -139,7 +139,7 @@ public class Chat implements Module, Listener
 	
 	public boolean broadcastFormatted(String format, CommandSender sender, String message, AsyncPlayerChatEvent event)
 	{
-		return broadcastFormatted(format, sender, message, Utils.getName(sender), null);
+		return broadcastFormatted(format, sender, message, Utils.getName(sender), event);
 	}
 	
 	public boolean broadcastFormatted(String format, CommandSender sender, String message, String name,
