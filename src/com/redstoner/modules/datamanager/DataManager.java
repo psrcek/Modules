@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 8, compatible = 4)
+@Version(major = 4, minor = 1, revision = 9, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -734,14 +734,14 @@ public final class DataManager implements CoreModule, Listener
 		}
 	}
 	
-	@Command(hook = "list")
+	@Command(hook = "config_list")
 	public boolean list(CommandSender sender)
 	{
 		getLogger().message(sender, Arrays.toString(module_index.toArray(new String[] {})));
 		return true;
 	}
 	
-	@Command(hook = "list2")
+	@Command(hook = "config_list2")
 	public boolean list(CommandSender sender, String module)
 	{
 		Object o = config_data.get(module);
@@ -764,7 +764,7 @@ public final class DataManager implements CoreModule, Listener
 		return true;
 	}
 	
-	@Command(hook = "get")
+	@Command(hook = "config_get")
 	public boolean get(CommandSender sender, String module, String key)
 	{
 		getLogger().message(sender, new String[] {"§e" + module + "." + key + "§7 currently holds the value:",
@@ -772,7 +772,7 @@ public final class DataManager implements CoreModule, Listener
 		return true;
 	}
 	
-	@Command(hook = "set")
+	@Command(hook = "config_set")
 	public boolean set(CommandSender sender, String module, String key, String value)
 	{
 		if (setConfig_(module, key, value))
@@ -787,7 +787,7 @@ public final class DataManager implements CoreModule, Listener
 		return true;
 	}
 	
-	@Command(hook = "remove_all")
+	@Command(hook = "config_remove_all")
 	public boolean remove_all(CommandSender sender, String module)
 	{
 		if (removeAllConfig_(module))
