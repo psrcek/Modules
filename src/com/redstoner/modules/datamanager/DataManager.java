@@ -36,7 +36,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.Stream)
 @AutoRegisterListener
-@Version(major = 4, minor = 1, revision = 5, compatible = 4)
+@Version(major = 4, minor = 1, revision = 6, compatible = 4)
 public final class DataManager implements CoreModule, Listener
 {
 	protected final File dataFolder = new File(Main.plugin.getDataFolder(), "data");
@@ -45,8 +45,10 @@ public final class DataManager implements CoreModule, Listener
 	protected ArrayList<String> module_index;
 	int old_hash = 0;
 	protected HashMap<String, HashMap<String, Boolean>> states = new HashMap<>();
-	private DataManager previous_instance = null;
+	private static DataManager previous_instance = null;
 	protected ArrayList<String> subcommands;
+	protected List<String> scheduled_saves = new ArrayList<>();
+	int task_id;
 	
 	@Override
 	public void postEnable()
@@ -75,6 +77,24 @@ public final class DataManager implements CoreModule, Listener
 		fixJson();
 		updateIndex();
 		CommandManager.registerCommand(getClass().getResourceAsStream("DataManager.cmd"), this, Main.plugin);
+		
+		// Schedule save every ten seconds
+		task_id = Bukkit.getScheduler().runTaskTimerAsynchronously(Main.plugin, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				for (String id : scheduled_saves)
+				{
+					scheduled_saves.remove(id);
+					Object raw = data.get(id);
+					if (raw == null || ((JSONObject) raw).size() == 0)
+						return;
+					JSONObject json = (JSONObject) raw;
+					JsonManager.save(json, new File(dataFolder, id + ".json"));
+				}
+			}
+		}, 0, 10000).getTaskId();
 	}
 	
 	@Override
@@ -86,6 +106,7 @@ public final class DataManager implements CoreModule, Listener
 			saveAndUnload(p);
 		}
 		JsonManager.save(config_data, new File(dataFolder, "configs.json"));
+		Bukkit.getScheduler().cancelTask(task_id);
 	}
 	
 	@Command(hook = "import_file")
@@ -535,12 +556,9 @@ public final class DataManager implements CoreModule, Listener
 		{}
 	}
 	
-	protected synchronized void save_(String id)
+	protected void save_(String id)
 	{
-		Object raw = data.get(id);
-		if (raw == null || ((JSONObject) raw).size() == 0)
-			return;
-		JsonManager.save((JSONObject) raw, new File(dataFolder, id + ".json"));
+		scheduled_saves.add(id);
 	}
 	
 	protected void saveAndUnload(CommandSender sender)
