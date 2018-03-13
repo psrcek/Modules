@@ -65,6 +65,13 @@ public class Chat implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "chatn")
+	public boolean chatn(CommandSender sender, String name, String message)
+	{
+		broadcastFormatted("chat", sender, message, name);
+		return true;
+	}
+	
 	@Command(hook = "action")
 	public boolean action(CommandSender sender, String message)
 	{

@@ -95,6 +95,7 @@ public class AFK implements Module, Listener
 		}
 		else
 		{
+			DataManager.setData(sender, "afk_time", System.currentTimeMillis());
 			DataManager.setData(sender, "afk_reason", reason);
 			DataManager.setState(sender, "afk", true);
 			if (!silent)

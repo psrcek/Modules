@@ -20,6 +20,14 @@ command chat {
         help A way to speak in normal chat with normal formatting if you have ACT or CGT on.; 
     }
 }
+command chatn {
+    alias speakn;
+    [string:name] [string:message...] {
+        perm utils.chatn;
+        run chatn name message;
+        help A way to speak in normal chat with normal formatting for console users.; 
+    }
+}
 command shrug {
     [string:message...] {
         perm utils.shrug;

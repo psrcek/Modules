@@ -37,6 +37,8 @@ import com.redstoner.misc.CommandHolderType;
 import com.redstoner.misc.Main;
 import com.redstoner.modules.Module;
 
+import net.nemez.chatapi.ChatAPI;
+
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
 @Version(major = 4, minor = 0, revision = 0, compatible = 4)
@@ -330,12 +332,12 @@ public class DamnSpam implements Module, Listener
 				if (checktime == -1)
 				{
 					event.setCancelled(true);
-					getLogger().message(sender, "This " + btype + " is locked permanently by /damnspam.");
+					ChatAPI.sendActionBar(sender, "This " + btype + " is locked permanently by /damnspam.");
 				}
 				else if (timeLeft > 0)
 				{
 					event.setCancelled(true);
-					getLogger().message(sender, "This " + btype + " has a damnspam timeout of " + checktime + ", with "
+					ChatAPI.sendActionBar(sender, "This " + btype + " has a damnspam timeout of " + checktime + ", with "
 							+ timeLeft + " left.");
 				}
 				else

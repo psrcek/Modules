@@ -95,8 +95,11 @@ public class Seen implements Module, Listener
 			{
 				message.add("They're currently &eAFK&7:");
 				String reason = (String) DataManager.getOrDefault(p.getUniqueId().toString(), "AFK", "afk_reason", "");
+				Long timeAFK = (Long) DataManager.getOrDefault(p.getUniqueId().toString(), "AFK", "afk_time", "");
+				message.add(" &9For: " +  DateUtil.formatDateDiff(timeAFK));
 				if (reason.length() >= 1)
-					message.add(" &5- " + reason);
+					message.add(" &9Reason: " + reason);
+				
 			}
 			if (DataManager.getState((Player) p, "vanished"))
 				message.add("They're currently &evanished&7!");
