@@ -16,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.EventExecutor;
-
 import com.nemez.cmdmgr.Command;
 import com.redstoner.annotations.AutoRegisterListener;
 import com.redstoner.annotations.Commands;
@@ -35,6 +34,7 @@ public class AFK implements Module, Listener
 {
 	private CustomListener listener;
 	boolean move = true, look = false;
+	
 	
 	@Override
 	public void firstLoad()
@@ -76,27 +76,23 @@ public class AFK implements Module, Listener
 	}
 	
 	@Command(hook = "afk")
-	public boolean afk(CommandSender sender)
+	public boolean afk(CommandSender sender, boolean silent)
 	{
-		return afk(sender, "");
+		return afk(sender, silent, "");
 	}
 	
 	@Command(hook = "afk2")
-	public boolean afk(CommandSender sender, String reason)
-	{
-		return afk(sender, reason, false);
-	}
-	
-	public boolean afk(CommandSender sender, String reason, boolean silent)
+	public boolean afk(CommandSender sender, boolean silent, String reason)
 	{
 		if (isafk(sender))
 		{
-			unafk(sender);
+			unafk(sender, silent);
 		}
 		else
 		{
 			DataManager.setData(sender, "afk_time", System.currentTimeMillis());
 			DataManager.setData(sender, "afk_reason", reason);
+			DataManager.setState(sender, "afk_silent", silent);
 			DataManager.setState(sender, "afk", true);
 			if (!silent)
 				Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is now AFK", null);
@@ -104,10 +100,11 @@ public class AFK implements Module, Listener
 		return true;
 	}
 	
-	public void unafk(CommandSender sender)
+	public void unafk(CommandSender sender, boolean silent)
 	{
 		DataManager.setState(sender, "afk", false);
-		Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is no longer AFK", null);
+		if (!silent)
+			Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is no longer AFK", null);
 	}
 	
 	public boolean isafk(CommandSender sender)
@@ -201,12 +198,18 @@ class CustomListener implements Listener, EventExecutor
 	public void unafk(CommandSender sender)
 	{
 		DataManager.setState(sender, "afk", false);
-		Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is no longer AFK", null);
+		if ( !isSilent(sender) )
+			Utils.broadcast("§7 * ", Utils.getName(sender) + "§7 is no longer AFK", null);
 	}
 	
 	public boolean isafk(CommandSender sender)
 	{
 		return DataManager.getState(sender, "afk");
+	}
+	
+	public boolean isSilent(CommandSender sender)
+	{
+		return DataManager.getState(sender, "afk_silent");
 	}
 	
 	public boolean isVanished(Player player)
