@@ -197,15 +197,12 @@ public class Chatalias implements Module, Listener
 			String keyword = (String) key;
 			String replacement = ( (String) playerAliases.get(key) ).substring(1);
 			
-			System.out.println( "\"" + command + "\" | \"" + keyword + "\" | \"" + replacement + "\"");
-			
 			if ( keyword.startsWith("C") ) {
 				
 				String newCommand = keyword.substring(3);
 				
 				if ( command.startsWith(newCommand) ) {
 					command = command.replaceAll(newCommand, replacement);
-					System.out.println(command);
 					player.performCommand(command);
 					event.setCancelled(true);
 					return true;

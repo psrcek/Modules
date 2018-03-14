@@ -5,7 +5,7 @@ command alias {
     }
     del -c [string:keyword] {
         help Deletes a command alias.; 
-        run delcommandalias -r keyword; 
+        run delcommandalias keyword; 
     }
     add [flag:-r] [string:keyword] [string:replacement...] { 
         help Adds a new alias. Set -r to make it a regex-alias.; 
