@@ -167,7 +167,7 @@ public class DamnSpam implements Module, Listener
 			getLogger().message(sender, true, "The timeout must be -1 or within 0 and " + maxTimeout);
 			return;
 		}
-		getLogger().message(sender, "Please click the input you would like to set.");
+		ChatAPI.sendActionBar(sender, "Please click the input you would like to set.");
 		setPlayer((Player) sender, destroyingInput, secondsOff, secondsOn);
 	}
 	
@@ -238,12 +238,11 @@ public class DamnSpam implements Module, Listener
 		SpamInput input = inputs.get(posStr);
 		Player sender = event.getPlayer();
 		String typeStr = block.getType().toString().toLowerCase().replace("_", " ");
-		String inputStr = (block.getLocation().equals(event.getBlock()) ? "this " + typeStr
+		String inputStr = (block.getLocation().equals(event.getBlock()) ? "the " + typeStr
 				: "the " + typeStr + " attached to that block");
 		if (!sender.isSneaking())
 		{
-			getLogger().message(sender, true, "You cannot destroy " + inputStr);
-			getLogger().message(sender, true, "Sneak and break or set the timeout to 0 if you want to remove it.");
+			ChatAPI.sendActionBar(sender, "&7To destroy the" + typeStr + ", hold &esneak&7 while breaking it.");
 			event.setCancelled(true);
 			return;
 		}
@@ -251,11 +250,11 @@ public class DamnSpam implements Module, Listener
 		{
 			inputs.remove(posStr);
 			saveInputs();
-			getLogger().message(sender, "Succesfully removed " + inputStr);
+			ChatAPI.sendActionBar(sender, "&7Succesfully destroyed the" + typeStr + ".");
 		}
 		else
 		{
-			getLogger().message(sender, true, "You are not allowed to remove " + inputStr);
+			ChatAPI.sendActionBar(sender, "You are not allowed to remove the" + typeStr);
 			event.setCancelled(true);
 		}
 	}
@@ -332,13 +331,13 @@ public class DamnSpam implements Module, Listener
 				if (checktime == -1)
 				{
 					event.setCancelled(true);
-					ChatAPI.sendActionBar(sender, "This " + btype + " is locked permanently by /damnspam.");
+					ChatAPI.sendActionBar(sender, "&7This " + btype + " is locked permanently by /damnspam.");
 				}
 				else if (timeLeft > 0)
 				{
 					event.setCancelled(true);
-					ChatAPI.sendActionBar(sender, "This " + btype + " has a damnspam timeout of " + checktime + ", with "
-							+ timeLeft + " left.");
+					ChatAPI.sendActionBar(sender, "&7This " + btype + " has a damnspam timeout of &e" + checktime + "&7, with &e"
+							+ timeLeft + "&7 left.");
 				}
 				else
 				{

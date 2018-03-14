@@ -76,6 +76,12 @@ public class AFK implements Module, Listener
 	}
 	
 	@Command(hook = "afk")
+	public boolean afk(CommandSender sender)
+	{
+		return afk(sender, false, "");
+	}
+	
+	@Command(hook = "afks")
 	public boolean afk(CommandSender sender, boolean silent)
 	{
 		return afk(sender, silent, "");

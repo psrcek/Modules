@@ -2,8 +2,12 @@ command afk {
     alias eafk;
     alias away;
     alias eaway;
+    [empty] {
+        run afk;
+        perm utils.afk;
+    }
     [optional:-s] {
-        run afk -s;
+        run afks -s;
         perm utils.afk;
     }
     [optional:-s] [string:reason...] {
