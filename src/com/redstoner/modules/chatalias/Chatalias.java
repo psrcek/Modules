@@ -30,9 +30,9 @@ import com.redstoner.modules.Module;
 
 import net.nemez.chatapi.ChatAPI;
 
-@Commands(CommandHolderType.String)
+@Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class Chatalias implements Module, Listener
 {
 	private final String[] commands = new String[] {"e?r", "e?m .+?", "e?t", "e?w", "e?msg .+?", "e?message .+?",
@@ -43,9 +43,7 @@ public class Chatalias implements Module, Listener
 	public boolean onEnable()
 	{
 		for (Player p : Bukkit.getOnlinePlayers())
-		{
 			loadAliases(p.getUniqueId());
-		}
 		return true;
 	}
 	
@@ -131,6 +129,9 @@ public class Chatalias implements Module, Listener
 	{
 		if (event.isCancelled())
 			return;
+		if ( commandAlias(event) )
+			return;
+		
 		boolean listening = false;
 		String command = "";
 		for (String s : commands)
@@ -184,19 +185,67 @@ public class Chatalias implements Module, Listener
 		event.setMessage(command + event.getMessage());
 	}
 	
-	@SuppressWarnings("unchecked")
+	public boolean commandAlias(PlayerCommandPreprocessEvent event) {
+		
+		Player player = event.getPlayer();
+		UUID uuid = player.getUniqueId();
+		JSONObject playerAliases = (JSONObject) aliases.get(uuid.toString());
+		String command = event.getMessage();
+		
+		for (Object key : playerAliases.keySet()) {
+			
+			String keyword = (String) key;
+			String replacement = ( (String) playerAliases.get(key) ).substring(1);
+			
+			System.out.println( "\"" + command + "\" | \"" + keyword + "\" | \"" + replacement + "\"");
+			
+			if ( keyword.startsWith("C") ) {
+				
+				String newCommand = keyword.substring(3);
+				
+				if ( command.startsWith(newCommand) ) {
+					command = command.replaceAll(newCommand, replacement);
+					System.out.println(command);
+					player.performCommand(command);
+					event.setCancelled(true);
+					return true;
+				}
+			}
+		}
+		return false; 
+			
+	}
+	
+	@Command(hook = "addcommandalias")
+	public boolean addCommandAlias(CommandSender sender, String keyword, String replacement) {
+		return addAlias(sender, 'C', keyword, replacement);
+	}
+	
 	@Command(hook = "addalias")
-	public boolean addAlias(CommandSender sender, boolean regex, String keyword, String replacement)
+	public boolean addAlias(CommandSender sender, boolean regex, String keyword, String replacement) {
+		return addAlias(sender, regex? 'R' : 'N', keyword, replacement);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean addAlias(CommandSender sender, char type, String keyword, String replacement)
 	{
-		if (regex && keyword.equals(".*"))
+		if (type == 'R' && keyword.equals(".*"))
 		{
 			getLogger().message(sender, true, "You may not define the wildcard regex as an alias.");
 			return true;
 		}
+		
+		if (type == 'C') {
+			if (!keyword.startsWith("/"))
+				keyword = "/" + keyword;
+			if (!replacement.startsWith("/"))
+				replacement = "/" + replacement;
+		}
+		
 		Player player = (Player) sender;
 		UUID uuid = player.getUniqueId();
 		JSONObject data = (JSONObject) aliases.get(uuid.toString());
-		keyword = (regex ? "R: " : "N: ") + keyword;
+		keyword = type + ": " + keyword;
 		if (!data.containsKey(keyword))
 		{
 			int maxAmount;
@@ -215,9 +264,9 @@ public class Chatalias implements Module, Listener
 			}
 		}
 		data.put(keyword, replacement);
-		if (sender.hasPermission("essentials.chat.color"))
+		if (type == 'C')
 			getLogger().message(sender,
-					"Successfully created alias " + keyword.substring(3) + " §7-> " + replacement + " §7for you.");
+					"Successfully created command alias " + keyword.substring(3) + " §7-> " + replacement + " §7for you.");
 		else
 			getLogger().message(sender,
 					"Successfully created alias " + keyword.substring(3) + " §7-> " + replacement + " §7for you.");
@@ -225,22 +274,37 @@ public class Chatalias implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "delcommandalias")
+	public boolean delAlias(CommandSender sender, String keyword) {
+		return delAlias(sender, 'C', keyword);
+	}
+	
 	@Command(hook = "delalias")
-	public boolean delAlias(CommandSender sender, boolean regex, String keyword)
+	public boolean delAlias(CommandSender sender, boolean regex, String keyword) {
+		return delAlias(sender, regex? 'R' : 'N', keyword);
+	}
+	
+	public boolean delAlias(CommandSender sender, char type, String keyword)
 	{
 		Player player = (Player) sender;
 		UUID uuid = player.getUniqueId();
 		JSONObject data = (JSONObject) aliases.get(uuid.toString());
-		keyword = (regex ? "R: " : "N: ") + keyword;
+		keyword = type + ": " + keyword;
 		if (data.remove(keyword) != null)
 		{
-			getLogger().message(sender, "Successfully removed the alias!");
+			if (type == 'C')
+				getLogger().message(sender, "Successfully removed the command alias!");
+			else
+				getLogger().message(sender, "Successfully removed the alias!");
 			saveAliases(uuid);
 			return true;
 		}
 		else
 		{
-			getLogger().message(sender, true, "That alias doesn't exist! Hint: regex/no regex does matter for this.");
+			if (type == 'C')
+				getLogger().message(sender, true, "That command alias doesn't exist!");
+			else
+				getLogger().message(sender, true, "That alias doesn't exist! Hint: regex/no regex does matter for this.");
 			return true;
 		}
 	}
@@ -314,27 +378,4 @@ public class Chatalias implements Module, Listener
 		temp.put("data", aliases.get(uuid.toString()));
 		JsonManager.save(temp, new File(Main.plugin.getDataFolder(), "aliases/" + uuid.toString() + ".json"));
 	}
-	
-	// @noformat
-	@Override
-	public String getCommandString()
-	{
-		return "command alias {\n" + 
-				"    add [flag:-r] [string:keyword] [string:replacement...] {\n" + 
-				"        help Adds a new alias. Set -r to make it a regex-alias.;\n" + 
-				"        run addalias -r keyword replacement;\n" + 
-				"    }\n" + 
-				"    del [flag:-r] [string:keyword] {\n" + 
-				"        help Deletes an alias. -r indicates if it was a regex-alias.;\n" + 
-				"        run delalias -r keyword;\n" + 
-				"    }\n" + 
-				"    list {\n" + 
-				"        help Lists your aliases.;\n" + 
-				"        run listaliases;\n" + 
-				"    }\n" + 
-				"    perm utils.alias;\n" + 
-				"    type player;\n" + 
-				"}";
-	}
-	// @format
 }
