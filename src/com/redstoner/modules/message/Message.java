@@ -24,12 +24,25 @@ import com.redstoner.modules.datamanager.DataManager;
 import com.redstoner.modules.ignore.Ignore;
 import com.redstoner.modules.socialspy.Socialspy;
 
+import net.nemez.chatapi.ChatAPI;
+
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 3, compatible = 4)
+@Version(major = 4, minor = 0, revision = 4, compatible = 4)
 public class Message implements Module
 {
 	HashMap<CommandSender, CommandSender> replyTargets = new HashMap<>();
-	HashMap<Player, String> toggles = new HashMap<Player, String>();
+	HashMap<Player, String> toggles = new HashMap<>();
+	
+	@Override
+	public void migrate(Version old)
+	{
+		Module.super.migrate(old);
+		if (old.major() == 4 && old.minor() == 0 && old.revision() <= 3)
+		{
+			DataManager.setConfig("from", getDefaultFormatFrom());
+			DataManager.setConfig("to", getDefaultFormatTo());
+		}
+	}
 	
 	@Command(hook = "message", async = AsyncType.ALWAYS)
 	public boolean message(CommandSender sender, String target, String message)
@@ -44,7 +57,8 @@ public class Message implements Module
 			getLogger().message(sender, true, "That player couldn't be found!");
 			return true;
 		}
-		else if (ModuleLoader.exists("Ignore")? !Ignore.getIgnoredBy(sender).sendTo(p) : true) {
+		else if (ModuleLoader.exists("Ignore") ? !Ignore.getIgnoredBy(sender).sendTo(p) : true)
+		{
 			getLogger().message(sender, true, Utils.getName(p) + " has ignored you. Your message was not sent.");
 			return true;
 		}
@@ -60,14 +74,22 @@ public class Message implements Module
 					}
 				});
 			
+			String format = (String) DataManager.getConfigOrDefault("to", getDefaultFormatTo());
+			format = ChatAPI.colorify(null, format);
+			format = applyFormat(format, sender, p, message);
 			net.nemez.chatapi.click.Message m = new net.nemez.chatapi.click.Message(sender, null);
-			m.appendText("&6[&cme &6-> " + Utils.getName(p) + "&6] " + "§f" + message);
+			m.appendText(format);
 			m.send();
 			
-			net.nemez.chatapi.click.Message m2 = new net.nemez.chatapi.click.Message(p, null);
-			m2.appendText("&6[" + Utils.getName(sender) + " &6-> &cme&6] " + "§f" + message);
-			m2.send();
-			
+			if (!sender.equals(p))
+			{
+				format = (String) DataManager.getConfigOrDefault("from", getDefaultFormatFrom());
+				format = ChatAPI.colorify(null, format);
+				format = applyFormat(format, sender, p, message);
+				net.nemez.chatapi.click.Message m2 = new net.nemez.chatapi.click.Message(p, null);
+				m2.appendText(format);
+				m2.send();
+			}
 			replyTargets.put(sender, p);
 			replyTargets.put(p, sender);
 			
@@ -88,7 +110,8 @@ public class Message implements Module
 			getLogger().message(sender, true, "You don't have anyone to reply to!");
 			return true;
 		}
-		else if (ModuleLoader.exists("Ignore")? !Ignore.getIgnoredBy(sender).sendTo(target) : true) {
+		else if (ModuleLoader.exists("Ignore") ? !Ignore.getIgnoredBy(sender).sendTo(target) : true)
+		{
 			getLogger().message(sender, true, Utils.getName(target) + " has ignored you. Your message was not sent.");
 			return true;
 		}
@@ -104,13 +127,22 @@ public class Message implements Module
 					}
 				});
 			
+			String format = (String) DataManager.getConfigOrDefault("to", getDefaultFormatTo());
+			format = ChatAPI.colorify(null, format);
+			format = applyFormat(format, sender, target, message);
 			net.nemez.chatapi.click.Message m = new net.nemez.chatapi.click.Message(sender, null);
-			m.appendText("&6[&cme &6-> " + Utils.getName(target) + "&6] " + "§f" + message);
+			m.appendText(format);
 			m.send();
 			
-			net.nemez.chatapi.click.Message m2 = new net.nemez.chatapi.click.Message(target, null);
-			m2.appendText("&6[" + Utils.getName(sender) + " &6-> &cme&6] " + "§f" + message);
-			m2.send();
+			if (!sender.equals(target))
+			{
+				format = (String) DataManager.getConfigOrDefault("from", getDefaultFormatFrom());
+				format = ChatAPI.colorify(null, format);
+				format = applyFormat(format, sender, target, message);
+				net.nemez.chatapi.click.Message m2 = new net.nemez.chatapi.click.Message(target, null);
+				m2.appendText(format);
+				m2.send();
+			}
 		}
 		replyTargets.put(sender, target);
 		replyTargets.put(target, sender);
@@ -167,5 +199,28 @@ public class Message implements Module
 					getLogger().message(entry.getKey(),
 							"We removed your pmtoggle for &6" + player + "&7, as they left the game.");
 				}
+	}
+	
+	public String applyFormat(String format, CommandSender sender, CommandSender target, String message)
+	{
+		format = format.replace("%%", "§§");
+		format = format.replace("%s", Utils.getName(sender));
+		format = format.replace("%S", sender.getName());
+		format = format.replace("%t", Utils.getName(target));
+		format = format.replace("%T", target.getName());
+		format = format.replace("%m", message);
+		format = format.replaceAll("§§", "%");
+		
+		return format;
+	}
+	
+	public String getDefaultFormatFrom()
+	{
+		return "&6[&9%s&6 -> &cme&6]&f %m";
+	}
+	
+	public String getDefaultFormatTo()
+	{
+		return "&6[&cme&6 -> &9%t&6]&f %m";
 	}
 }
