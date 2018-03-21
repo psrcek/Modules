@@ -1,11 +1,15 @@
 command socialspy {
     format {
-        run format_show;
+        run config_format_show;
         help Displays your current format;
     }
     format --default {
         run config_format_default;
-        help Resets your format back to the default: &e%s;
+        help Resets your format back to the default;
+    }
+    format --reset {
+        run config_format_default;
+        help Resets your format back to the default;
     }
     format [string:format...] {
         run config_format format;

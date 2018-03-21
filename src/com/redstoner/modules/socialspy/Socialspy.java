@@ -25,7 +25,7 @@ import com.redstoner.modules.datamanager.DataManager;
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Socialspy implements CoreModule
 {
 	@Command(hook = "config_prefix_default")
@@ -49,9 +49,9 @@ public class Socialspy implements CoreModule
 	}
 	
 	@Command(hook = "config_format_show")
-	public boolean configFormatShow(CommandSender sender, String format)
+	public boolean configFormatShow(CommandSender sender)
 	{
-		DataManager.getOrDefault(sender, "format", getDefaultFormat());
+		String format = (String) DataManager.getOrDefault(sender, "format", getDefaultFormat());
 		getLogger().message(sender, "Your current format is: " + format.replaceAll("[&§]", "&&"));
 		return true;
 	}
@@ -83,7 +83,7 @@ public class Socialspy implements CoreModule
 	@Command(hook = "stripcolor_partial")
 	public boolean stripcolor_partial(CommandSender sender)
 	{
-		getLogger().message(sender, "Disabled stripping colors!");
+		getLogger().message(sender, "Now replacing colors with their colorcode equivalent!");
 		DataManager.setData(sender, "stripcolor", "partial");
 		return true;
 	}
@@ -130,8 +130,8 @@ public class Socialspy implements CoreModule
 						" &c%t&earget &7(display name) | &c%T&earget &7(real name)",
 						" &c%p&erefix &7(see prefix option)", " &c%m&eessage", " &c%c&eommand",
 						" Any other text will be put as literal text. Use %% to escape any %.",
-						" The default format is: §e" + getDefaultFormat(),
-						" The default prefix is: §e" + getDefaultPrefix()});
+						" The default format is: §e" + getDefaultFormat().replaceAll("(?i)&([0-9a-fl-o])", "&&$1"),
+						" The default prefix is: §e" + getDefaultPrefix().replaceAll("(?i)&([0-9a-fl-o])", "&&$1")});
 		return true;
 	}
 	
@@ -289,9 +289,7 @@ public class Socialspy implements CoreModule
 		format = ChatColor.translateAlternateColorCodes('&', format);
 		// Insert command and message
 		format = format.replace("%c", command);
-		format = format.replace("%m", message);
-		// Convert placeholder back
-		format = format.replace("§§", "%");
+		
 		// Color stripping
 		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
 		if (o instanceof Boolean)
@@ -305,9 +303,14 @@ public class Socialspy implements CoreModule
 		}
 		String s = (String) o;
 		if (s.equals("on"))
-			message = ChatColor.stripColor(message);
+			message = ChatColor.stripColor(message).replaceAll("(?i)[&$][0-9a-fk-o]", "");
 		else if (s.equals("partial"))
-			message = message.replaceAll("[§&]", "&&");
+			message = message.replaceAll("(?i)[§&]([0-9a-fk-o])", "&&$1");
+		// Insert message
+		format = format.replace("%m", message);
+		
+		// Convert placeholder back
+		format = format.replace("§§", "%");
 		return format;
 	}
 	
@@ -328,11 +331,9 @@ public class Socialspy implements CoreModule
 		format = format.replace("%p", prefix);
 		// Apply colors to halfway replaced String
 		format = ChatColor.translateAlternateColorCodes('&', format);
-		// Insert command and message
+		// Insert command
 		format = format.replace("%c", command);
-		format = format.replace("%m", message);
-		// Convert placeholder back
-		format = format.replace("§§", "%");
+		
 		// Color stripping
 		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
 		if (o instanceof Boolean)
@@ -346,9 +347,14 @@ public class Socialspy implements CoreModule
 		}
 		String s = (String) o;
 		if (s.equals("on"))
-			message = ChatColor.stripColor(message);
+			message = ChatColor.stripColor(message).replaceAll("(?i)[&$][0-9a-fk-o]", "");
 		else if (s.equals("partial"))
-			message = message.replaceAll("[§&]", "&&");
+			message = message.replaceAll("(?i)[§&]([0-9a-fk-o])", "&&$1");
+		// Insert message
+		format = format.replace("%m", message);
+		
+		// Convert placeholder back
+		format = format.replace("§§", "%");
 		return format;
 	}
 	
