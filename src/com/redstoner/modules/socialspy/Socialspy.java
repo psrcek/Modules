@@ -25,7 +25,7 @@ import com.redstoner.modules.datamanager.DataManager;
 import net.nemez.chatapi.click.Message;
 
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Socialspy implements CoreModule
 {
 	@Command(hook = "config_prefix_default")
@@ -46,6 +46,14 @@ public class Socialspy implements CoreModule
 	public boolean configFormatDefault(CommandSender sender)
 	{
 		return configFormat(sender, getDefaultFormat());
+	}
+	
+	@Command(hook = "config_format_show")
+	public boolean configFormatShow(CommandSender sender, String format)
+	{
+		DataManager.getOrDefault(sender, "format", getDefaultFormat());
+		getLogger().message(sender, "Your current format is: " + format.replaceAll("[&§]", "&&"));
+		return true;
 	}
 	
 	@Command(hook = "config_format")
@@ -209,6 +217,13 @@ public class Socialspy implements CoreModule
 				else
 					DataManager.setData(sender, "enabled", false);
 		}
+		if (((JSONArray) DataManager.getOrDefault(Bukkit.getConsoleSender(), "commands", getDefaultCommandList()))
+				.contains(command))
+		{
+			Message m = new Message(Bukkit.getConsoleSender(), null);
+			m.appendText(formatMessage(Bukkit.getConsoleSender(), sender, target, message, command));
+			m.send();
+		}
 	}
 	
 	public static void spyBroadcast(CommandSender sender, String target, String message, String command,
@@ -246,26 +261,18 @@ public class Socialspy implements CoreModule
 				else
 					DataManager.setData(sender, "enabled", false);
 		}
+		if (((JSONArray) DataManager.getOrDefault(Bukkit.getConsoleSender(), "commands", getDefaultCommandList()))
+				.contains(command))
+		{
+			Message m = new Message(Bukkit.getConsoleSender(), null);
+			m.appendText(formatMessage(Bukkit.getConsoleSender(), sender, target, message, command));
+			m.send();
+		}
 	}
 	
 	private String formatMessage(CommandSender formatHolder, CommandSender sender, CommandSender target, String message,
 			String command)
 	{
-		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
-		if (o instanceof Boolean)
-		{
-			boolean b = (boolean) o;
-			if (b)
-				o = "on";
-			else
-				o = "off";
-			DataManager.setData(formatHolder, "stripcolor", o);
-		}
-		String s = (String) o;
-		if (s.equals("on"))
-			message = ChatColor.stripColor(message);
-		else if (s.equals("partial"))
-			message = message.replace("§", "&&");
 		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
@@ -285,12 +292,7 @@ public class Socialspy implements CoreModule
 		format = format.replace("%m", message);
 		// Convert placeholder back
 		format = format.replace("§§", "%");
-		return format;
-	}
-	
-	private String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
-			String command)
-	{
+		// Color stripping
 		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
 		if (o instanceof Boolean)
 		{
@@ -305,7 +307,13 @@ public class Socialspy implements CoreModule
 		if (s.equals("on"))
 			message = ChatColor.stripColor(message);
 		else if (s.equals("partial"))
-			message = message.replace("§", "&&");
+			message = message.replaceAll("[§&]", "&&");
+		return format;
+	}
+	
+	private String formatMessage(CommandSender formatHolder, CommandSender sender, String target, String message,
+			String command)
+	{
 		String format = (String) DataManager.getOrDefault(formatHolder, "format", getDefaultFormat());
 		// Replace escaped % with placeholder
 		format = format.replace("%%", "§§");
@@ -325,6 +333,22 @@ public class Socialspy implements CoreModule
 		format = format.replace("%m", message);
 		// Convert placeholder back
 		format = format.replace("§§", "%");
+		// Color stripping
+		Object o = DataManager.getOrDefault(formatHolder, "stripcolor", "off");
+		if (o instanceof Boolean)
+		{
+			boolean b = (boolean) o;
+			if (b)
+				o = "on";
+			else
+				o = "off";
+			DataManager.setData(formatHolder, "stripcolor", o);
+		}
+		String s = (String) o;
+		if (s.equals("on"))
+			message = ChatColor.stripColor(message);
+		else if (s.equals("partial"))
+			message = message.replaceAll("[§&]", "&&");
 		return format;
 	}
 	

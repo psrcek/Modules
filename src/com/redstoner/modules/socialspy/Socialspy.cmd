@@ -1,5 +1,9 @@
 command socialspy {
     format {
+        run format_show;
+        help Displays your current format;
+    }
+    format --default {
         run config_format_default;
         help Resets your format back to the default: &e%s;
     }
@@ -45,17 +49,20 @@ command socialspy {
     }
     on {
         run on;
+        type player;
     }
     off {
         run off;
+        type player;
     }
     [empty] {
         run toggle;
+        type player;
     }
     perm utils.socialspy;
-    type player;
     migrate {
         run migrate;
         type console;
     }
+    type all;
 }
