@@ -34,7 +34,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 5, compatible = 4)
+@Version(major = 4, minor = 0, revision = 6, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
@@ -68,7 +68,7 @@ public class Seen implements Module, Listener
 			if (p != null)
 				p = Bukkit.getOfflinePlayer(p.getUniqueId());
 		}
-		if (p == null || (!p.isOnline() && !p.hasPlayedBefore()) || (!cansee && p.getName().equalsIgnoreCase(player)))
+		if (p == null || (!p.isOnline() && !p.hasPlayedBefore()) || (!cansee && !p.getName().equalsIgnoreCase(player)))
 		{
 			getLogger().message(sender, true, "§e" + player + "§7 has never joined the server!");
 			return true;
