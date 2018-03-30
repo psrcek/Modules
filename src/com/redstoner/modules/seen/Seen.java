@@ -34,7 +34,7 @@ import com.redstoner.modules.datamanager.DataManager;
 
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 4, compatible = 4)
+@Version(major = 4, minor = 0, revision = 5, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
@@ -60,19 +60,19 @@ public class Seen implements Module, Listener
 	{
 		ArrayList<String> message = new ArrayList<>();
 		OfflinePlayer p = Bukkit.getPlayer(player);
+		boolean cansee = (sender instanceof Player ? p instanceof Player && ((Player) sender).canSee((Player) p)
+				: true);
 		if (p == null)
 		{
 			p = Bukkit.getOfflinePlayer(player);
 			if (p != null)
 				p = Bukkit.getOfflinePlayer(p.getUniqueId());
 		}
-		if (p == null || (!p.isOnline() && !p.hasPlayedBefore()))
+		if (p == null || (!p.isOnline() && !p.hasPlayedBefore()) || (!cansee && p.getName().equalsIgnoreCase(player)))
 		{
 			getLogger().message(sender, true, "§e" + player + "§7 has never joined the server!");
 			return true;
 		}
-		boolean cansee = (sender instanceof Player ? p instanceof Player && ((Player) sender).canSee((Player) p)
-				: true);
 		boolean online = cansee ? p instanceof Player : false;
 		String state;
 		long timestamp;
@@ -122,8 +122,8 @@ public class Seen implements Module, Listener
 					message.add("They've joined with the following IPs: &e"
 							+ _ips.toJSONString().replaceAll("[\"\\[\\]]", "").replace(",", "&7, &e"));
 			}
-			message.add("Their current IP is: &a"
-					+ DataManager.getOrDefault(p.getUniqueId().toString(), "ip", "unknown"));
+			message.add(
+					"Their current IP is: &a" + DataManager.getOrDefault(p.getUniqueId().toString(), "ip", "unknown"));
 		}
 		getLogger().message(sender, message.toArray(new String[] {}));
 		return true;
@@ -245,10 +245,10 @@ public class Seen implements Module, Listener
 		Player player = Bukkit.getPlayer(name);
 		if (player == null)
 		{
-			getLogger().message(sender, true,
-			"§e" + name + "§7 couldn't be found! Hint: Currently, you can only check statistics of players that are online!");
+			getLogger().message(sender, true, "§e" + name
+					+ "§7 couldn't be found! Hint: Currently, you can only check statistics of players that are online!");
 			return true;
-			}
+		}
 		int ticks_lived = player.getStatistic(Statistic.PLAY_ONE_TICK);
 		int days = ticks_lived / 1728000;
 		int hours = (ticks_lived % 1728000) / 72000;
