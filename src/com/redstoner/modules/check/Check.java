@@ -35,7 +35,7 @@ import com.redstoner.modules.Module;
 
 import net.nemez.chatapi.click.Message;
 
-@Version(major = 4, minor = 0, revision = 2, compatible = 4)
+@Version(major = 4, minor = 0, revision = 3, compatible = 4)
 public class Check implements Module, Listener
 {
 	MysqlTable table;
@@ -122,7 +122,7 @@ public class Check implements Module, Listener
 		}
 		try
 		{
-			URL ipinfo = new URL("http://ipinfo.io/" + ip + "/json");
+			URL ipinfo = new URL("https://ipinfo.io/" + ip + "/json");
 			String rawJson = read(ipinfo);
 			return (JSONObject) new JSONParser().parse(rawJson);
 		}
