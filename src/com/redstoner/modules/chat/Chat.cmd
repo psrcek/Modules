@@ -56,6 +56,14 @@ command mute {
     }
 }
 
+command print {
+    [string:message...] { 
+        perm utils.print; 
+        run print message;
+        help A way to just print something in to chat with all the formatting things a user has.; 
+    } 
+}
+
 command unmute {
     [string:player] {
         perm utils.chat.admin;
