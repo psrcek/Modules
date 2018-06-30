@@ -1,5 +1,8 @@
 package com.redstoner.modules.chat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -25,19 +28,31 @@ import net.nemez.chatapi.ChatAPI;
 
 @Commands(CommandHolderType.File)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 7, compatible = 4)
+@Version(major = 4, minor = 1, revision = 0, compatible = 4)
 public class Chat implements Module, Listener
 {
+	private final Map<String, String> defaults = new HashMap<>();
+	
+	public Chat()
+	{
+		defaults.put("chat", " %n §7→§r %m");
+		defaults.put("me", " §7- %n §7⇦ %m");
+		defaults.put("action", " §7- %n §7⇦ %m");
+		defaults.put("say", " §7[§9%n§7]:§r %m");
+		defaults.put("shrug", " %n §7→§r %m ¯\\_(ツ)_/¯");
+		defaults.put("print", "%m");
+	}
 	
 	@Override
 	public void firstLoad()
 	{
 		Module.super.firstLoad();
-		DataManager.setConfig("chat", " %n §7→§r %m");
-		DataManager.setConfig("me", " §7- %n §7⇦ %m");
-		DataManager.setConfig("action", " %n §7 <- §r %m");
-		DataManager.setConfig("say", " §7[§9%n§7]:§r %m");
-		DataManager.setConfig("shrug", " %n §7→§r %m ¯\\_(ツ)_/¯");
+		DataManager.setConfig("chat", defaults.get("chat"));
+		DataManager.setConfig("me", defaults.get("me"));
+		DataManager.setConfig("action", defaults.get("action"));
+		DataManager.setConfig("say", defaults.get("say"));
+		DataManager.setConfig("shrug", defaults.get("shrug"));
+		DataManager.setConfig("print", defaults.get("print"));
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -105,6 +120,13 @@ public class Chat implements Module, Listener
 		return true;
 	}
 	
+	@Command(hook = "print")
+	public boolean print(CommandSender sender, String message)
+	{
+		broadcastFormatted("print", sender, message);
+		return true;
+	}
+	
 	@Command(hook = "mute")
 	public boolean mute(CommandSender sender, String player)
 	{
@@ -160,7 +182,7 @@ public class Chat implements Module, Listener
 					+ "&7) while being &cmuted&7.");
 			return false;
 		}
-		String raw = (String) DataManager.getConfigOrDefault(format, " %n §7→§r %m");
+		String raw = (String) DataManager.getConfigOrDefault(format, defaults.get(format));
 		String formatted = raw.replace("%n", name).replace("%m", message);
 		Utils.broadcast("", ChatAPI.colorify(sender, formatted),
 				wrap(ModuleLoader.exists("Ignore") ? Ignore.getIgnoredBy(sender) : null, event));
