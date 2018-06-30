@@ -32,9 +32,11 @@ import com.redstoner.misc.Utils;
 import com.redstoner.modules.Module;
 import com.redstoner.modules.datamanager.DataManager;
 
+import net.nemez.chatapi.click.Message;
+
 @AutoRegisterListener
 @Commands(CommandHolderType.File)
-@Version(major = 4, minor = 0, revision = 6, compatible = 4)
+@Version(major = 4, minor = 0, revision = 9, compatible = 4)
 public class Seen implements Module, Listener
 {
 	HashMap<UUID, JSONArray> names = new HashMap<>();
@@ -59,7 +61,11 @@ public class Seen implements Module, Listener
 	public boolean seen(CommandSender sender, String player, boolean show_ips)
 	{
 		ArrayList<String> message = new ArrayList<>();
-		OfflinePlayer p = Bukkit.getPlayer(player);
+		OfflinePlayer p;
+		if (Utils.isUUID(player))
+			p = Bukkit.getOfflinePlayer(UUID.fromString(player));
+		else
+			p = Bukkit.getPlayer(player);
 		boolean cansee = (sender instanceof Player ? p instanceof Player && ((Player) sender).canSee((Player) p)
 				: true);
 		if (p == null)
@@ -96,7 +102,7 @@ public class Seen implements Module, Listener
 				message.add("They're currently &eAFK&7:");
 				String reason = (String) DataManager.getOrDefault(p.getUniqueId().toString(), "AFK", "afk_reason", "");
 				if (reason.length() >= 1)
-					message.add(" &5- " + reason);
+					message.add(" &3- " + reason);
 			}
 			if (DataManager.getState((Player) p, "vanished"))
 				message.add("They're currently &evanished&7!");
@@ -253,12 +259,59 @@ public class Seen implements Module, Listener
 		int days = ticks_lived / 1728000;
 		int hours = (ticks_lived % 1728000) / 72000;
 		int minutes = (ticks_lived % 72000) / 1200;
-		getLogger().message(sender,
-				"The player &e" + name + " &7has been online for "
-						+ (days == 0 && hours == 0 && minutes == 0 ? "less than a minute."
-								: ("a total of: &e" + (days != 0 ? (days + "d ") : "")
-										+ ((hours != 0 || days != 0) ? (hours + "h ") : "")
-										+ ((minutes != 0 || hours != 0 || days != 0) ? (minutes + "m") : ""))));
+		if (sender.getName().equals(name))
+		{
+			getLogger().message(sender,
+					"You have played for &b"
+							+ (days == 0 && hours == 0 && minutes == 0 ? "less than a minute."
+									: ("a total of: &e" + (days != 0 ? (days + "d ") : "")
+											+ ((hours != 0 || days != 0) ? (hours + "h ") : "")
+											+ ((minutes != 0 || hours != 0 || days != 0) ? (minutes + "m") : "")))
+							+ "&7.");
+		}
+		else
+		{
+			getLogger().message(sender, "&3" + name + " &7has played for "
+					+ (days == 0 && hours == 0 && minutes == 0 ? "less than a minute."
+							: ("a total of: &e" + (days != 0 ? (days + "d ") : "")
+									+ ((hours != 0 || days != 0) ? (hours + "h ") : "")
+									+ ((minutes != 0 || hours != 0 || days != 0) ? (minutes + "m") : "")))
+					+ "&7.");
+		}
+		return true;
+	}
+	
+	@Command(hook = "uuidDef")
+	public boolean uuid(CommandSender sender)
+	{
+		Player player = (Player) sender;
+		Message m = new Message(sender, null);
+		m.appendText(getLogger().getPrefix());
+		m.appendSuggestHover("&6> UUID: &e" + player.getUniqueId().toString(), player.getUniqueId().toString(),
+				"Click to copy into chatbox!");
+		m.send();
+		return true;
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Command(hook = "uuid")
+	public boolean uuid(CommandSender sender, String name)
+	{
+		OfflinePlayer player = Bukkit.getPlayer(name);
+		if (player == null)
+		{
+			player = Bukkit.getOfflinePlayer(name);
+			if (player == null)
+			{
+				getLogger().error("That player couldn't be found!");
+				return true;
+			}
+		}
+		Message m = new Message(sender, null);
+		m.appendText(getLogger().getPrefix());
+		m.appendSuggestHover("&6> UUID: &e" + player.getUniqueId().toString(), player.getUniqueId().toString(),
+				"Click to copy into chatbox!");
+		m.send();
 		return true;
 	}
 }

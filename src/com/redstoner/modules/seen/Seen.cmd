@@ -37,3 +37,17 @@ command playtime {
         help Displays the playtime of another player. The player must be online!;
     }
 }
+
+command uuid {
+    [empty] {
+        type player;
+        run uuidDef;
+        perm utils.uuid;
+        help Displays your UUID (click to copy);
+    }
+    [string:name] {
+        run uuid name;
+        perm utils.uuid.other;
+        help Displays someone elses UUID (click to copy);
+    }
+}
