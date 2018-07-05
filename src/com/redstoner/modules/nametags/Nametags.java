@@ -21,7 +21,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 0, compatible = 4)
+@Version(major = 4, minor = 0, revision = 1, compatible = 4)
 public class Nametags implements Module, Listener
 {
 	@EventHandler
@@ -33,7 +33,7 @@ public class Nametags implements Module, Listener
 	@EventHandler
 	public void commandPreprocessEvent(PlayerCommandPreprocessEvent event)
 	{
-		ArrayList<Player> toSort = new ArrayList<Player>();
+		ArrayList<Player> toSort = new ArrayList<>();
 		if (event.getMessage().contains("promote") || event.getMessage().contains("demote")
 				|| event.getMessage().matches("pex user .* group (set|add|leave)"))
 		{
@@ -59,7 +59,7 @@ public class Nametags implements Module, Listener
 	@EventHandler
 	public void consoleCommand(ServerCommandEvent event)
 	{
-		ArrayList<Player> toSort = new ArrayList<Player>();
+		ArrayList<Player> toSort = new ArrayList<>();
 		if (event.getCommand().contains("promote") || event.getCommand().contains("demote")
 				|| event.getCommand().matches("pex user .* group (set|add|leave)"))
 		{
@@ -114,7 +114,8 @@ public class Nametags implements Module, Listener
 	
 	private String getTeam(Player player)
 	{
-		String[] teams = new String[] {"admin", "mod", "trainingmod", "trusted", "builder", "member", "visitor"};
+		String[] teams = new String[] {"admin", "mod", "trainingmod", "trusted", "builder", "member", "visitor",
+				"bots"};
 		char prefix = 'a';
 		for (String team : teams)
 		{
@@ -124,7 +125,7 @@ public class Nametags implements Module, Listener
 			}
 			prefix++;
 		}
-		return "g_visitor";
+		return prefix + "_" + teams[teams.length - 1];
 	}
 	
 	// @noformat
