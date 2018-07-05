@@ -21,7 +21,7 @@ import com.redstoner.modules.Module;
 
 @Commands(CommandHolderType.String)
 @AutoRegisterListener
-@Version(major = 4, minor = 0, revision = 1, compatible = 4)
+@Version(major = 4, minor = 0, revision = 2, compatible = 4)
 public class Nametags implements Module, Listener
 {
 	@EventHandler
@@ -125,7 +125,7 @@ public class Nametags implements Module, Listener
 			}
 			prefix++;
 		}
-		return prefix + "_" + teams[teams.length - 1];
+		return (prefix - 1) + "_" + teams[teams.length - 1];
 	}
 	
 	// @noformat
